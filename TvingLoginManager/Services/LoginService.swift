@@ -62,7 +62,11 @@ final class LoginService: NSObject {
                 // 아이디 입력 — 엘리먼트가 나타날 때까지 대기
                 onStatusUpdate?(.enteringCredentials, "Entering username...")
                 let usernameEntered = try await waitAndFill(
-                    selectors: ["input[placeholder=\"아이디\"]", "input#userId"],
+                    selectors: [
+                        "input[name='id']",
+                        "input[autocomplete='username']",
+                        "input[placeholder='아이디']",
+                    ],
                     value: account.username
                 )
                 guard usernameEntered else {
@@ -74,7 +78,11 @@ final class LoginService: NSObject {
                 // 비밀번호 입력
                 onStatusUpdate?(.enteringCredentials, "Entering password...")
                 let passwordEntered = try await waitAndFill(
-                    selectors: ["input[placeholder=\"비밀번호\"]", "input#userPwd"],
+                    selectors: [
+                        "input[name='password']",
+                        "input[autocomplete='current-password']",
+                        "input[placeholder='비밀번호']",
+                    ],
                     value: account.password
                 )
                 guard passwordEntered else {
@@ -83,9 +91,18 @@ final class LoginService: NSObject {
                 }
                 try await Task.sleep(for: .seconds(1))
 
-                // 로그인 제출
+                // 로그인 버튼 클릭
                 onStatusUpdate?(.submitting, LoginStep.submitting.rawValue)
-                try await clickElement("#doLoginBtn", fallback: "button[type='submit']")
+                let loginClicked = try await waitAndClick(
+                    selectors: [
+                        "button[type='submit']",
+                        "#doLoginBtn",
+                    ]
+                )
+                if !loginClicked {
+                    onComplete?(false, "Could not find login button.")
+                    return
+                }
                 try await Task.sleep(for: .seconds(5))
 
                 // 결과 확인
