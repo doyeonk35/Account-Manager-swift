@@ -49,13 +49,13 @@ final class LoginService: NSObject {
                 // 사용자가 "티빙 아이디로 로그인"을 직접 클릭할 때까지 대기
                 onStatusUpdate?(.clickingLogin, "'티빙 아이디로 로그인' 버튼을 눌러주세요.")
                 for _ in 0..<200 {
-                    let found = try await executeJS("""
+                    let found = (try? await executeJS("""
                         (function() {
                             var f = document.querySelector("input[name='id']")
                                  || document.querySelector("input[placeholder='아이디']");
                             return f ? 'found' : 'not_found';
                         })()
-                    """)
+                    """)) ?? "not_found"
                     if found == "found" { break }
                     try await Task.sleep(for: .milliseconds(500))
                 }
@@ -105,9 +105,9 @@ final class LoginService: NSObject {
     private func injectOTP(_ code: String) async throws {
         // #code-num01 필드가 나타날 때까지 대기 (최대 10초)
         for _ in 0..<20 {
-            let found = try await executeJS("""
+            let found = (try? await executeJS("""
                 (function() { return document.querySelector('#code-num01') ? 'found' : 'not_found'; })()
-            """)
+            """)) ?? "not_found"
             if found == "found" { break }
             try await Task.sleep(for: .milliseconds(500))
         }
@@ -139,9 +139,9 @@ final class LoginService: NSObject {
         // 페이지 이동 대기 (최대 100초, 자동 실패 시 사용자가 직접 클릭 가능)
         onStatusUpdate?(.enteringOTP, "OTP submitted. Waiting for next page...")
         for _ in 0..<200 {
-            let stillOnOTP = try await executeJS("""
+            let stillOnOTP = (try? await executeJS("""
                 (function() { return document.querySelector('#code-num01') ? 'yes' : 'no'; })()
-            """)
+            """)) ?? "no"
             if stillOnOTP == "no" { break }
             try await Task.sleep(for: .milliseconds(500))
         }
