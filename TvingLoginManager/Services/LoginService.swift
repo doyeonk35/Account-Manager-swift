@@ -46,9 +46,13 @@ final class LoginService: NSObject {
                     try await Task.sleep(for: .seconds(2))
                 }
 
-                // 로그인 페이지 이동 버튼 클릭
-                onStatusUpdate?(.clickingLogin, LoginStep.clickingLogin.rawValue)
-                try await clickElement("#locLogin")
+                // "티빙 아이디로 로그인" 버튼 클릭 (텍스트로 검색)
+                onStatusUpdate?(.clickingLogin, "Selecting TVING ID login...")
+                let loginMethodClicked = try await clickByText("티빙 아이디로 로그인", fallbackSelector: "#locLogin")
+                if !loginMethodClicked {
+                    // 폴백: 이미 로그인 폼 페이지일 수 있음
+                    onStatusUpdate?(.clickingLogin, "Login form may already be visible...")
+                }
                 try await Task.sleep(for: .seconds(3))
 
                 // 아이디 입력 — 엘리먼트가 나타날 때까지 대기
@@ -171,6 +175,39 @@ final class LoginService: NSObject {
     }
 
     // MARK: - Click
+
+    /// 텍스트 내용으로 버튼/링크를 찾아 클릭 (최대 10초 대기)
+    private func clickByText(_ text: String, fallbackSelector: String? = nil) async throws -> Bool {
+        for _ in 0..<20 {
+            let result = try await executeJS("""
+                (function() {
+                    var elements = document.querySelectorAll('a, button, [role="button"]');
+                    for (var i = 0; i < elements.length; i++) {
+                        var el = elements[i];
+                        if (el.textContent.trim().includes('\(text.escapedForJS)')) {
+                            el.click();
+                            return 'clicked';
+                        }
+                    }
+                    return 'not_found';
+                })()
+            """)
+            if result == "clicked" { return true }
+            try await Task.sleep(for: .milliseconds(500))
+        }
+        // 폴백 셀렉터 시도
+        if let fallback = fallbackSelector {
+            let result = try await executeJS("""
+                (function() {
+                    var e = document.querySelector('\(fallback)');
+                    if (e) { e.click(); return 'clicked'; }
+                    return 'not_found';
+                })()
+            """)
+            return result == "clicked"
+        }
+        return false
+    }
 
     private func clickElement(_ selector: String, fallback: String? = nil) async throws {
         var js = "document.querySelector('\(selector)')"
