@@ -1,6 +1,20 @@
 import Foundation
 import SwiftUI
 
+enum SidebarTab: String, CaseIterable, Identifiable {
+    case accounts = "Accounts"
+    case settings = "Settings"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .accounts: "person.2"
+        case .settings: "gearshape"
+        }
+    }
+}
+
 @MainActor
 final class AccountManager: ObservableObject {
 
@@ -26,6 +40,13 @@ final class AccountManager: ObservableObject {
 
     // Delete confirmation
     @Published var accountToDelete: AccountInfo?
+
+    // Custom login URLs (persisted via UserDefaults)
+    @AppStorage("loginURL_QC") var qcLoginURL = "https://user.tving.com/"
+    @AppStorage("loginURL_QA") var qaLoginURL = "https://userqa.tving.com/tv/login/qrcode.tving"
+
+    // Sidebar
+    @Published var selectedTab: SidebarTab = .accounts
 
     private let storage: StorageService
     private let keychain: KeychainService
@@ -130,6 +151,14 @@ final class AccountManager: ObservableObject {
     }
 
     // MARK: - Login
+
+    /// 계정 타입에 맞는 커스텀 로그인 URL 반환
+    func loginURL(for accountType: AccountType) -> URL {
+        switch accountType {
+        case .qc: URL(string: qcLoginURL) ?? URL(string: "https://user.tving.com/")!
+        case .qa: URL(string: qaLoginURL) ?? URL(string: "https://userqa.tving.com/tv/login/qrcode.tving")!
+        }
+    }
 
     func startLogin(account: AccountInfo) {
         guard !isLoggingIn else { return }

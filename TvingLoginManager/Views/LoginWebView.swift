@@ -30,7 +30,7 @@ struct LoginWebView: View {
             Divider()
 
             WebViewContainer(
-                url: account.loginURL,
+                url: manager.loginURL(for: account.accountType),
                 account: account,
                 otpCode: otpCode,
                 onStatusUpdate: { _, message in
