@@ -51,8 +51,8 @@ final class LoginService: NSObject {
                 for _ in 0..<200 {
                     let found = (try? await executeJS("""
                         (function() {
-                            var f = document.querySelector("input[name='id']")
-                                 || document.querySelector("input[placeholder='아이디']");
+                            var f = document.querySelector('input[name="id"]')
+                                 || document.querySelector('input[placeholder="아이디"]');
                             return f ? 'found' : 'not_found';
                         })()
                     """)) ?? "not_found"
@@ -64,9 +64,9 @@ final class LoginService: NSObject {
                 onStatusUpdate?(.enteringCredentials, "Entering username...")
                 let usernameEntered = try await waitAndFill(
                     selectors: [
-                        "input[name='id']",
-                        "input[autocomplete='username']",
-                        "input[placeholder='아이디']",
+                        "input[name=\"id\"]",
+                        "input[autocomplete=\"username\"]",
+                        "input[placeholder=\"아이디\"]",
                     ],
                     value: account.username
                 )
@@ -80,9 +80,9 @@ final class LoginService: NSObject {
                 onStatusUpdate?(.enteringCredentials, "Entering password...")
                 let passwordEntered = try await waitAndFill(
                     selectors: [
-                        "input[name='password']",
-                        "input[autocomplete='current-password']",
-                        "input[placeholder='비밀번호']",
+                        "input[name=\"password\"]",
+                        "input[autocomplete=\"current-password\"]",
+                        "input[placeholder=\"비밀번호\"]",
                     ],
                     value: account.password
                 )
