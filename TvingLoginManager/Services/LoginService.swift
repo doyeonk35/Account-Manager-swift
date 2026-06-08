@@ -39,18 +39,21 @@ final class LoginService: NSObject {
 
         Task { @MainActor in
             do {
+                // OTP 처리
                 if !otpCode.isEmpty {
                     onStatusUpdate?(.enteringOTP, LoginStep.enteringOTP.rawValue)
                     try await injectOTP(otpCode)
                     try await Task.sleep(for: .seconds(2))
                 }
 
+                // 로그인 페이지 이동 버튼 클릭
                 onStatusUpdate?(.clickingLogin, LoginStep.clickingLogin.rawValue)
                 try await clickElement("#locLogin")
                 try await Task.sleep(for: .seconds(3))
 
-                onStatusUpdate?(.enteringCredentials, LoginStep.enteringCredentials.rawValue)
-                let usernameEntered = try await fillField(
+                // 아이디 입력 — 엘리먼트가 나타날 때까지 대기
+                onStatusUpdate?(.enteringCredentials, "Entering username...")
+                let usernameEntered = try await waitAndFill(
                     selectors: ["input[placeholder=\"아이디\"]", "input#userId"],
                     value: account.username
                 )
@@ -60,7 +63,9 @@ final class LoginService: NSObject {
                 }
                 try await Task.sleep(for: .seconds(1))
 
-                let passwordEntered = try await fillField(
+                // 비밀번호 입력
+                onStatusUpdate?(.enteringCredentials, "Entering password...")
+                let passwordEntered = try await waitAndFill(
                     selectors: ["input[placeholder=\"비밀번호\"]", "input#userPwd"],
                     value: account.password
                 )
@@ -70,10 +75,12 @@ final class LoginService: NSObject {
                 }
                 try await Task.sleep(for: .seconds(1))
 
+                // 로그인 제출
                 onStatusUpdate?(.submitting, LoginStep.submitting.rawValue)
                 try await clickElement("#doLoginBtn", fallback: "button[type='submit']")
                 try await Task.sleep(for: .seconds(5))
 
+                // 결과 확인
                 onStatusUpdate?(.verifying, LoginStep.verifying.rawValue)
                 let success = try await verifyLogin()
 
@@ -92,14 +99,14 @@ final class LoginService: NSObject {
         }
     }
 
-    @MainActor
+    // MARK: - OTP
+
     private func injectOTP(_ code: String) async throws {
         try await executeJS("""
             (function() {
                 var f = document.querySelector('#code-num01');
                 if (f) {
-                    f.value = '\(code.escapedForJS)';
-                    f.dispatchEvent(new Event('input', {bubbles:true}));
+                    \(reactSetValue("f", code.escapedForJS))
                     var b = document.querySelector('#confirmBtn');
                     if (b) b.click();
                 }
@@ -107,26 +114,52 @@ final class LoginService: NSObject {
         """)
     }
 
-    @MainActor
-    private func fillField(selectors: [String], value: String) async throws -> Bool {
+    // MARK: - Wait + Fill (React 호환)
+
+    /// 셀렉터에 해당하는 엘리먼트가 나타날 때까지 최대 10초 대기 후 값 입력
+    private func waitAndFill(selectors: [String], value: String) async throws -> Bool {
         let selectorJS = selectors.map { "document.querySelector('\($0)')" }.joined(separator: " || ")
+
+        // 엘리먼트 대기 (500ms 간격, 최대 20회 = 10초)
+        for _ in 0..<20 {
+            let found = try await executeJS("""
+                (function() {
+                    var f = \(selectorJS);
+                    return f ? 'found' : 'not_found';
+                })()
+            """)
+            if found == "found" { break }
+            try await Task.sleep(for: .milliseconds(500))
+        }
+
+        // React/Vue 호환 값 입력
         let result = try await executeJS("""
             (function() {
                 var f = \(selectorJS);
-                if (f) {
-                    f.focus();
-                    f.value = '\(value.escapedForJS)';
-                    f.dispatchEvent(new Event('input', {bubbles:true}));
-                    f.dispatchEvent(new Event('change', {bubbles:true}));
-                    return 'ok';
-                }
-                return 'not_found';
+                if (!f) return 'not_found';
+
+                f.focus();
+
+                // React 호환: nativeInputValueSetter로 값 설정
+                var nativeSetter = Object.getOwnPropertyDescriptor(
+                    window.HTMLInputElement.prototype, 'value'
+                ).set;
+                nativeSetter.call(f, '\(value.escapedForJS)');
+
+                // 이벤트 디스패치 — React, Vue, Angular 모두 대응
+                f.dispatchEvent(new Event('input', {bubbles: true}));
+                f.dispatchEvent(new Event('change', {bubbles: true}));
+                f.dispatchEvent(new KeyboardEvent('keydown', {bubbles: true}));
+                f.dispatchEvent(new KeyboardEvent('keyup', {bubbles: true}));
+
+                return 'ok';
             })()
         """)
         return result == "ok"
     }
 
-    @MainActor
+    // MARK: - Click
+
     private func clickElement(_ selector: String, fallback: String? = nil) async throws {
         var js = "document.querySelector('\(selector)')"
         if let fb = fallback {
@@ -135,7 +168,8 @@ final class LoginService: NSObject {
         try await executeJS("(function() { var e = \(js); if (e) e.click(); })()")
     }
 
-    @MainActor
+    // MARK: - Verify
+
     private func verifyLogin() async throws -> Bool {
         let result = try await executeJS("""
             (function() {
@@ -150,12 +184,25 @@ final class LoginService: NSObject {
         return result == "success"
     }
 
-    @MainActor
+    // MARK: - JS Execution
+
     @discardableResult
     private func executeJS(_ js: String) async throws -> String {
         guard let webView = webView else { throw LoginError.webViewDeallocated }
         let result = try await webView.evaluateJavaScript(js)
         return (result as? String) ?? ""
+    }
+
+    // MARK: - React 호환 value setter JS 생성
+
+    /// React의 synthetic event 시스템을 우회하여 input value를 설정하는 JS 코드 조각
+    private func reactSetValue(_ varName: String, _ value: String) -> String {
+        """
+        var _ns = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        _ns.call(\(varName), '\(value)');
+        \(varName).dispatchEvent(new Event('input', {bubbles: true}));
+        \(varName).dispatchEvent(new Event('change', {bubbles: true}));
+        """
     }
 }
 
