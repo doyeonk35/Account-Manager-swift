@@ -8,14 +8,18 @@
 
 /* Begin PBXBuildFile section */
 		4981F4E4B078B6F43F1117DE /* AccountInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DCEA8D0FBE8491AB19D5E4E /* AccountInfo.swift */; };
+		5236C3EC02DC440F31C15C34 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6FCA6BA45DEBB82D670ED17 /* ContentView.swift */; };
 		56236DDEC5D90487B8A3D82E /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A82DB157948D9203553CC37 /* StorageService.swift */; };
+		5BE28DDA6410ED68EF4E0BBC /* AccountListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF25FE62BE1C92B3B506C8B /* AccountListView.swift */; };
 		64A653A3A19EE715E3C1B0B6 /* TvingLoginManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */; };
 		65481ACE8DDF61B89B7010F6 /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 754D17A5AF778A9D470E3ED7 /* KeychainServiceTests.swift */; };
 		70B41726ACAAD49C8D00DE5D /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183FB7A9FFB349092341B88 /* AccountManager.swift */; };
 		82C313E08BD9C0050CD70376 /* AccountInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD0DBEFC2724CCA2A4A7E3F /* AccountInfoTests.swift */; };
 		A22F82D967BA8636BF6CF1A2 /* AccountManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC68E68998CE6A63D132F06 /* AccountManagerTests.swift */; };
 		B592121B4E02FEC058C0DD3F /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB3FC5C351CA4355E25686A5 /* KeychainService.swift */; };
+		BC92E0CB057509BB718A17E0 /* LoginWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF84013D1BA82F576B418B6 /* LoginWebView.swift */; };
 		C24BB0FB03962CE05D3765DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */; };
+		E9D300789705FAEB895607EA /* AccountEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1478CF2C20EB8CA4469FCA8 /* AccountEditView.swift */; };
 		FBDB3685D3F06F65E194E4DD /* StorageServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E028443A00528A1D04D208D /* StorageServiceTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -33,6 +37,7 @@
 		0DCEA8D0FBE8491AB19D5E4E /* AccountInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountInfo.swift; sourceTree = "<group>"; };
 		2EF2EF2D74BDCF2755191CC5 /* TvingLoginManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TvingLoginManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BE5F51183598AED1109FA33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		4CF84013D1BA82F576B418B6 /* LoginWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWebView.swift; sourceTree = "<group>"; };
 		4E028443A00528A1D04D208D /* StorageServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageServiceTests.swift; sourceTree = "<group>"; };
 		6183FB7A9FFB349092341B88 /* AccountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManager.swift; sourceTree = "<group>"; };
 		6AD0DBEFC2724CCA2A4A7E3F /* AccountInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountInfoTests.swift; sourceTree = "<group>"; };
@@ -41,8 +46,11 @@
 		7A82DB157948D9203553CC37 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
 		9A800A89132BA96919B285AF /* TvingLoginManager.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TvingLoginManager.entitlements; sourceTree = "<group>"; };
 		A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BDF25FE62BE1C92B3B506C8B /* AccountListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountListView.swift; sourceTree = "<group>"; };
+		C1478CF2C20EB8CA4469FCA8 /* AccountEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditView.swift; sourceTree = "<group>"; };
 		DB3FC5C351CA4355E25686A5 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvingLoginManagerApp.swift; sourceTree = "<group>"; };
+		E6FCA6BA45DEBB82D670ED17 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		EAC68E68998CE6A63D132F06 /* AccountManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -67,6 +75,10 @@
 		469DA30C0F77E0443CEBF0C3 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C1478CF2C20EB8CA4469FCA8 /* AccountEditView.swift */,
+				BDF25FE62BE1C92B3B506C8B /* AccountListView.swift */,
+				E6FCA6BA45DEBB82D670ED17 /* ContentView.swift */,
+				4CF84013D1BA82F576B418B6 /* LoginWebView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -228,9 +240,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9D300789705FAEB895607EA /* AccountEditView.swift in Sources */,
 				4981F4E4B078B6F43F1117DE /* AccountInfo.swift in Sources */,
+				5BE28DDA6410ED68EF4E0BBC /* AccountListView.swift in Sources */,
 				70B41726ACAAD49C8D00DE5D /* AccountManager.swift in Sources */,
+				5236C3EC02DC440F31C15C34 /* ContentView.swift in Sources */,
 				B592121B4E02FEC058C0DD3F /* KeychainService.swift in Sources */,
+				BC92E0CB057509BB718A17E0 /* LoginWebView.swift in Sources */,
 				56236DDEC5D90487B8A3D82E /* StorageService.swift in Sources */,
 				64A653A3A19EE715E3C1B0B6 /* TvingLoginManagerApp.swift in Sources */,
 			);
