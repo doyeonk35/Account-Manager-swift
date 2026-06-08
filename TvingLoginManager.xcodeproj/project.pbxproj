@@ -9,7 +9,9 @@
 /* Begin PBXBuildFile section */
 		4981F4E4B078B6F43F1117DE /* AccountInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DCEA8D0FBE8491AB19D5E4E /* AccountInfo.swift */; };
 		64A653A3A19EE715E3C1B0B6 /* TvingLoginManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */; };
+		65481ACE8DDF61B89B7010F6 /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 754D17A5AF778A9D470E3ED7 /* KeychainServiceTests.swift */; };
 		82C313E08BD9C0050CD70376 /* AccountInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD0DBEFC2724CCA2A4A7E3F /* AccountInfoTests.swift */; };
+		B592121B4E02FEC058C0DD3F /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB3FC5C351CA4355E25686A5 /* KeychainService.swift */; };
 		C24BB0FB03962CE05D3765DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -28,9 +30,11 @@
 		2EF2EF2D74BDCF2755191CC5 /* TvingLoginManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TvingLoginManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BE5F51183598AED1109FA33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6AD0DBEFC2724CCA2A4A7E3F /* AccountInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountInfoTests.swift; sourceTree = "<group>"; };
+		754D17A5AF778A9D470E3ED7 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
 		75AA199178276CF23B85DCB4 /* TvingLoginManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TvingLoginManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A800A89132BA96919B285AF /* TvingLoginManager.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TvingLoginManager.entitlements; sourceTree = "<group>"; };
 		A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DB3FC5C351CA4355E25686A5 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvingLoginManagerApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -46,6 +50,7 @@
 		1D8C938B80E0A2A01EF4F716 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				DB3FC5C351CA4355E25686A5 /* KeychainService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -101,6 +106,7 @@
 			isa = PBXGroup;
 			children = (
 				6AD0DBEFC2724CCA2A4A7E3F /* AccountInfoTests.swift */,
+				754D17A5AF778A9D470E3ED7 /* KeychainServiceTests.swift */,
 			);
 			path = TvingLoginManagerTests;
 			sourceTree = "<group>";
@@ -200,6 +206,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				82C313E08BD9C0050CD70376 /* AccountInfoTests.swift in Sources */,
+				65481ACE8DDF61B89B7010F6 /* KeychainServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -208,6 +215,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4981F4E4B078B6F43F1117DE /* AccountInfo.swift in Sources */,
+				B592121B4E02FEC058C0DD3F /* KeychainService.swift in Sources */,
 				64A653A3A19EE715E3C1B0B6 /* TvingLoginManagerApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
