@@ -15,6 +15,7 @@
 		65481ACE8DDF61B89B7010F6 /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 754D17A5AF778A9D470E3ED7 /* KeychainServiceTests.swift */; };
 		70B41726ACAAD49C8D00DE5D /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183FB7A9FFB349092341B88 /* AccountManager.swift */; };
 		82C313E08BD9C0050CD70376 /* AccountInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD0DBEFC2724CCA2A4A7E3F /* AccountInfoTests.swift */; };
+		96EF5E548691529BECD5FA45 /* LoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EA0461693FFD2DF2755889 /* LoginService.swift */; };
 		A22F82D967BA8636BF6CF1A2 /* AccountManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC68E68998CE6A63D132F06 /* AccountManagerTests.swift */; };
 		B592121B4E02FEC058C0DD3F /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB3FC5C351CA4355E25686A5 /* KeychainService.swift */; };
 		BC92E0CB057509BB718A17E0 /* LoginWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF84013D1BA82F576B418B6 /* LoginWebView.swift */; };
@@ -48,6 +49,7 @@
 		A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BDF25FE62BE1C92B3B506C8B /* AccountListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountListView.swift; sourceTree = "<group>"; };
 		C1478CF2C20EB8CA4469FCA8 /* AccountEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditView.swift; sourceTree = "<group>"; };
+		D3EA0461693FFD2DF2755889 /* LoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginService.swift; sourceTree = "<group>"; };
 		DB3FC5C351CA4355E25686A5 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvingLoginManagerApp.swift; sourceTree = "<group>"; };
 		E6FCA6BA45DEBB82D670ED17 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -67,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				DB3FC5C351CA4355E25686A5 /* KeychainService.swift */,
+				D3EA0461693FFD2DF2755889 /* LoginService.swift */,
 				7A82DB157948D9203553CC37 /* StorageService.swift */,
 			);
 			path = Services;
@@ -246,6 +249,7 @@
 				70B41726ACAAD49C8D00DE5D /* AccountManager.swift in Sources */,
 				5236C3EC02DC440F31C15C34 /* ContentView.swift in Sources */,
 				B592121B4E02FEC058C0DD3F /* KeychainService.swift in Sources */,
+				96EF5E548691529BECD5FA45 /* LoginService.swift in Sources */,
 				BC92E0CB057509BB718A17E0 /* LoginWebView.swift in Sources */,
 				56236DDEC5D90487B8A3D82E /* StorageService.swift in Sources */,
 				64A653A3A19EE715E3C1B0B6 /* TvingLoginManagerApp.swift in Sources */,
