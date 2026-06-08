@@ -155,18 +155,18 @@ final class LoginService: NSObject {
 
         // 엘리먼트 대기 (500ms 간격, 최대 20회 = 10초)
         for _ in 0..<20 {
-            let found = try await executeJS("""
+            let found = (try? await executeJS("""
                 (function() {
                     var f = \(selectorJS);
                     return f ? 'found' : 'not_found';
                 })()
-            """)
+            """)) ?? "not_found"
             if found == "found" { break }
             try await Task.sleep(for: .milliseconds(500))
         }
 
         // React/Vue 호환 값 입력
-        let result = try await executeJS("""
+        let result = (try? await executeJS("""
             (function() {
                 var f = \(selectorJS);
                 if (!f) return 'not_found';
@@ -187,7 +187,7 @@ final class LoginService: NSObject {
 
                 return 'ok';
             })()
-        """)
+        """)) ?? "not_found"
         return result == "ok"
     }
 
@@ -197,13 +197,13 @@ final class LoginService: NSObject {
     private func waitAndClick(selectors: [String]) async throws -> Bool {
         let selectorJS = selectors.map { "document.querySelector('\($0)')" }.joined(separator: " || ")
         for _ in 0..<20 {
-            let result = try await executeJS("""
+            let result = (try? await executeJS("""
                 (function() {
                     var e = \(selectorJS);
                     if (e) { e.click(); return 'clicked'; }
                     return 'not_found';
                 })()
-            """)
+            """)) ?? "not_found"
             if result == "clicked" { return true }
             try await Task.sleep(for: .milliseconds(500))
         }
@@ -215,7 +215,7 @@ final class LoginService: NSObject {
         if let fb = fallback {
             js = "(\(js) || document.querySelector('\(fb)'))"
         }
-        try await executeJS("(function() { var e = \(js); if (e) e.click(); })()")
+        _ = try? await executeJS("(function() { var e = \(js); if (e) e.click(); })()")
     }
 
     // MARK: - Verify
