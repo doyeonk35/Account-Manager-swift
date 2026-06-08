@@ -3,6 +3,7 @@ import SwiftUI
 struct AccountEditView: View {
     @EnvironmentObject var manager: AccountManager
     @FocusState private var focusedField: Field?
+    @State private var showPassword = false
 
     private enum Field: Hashable {
         case title, username, password
@@ -16,9 +17,23 @@ struct AccountEditView: View {
                 TextField("TVING ID", text: $manager.editUsername)
                     .focused($focusedField, equals: .username)
                     .textContentType(.username)
-                SecureField("Password", text: $manager.editPassword)
-                    .focused($focusedField, equals: .password)
-                    .textContentType(.password)
+                HStack {
+                    if showPassword {
+                        TextField("Password", text: $manager.editPassword)
+                            .focused($focusedField, equals: .password)
+                            .textContentType(.password)
+                    } else {
+                        SecureField("Password", text: $manager.editPassword)
+                            .focused($focusedField, equals: .password)
+                            .textContentType(.password)
+                    }
+                    Button {
+                        showPassword.toggle()
+                    } label: {
+                        Image(systemName: showPassword ? "eye.slash" : "eye")
+                    }
+                    .buttonStyle(.borderless)
+                }
                 Picker("Account Type", selection: $manager.editAccountType) {
                     ForEach(AccountType.allCases, id: \.self) { type in
                         Text(type.rawValue).tag(type)
