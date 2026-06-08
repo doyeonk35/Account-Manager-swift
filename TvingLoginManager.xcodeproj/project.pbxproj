@@ -1,0 +1,452 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		12BEFF8A391114DE02154758 /* TvingLoginManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A30D105103B7A0E77A8AAEC /* TvingLoginManagerTests.swift */; };
+		64A653A3A19EE715E3C1B0B6 /* TvingLoginManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */; };
+		C24BB0FB03962CE05D3765DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		747075BCFEF47FCED05EFEC7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E35636C6E26DC7AB2A9C5593 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D22DCBFBCE2AAB3D2AF42AF8;
+			remoteInfo = TvingLoginManager;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		2EF2EF2D74BDCF2755191CC5 /* TvingLoginManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TvingLoginManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4BE5F51183598AED1109FA33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		5A30D105103B7A0E77A8AAEC /* TvingLoginManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvingLoginManagerTests.swift; sourceTree = "<group>"; };
+		75AA199178276CF23B85DCB4 /* TvingLoginManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TvingLoginManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A800A89132BA96919B285AF /* TvingLoginManager.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TvingLoginManager.entitlements; sourceTree = "<group>"; };
+		A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvingLoginManagerApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		041146D937E0F6763D9E9048 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		1D8C938B80E0A2A01EF4F716 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		469DA30C0F77E0443CEBF0C3 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		570D3E51E1416C58091B5AAC /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		60B187D9BE7F0085BB1A2169 = {
+			isa = PBXGroup;
+			children = (
+				6E30CB79F0D8A35C397E4319 /* TvingLoginManager */,
+				EE68A00E106765BCBBA728D3 /* TvingLoginManagerTests */,
+				C35692F888AAB0AC8925C578 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6E30CB79F0D8A35C397E4319 /* TvingLoginManager */ = {
+			isa = PBXGroup;
+			children = (
+				A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */,
+				4BE5F51183598AED1109FA33 /* Info.plist */,
+				9A800A89132BA96919B285AF /* TvingLoginManager.entitlements */,
+				DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */,
+				041146D937E0F6763D9E9048 /* Models */,
+				1D8C938B80E0A2A01EF4F716 /* Services */,
+				570D3E51E1416C58091B5AAC /* ViewModels */,
+				469DA30C0F77E0443CEBF0C3 /* Views */,
+			);
+			path = TvingLoginManager;
+			sourceTree = "<group>";
+		};
+		C35692F888AAB0AC8925C578 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				75AA199178276CF23B85DCB4 /* TvingLoginManager.app */,
+				2EF2EF2D74BDCF2755191CC5 /* TvingLoginManagerTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EE68A00E106765BCBBA728D3 /* TvingLoginManagerTests */ = {
+			isa = PBXGroup;
+			children = (
+				5A30D105103B7A0E77A8AAEC /* TvingLoginManagerTests.swift */,
+			);
+			path = TvingLoginManagerTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D1CC3683BB3DE1415BCA8A3E /* TvingLoginManagerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4FEFA4E4759121FFCDFC4B8F /* Build configuration list for PBXNativeTarget "TvingLoginManagerTests" */;
+			buildPhases = (
+				4995DDC983D65EC3E92B616B /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				89CC171A002A3B464B1A8371 /* PBXTargetDependency */,
+			);
+			name = TvingLoginManagerTests;
+			packageProductDependencies = (
+			);
+			productName = TvingLoginManagerTests;
+			productReference = 2EF2EF2D74BDCF2755191CC5 /* TvingLoginManagerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D22DCBFBCE2AAB3D2AF42AF8 /* TvingLoginManager */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 75E4A2C019E325089D96F9E4 /* Build configuration list for PBXNativeTarget "TvingLoginManager" */;
+			buildPhases = (
+				B6BE2436AD50EB164DACCC81 /* Sources */,
+				6409AC9E790E74AB71499BDE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TvingLoginManager;
+			packageProductDependencies = (
+			);
+			productName = TvingLoginManager;
+			productReference = 75AA199178276CF23B85DCB4 /* TvingLoginManager.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E35636C6E26DC7AB2A9C5593 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					D1CC3683BB3DE1415BCA8A3E = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					D22DCBFBCE2AAB3D2AF42AF8 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 99A48F3C9817DC08E6DBED77 /* Build configuration list for PBXProject "TvingLoginManager" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 60B187D9BE7F0085BB1A2169;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C35692F888AAB0AC8925C578 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D22DCBFBCE2AAB3D2AF42AF8 /* TvingLoginManager */,
+				D1CC3683BB3DE1415BCA8A3E /* TvingLoginManagerTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6409AC9E790E74AB71499BDE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C24BB0FB03962CE05D3765DF /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4995DDC983D65EC3E92B616B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				12BEFF8A391114DE02154758 /* TvingLoginManagerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B6BE2436AD50EB164DACCC81 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				64A653A3A19EE715E3C1B0B6 /* TvingLoginManagerApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		89CC171A002A3B464B1A8371 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D22DCBFBCE2AAB3D2AF42AF8 /* TvingLoginManager */;
+			targetProxy = 747075BCFEF47FCED05EFEC7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		33132ED60582B7615266C376 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = TvingLoginManager/TvingLoginManager.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = TvingLoginManager/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tving.login-manager";
+				PRODUCT_NAME = "TVING Login Manager";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		43044A269C919E000AEBB514 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TVING Login Manager.app/Contents/MacOS/TVING Login Manager";
+			};
+			name = Release;
+		};
+		9B56EBF6DA1D0CD6ACE4C063 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = TvingLoginManager/TvingLoginManager.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = TvingLoginManager/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tving.login-manager";
+				PRODUCT_NAME = "TVING Login Manager";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		A6ED4238B6F294B13268B215 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TVING Login Manager.app/Contents/MacOS/TVING Login Manager";
+			};
+			name = Debug;
+		};
+		ADFF512D8C203712DD0431C4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TvingLoginManager/TvingLoginManager.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = TvingLoginManager/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		EDAE3D92C55F404DFFE4780D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TvingLoginManager/TvingLoginManager.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = TvingLoginManager/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4FEFA4E4759121FFCDFC4B8F /* Build configuration list for PBXNativeTarget "TvingLoginManagerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A6ED4238B6F294B13268B215 /* Debug */,
+				43044A269C919E000AEBB514 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		75E4A2C019E325089D96F9E4 /* Build configuration list for PBXNativeTarget "TvingLoginManager" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ADFF512D8C203712DD0431C4 /* Debug */,
+				EDAE3D92C55F404DFFE4780D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		99A48F3C9817DC08E6DBED77 /* Build configuration list for PBXProject "TvingLoginManager" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				33132ED60582B7615266C376 /* Debug */,
+				9B56EBF6DA1D0CD6ACE4C063 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E35636C6E26DC7AB2A9C5593 /* Project object */;
+}

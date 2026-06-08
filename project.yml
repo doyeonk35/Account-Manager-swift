@@ -1,0 +1,42 @@
+name: TvingLoginManager
+options:
+  bundleIdPrefix: com.tving
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    CODE_SIGN_ENTITLEMENTS: TvingLoginManager/TvingLoginManager.entitlements
+    INFOPLIST_FILE: TvingLoginManager/Info.plist
+    PRODUCT_BUNDLE_IDENTIFIER: com.tving.login-manager
+    PRODUCT_NAME: "TVING Login Manager"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGN_IDENTITY: "Apple Development"
+    DEVELOPMENT_TEAM: ""
+targets:
+  TvingLoginManager:
+    type: application
+    platform: macOS
+    sources:
+      - TvingLoginManager
+    settings:
+      base:
+        CODE_SIGN_ENTITLEMENTS: TvingLoginManager/TvingLoginManager.entitlements
+        INFOPLIST_FILE: TvingLoginManager/Info.plist
+        CODE_SIGN_STYLE: Automatic
+  TvingLoginManagerTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - TvingLoginManagerTests
+    dependencies:
+      - target: TvingLoginManager
+    settings:
+      base:
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TVING Login Manager.app/Contents/MacOS/TVING Login Manager"
+        BUNDLE_LOADER: "$(TEST_HOST)"
