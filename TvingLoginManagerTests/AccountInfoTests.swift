@@ -75,6 +75,6 @@ final class AccountInfoTests: XCTestCase {
 
     func testLoginURLForQA() {
         let account = AccountInfo(title: "T", username: "u", accountType: .qa)
-        XCTAssertEqual(account.loginURL.absoluteString, "https://userqa.tving.com")
+        XCTAssertEqual(account.loginURL.absoluteString, "https://userqa.tving.com/tv/login/qrcode.tving")
     }
 }

@@ -40,7 +40,7 @@ struct AccountInfo: Identifiable {
     var loginURL: URL {
         switch accountType {
         case .qc: URL(string: "https://user.tving.com/")!
-        case .qa: URL(string: "https://userqa.tving.com")!
+        case .qa: URL(string: "https://userqa.tving.com/tv/login/qrcode.tving")!
         }
     }
 }
