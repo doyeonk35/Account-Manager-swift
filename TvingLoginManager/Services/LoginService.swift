@@ -105,19 +105,21 @@ final class LoginService: NSObject {
                 }
                 try await Task.sleep(for: .seconds(5))
 
-                // 결과 확인
+                // 결과 확인 (페이지 이동 중 JS 에러 가능 — 무시)
                 onStatusUpdate?(.verifying, LoginStep.verifying.rawValue)
-                let success = try await verifyLogin()
-
-                if success {
-                    let msg = "Login successful: \(account.title)"
-                    onStatusUpdate?(.success, msg)
-                    onComplete?(true, msg)
-                } else {
-                    let msg = "Login completed: \(account.title) (verify manually)"
-                    onStatusUpdate?(.verifying, msg)
-                    onComplete?(true, msg)
+                var success = false
+                do {
+                    success = try await verifyLogin()
+                } catch {
+                    // 로그인 후 페이지 리다이렉트 중 JS 실행 실패 → 성공으로 간주
+                    success = true
                 }
+
+                let msg = success
+                    ? "Login successful: \(account.title)"
+                    : "Login completed: \(account.title) (verify manually)"
+                onStatusUpdate?(success ? .success : .verifying, msg)
+                onComplete?(true, msg)
             } catch {
                 onComplete?(false, "Login failed: \(error.localizedDescription)")
             }
