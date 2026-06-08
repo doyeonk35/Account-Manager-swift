@@ -40,6 +40,13 @@ struct AccountEditView: View {
                     }
                 }
                 .pickerStyle(.segmented)
+
+                Picker("Plan", selection: $manager.editPlanType) {
+                    ForEach(PlanType.allCases, id: \.self) { plan in
+                        Text(plan.rawValue).tag(plan)
+                    }
+                }
+                .pickerStyle(.radioGroup)
             } header: {
                 Text(manager.editingAccountId != nil ? "Edit Account" : "New Account")
             }

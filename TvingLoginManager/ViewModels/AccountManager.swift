@@ -28,6 +28,7 @@ final class AccountManager: ObservableObject {
     @Published var editUsername = ""
     @Published var editPassword = ""
     @Published var editAccountType: AccountType = .qc
+    @Published var editPlanType: PlanType = .basic
 
     // Login state
     @Published var loginStatus = ""
@@ -83,21 +84,22 @@ final class AccountManager: ObservableObject {
 
     // MARK: - CRUD
 
-    func addAccount(title: String, username: String, password: String, accountType: AccountType) {
+    func addAccount(title: String, username: String, password: String, accountType: AccountType, planType: PlanType) {
         let account = AccountInfo(
-            title: title, username: username, password: password, accountType: accountType
+            title: title, username: username, password: password, accountType: accountType, planType: planType
         )
         keychain.saveOrUpdate(password: password, forAccountId: account.id)
         accounts.append(account)
         storage.save(accounts: accounts)
     }
 
-    func updateAccount(id: UUID, title: String, username: String, password: String, accountType: AccountType) {
+    func updateAccount(id: UUID, title: String, username: String, password: String, accountType: AccountType, planType: PlanType) {
         guard let index = accounts.firstIndex(where: { $0.id == id }) else { return }
         accounts[index].title = title
         accounts[index].username = username
         accounts[index].password = password
         accounts[index].accountType = accountType
+        accounts[index].planType = planType
         keychain.saveOrUpdate(password: password, forAccountId: id)
         storage.save(accounts: accounts)
     }
@@ -117,6 +119,7 @@ final class AccountManager: ObservableObject {
         editUsername = ""
         editPassword = ""
         editAccountType = .qc
+        editPlanType = .basic
         isEditing = true
     }
 
@@ -126,6 +129,7 @@ final class AccountManager: ObservableObject {
         editUsername = account.username
         editPassword = account.password
         editAccountType = account.accountType
+        editPlanType = account.planType
         isEditing = true
     }
 
@@ -137,10 +141,10 @@ final class AccountManager: ObservableObject {
     func saveEdit() {
         if let id = editingAccountId {
             updateAccount(id: id, title: editTitle, username: editUsername,
-                         password: editPassword, accountType: editAccountType)
+                         password: editPassword, accountType: editAccountType, planType: editPlanType)
         } else {
             addAccount(title: editTitle, username: editUsername,
-                      password: editPassword, accountType: editAccountType)
+                      password: editPassword, accountType: editAccountType, planType: editPlanType)
         }
         isEditing = false
         editingAccountId = nil

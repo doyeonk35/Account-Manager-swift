@@ -5,12 +5,20 @@ enum AccountType: String, Codable, CaseIterable {
     case qa = "QA"
 }
 
+enum PlanType: String, Codable, CaseIterable {
+    case basic = "베이직"
+    case adSupported = "광고 요금제"
+    case standard = "스탠다드"
+    case premium = "프리미엄"
+}
+
 struct AccountInfo: Identifiable {
     let id: UUID
     var title: String
     var username: String
     var password: String      // Memory only — stored in Keychain, NOT in JSON
     var accountType: AccountType
+    var planType: PlanType
     var lastUsed: Date
 
     init(
@@ -19,6 +27,7 @@ struct AccountInfo: Identifiable {
         username: String,
         password: String = "",
         accountType: AccountType = .qc,
+        planType: PlanType = .basic,
         lastUsed: Date = Date()
     ) {
         self.id = id
@@ -26,6 +35,7 @@ struct AccountInfo: Identifiable {
         self.username = username
         self.password = password
         self.accountType = accountType
+        self.planType = planType
         self.lastUsed = lastUsed
     }
 
@@ -50,6 +60,7 @@ extension AccountInfo: Codable {
     enum CodingKeys: String, CodingKey {
         case id, title, username, password
         case accountType = "account_type"
+        case planType = "plan_type"
         case lastUsed = "last_used"
     }
 
@@ -60,6 +71,7 @@ extension AccountInfo: Codable {
         try container.encode(username, forKey: .username)
         // password intentionally NOT encoded — stored in Keychain
         try container.encode(accountType, forKey: .accountType)
+        try container.encode(planType, forKey: .planType)
         try container.encode(lastUsed, forKey: .lastUsed)
     }
 
@@ -71,6 +83,8 @@ extension AccountInfo: Codable {
         // Migration: read password from Rust JSON if present, otherwise empty
         password = (try? container.decode(String.self, forKey: .password)) ?? ""
         accountType = try container.decode(AccountType.self, forKey: .accountType)
+        // Migration: plan_type이 없는 기존 JSON 호환
+        planType = (try? container.decode(PlanType.self, forKey: .planType)) ?? .basic
         lastUsed = try container.decode(Date.self, forKey: .lastUsed)
     }
 }

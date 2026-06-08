@@ -62,9 +62,20 @@ struct AccountListView: View {
                 Text("ID: \(account.username)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                Text("Type: \(account.accountType.rawValue)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 8) {
+                    Text(account.accountType.rawValue)
+                        .font(.caption)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(.secondary.opacity(0.2))
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                    Text(account.planType.rawValue)
+                        .font(.caption)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.accentColor.opacity(0.2))
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
             }
 
             Spacer()
