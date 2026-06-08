@@ -46,20 +46,21 @@ final class LoginService: NSObject {
                     try await Task.sleep(for: .seconds(2))
                 }
 
-                // "티빙 아이디로 로그인" 링크 클릭 (href 기반 + aria-label 폴백)
-                onStatusUpdate?(.clickingLogin, "Selecting TVING ID login...")
-                let loginMethodClicked = try await waitAndClick(
-                    selectors: [
-                        "a[href*='/account/login/tving']",           // <a> 태그 href 매칭
-                        "button[aria-label='티빙 아이디로 로그인']",   // aria-label 폴백
-                    ]
-                )
-                if !loginMethodClicked {
-                    onStatusUpdate?(.clickingLogin, "Login form may already be visible...")
+                // 사용자가 "티빙 아이디로 로그인"을 직접 클릭할 때까지 대기
+                onStatusUpdate?(.clickingLogin, "'티빙 아이디로 로그인' 버튼을 눌러주세요.")
+                for _ in 0..<200 {
+                    let found = try await executeJS("""
+                        (function() {
+                            var f = document.querySelector("input[name='id']")
+                                 || document.querySelector("input[placeholder='아이디']");
+                            return f ? 'found' : 'not_found';
+                        })()
+                    """)
+                    if found == "found" { break }
+                    try await Task.sleep(for: .milliseconds(500))
                 }
-                try await Task.sleep(for: .seconds(3))
 
-                // 아이디 입력 — 엘리먼트가 나타날 때까지 대기
+                // 아이디 입력
                 onStatusUpdate?(.enteringCredentials, "Entering username...")
                 let usernameEntered = try await waitAndFill(
                     selectors: [
@@ -89,37 +90,10 @@ final class LoginService: NSObject {
                     onComplete?(false, "Could not find password field.")
                     return
                 }
-                try await Task.sleep(for: .seconds(1))
 
-                // 로그인 버튼 클릭
-                onStatusUpdate?(.submitting, LoginStep.submitting.rawValue)
-                let loginClicked = try await waitAndClick(
-                    selectors: [
-                        "button[type='submit']",
-                        "#doLoginBtn",
-                    ]
-                )
-                if !loginClicked {
-                    onComplete?(false, "Could not find login button.")
-                    return
-                }
-                try await Task.sleep(for: .seconds(5))
-
-                // 결과 확인 (페이지 이동 중 JS 에러 가능 — 무시)
-                onStatusUpdate?(.verifying, LoginStep.verifying.rawValue)
-                var success = false
-                do {
-                    success = try await verifyLogin()
-                } catch {
-                    // 로그인 후 페이지 리다이렉트 중 JS 실행 실패 → 성공으로 간주
-                    success = true
-                }
-
-                let msg = success
-                    ? "Login successful: \(account.title)"
-                    : "Login completed: \(account.title) (verify manually)"
-                onStatusUpdate?(success ? .success : .verifying, msg)
-                onComplete?(true, msg)
+                // 자동완성 완료 안내
+                onStatusUpdate?(.enteringCredentials, "ID/PW 입력 완료. 로그인 버튼을 눌러주세요.")
+                onComplete?(true, "Credentials filled: \(account.title)")
             } catch {
                 onComplete?(false, "Login failed: \(error.localizedDescription)")
             }
