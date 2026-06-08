@@ -157,32 +157,17 @@ final class LoginService: NSObject {
             try await Task.sleep(for: .milliseconds(150))
         }
 
-        // 버튼이 활성화될 때까지 대기 후 클릭
-        try await Task.sleep(for: .seconds(1))
+        // OTP 입력 완료 안내 — 사용자가 직접 "계속" 버튼을 누르도록 대기
+        onStatusUpdate?(.enteringOTP, "OTP 입력 완료. '계속' 버튼을 눌러주세요.")
 
-        // "계속" 버튼 — 여러 방법으로 클릭 시도
-        try await executeJS("""
-            (function() {
-                var btn = document.querySelector('#confirmBtn');
-                if (!btn) return 'not_found';
-
-                // disabled 속성 강제 제거 (add() 검증이 비활성화했을 경우)
-                btn.disabled = false;
-                btn.removeAttribute('disabled');
-                btn.classList.remove('disabled');
-
-                // 포커스 후 전체 마우스 이벤트 시퀀스 시뮬레이션
-                btn.focus();
-                btn.dispatchEvent(new MouseEvent('mousedown', {bubbles: true, cancelable: true, view: window}));
-                btn.dispatchEvent(new MouseEvent('mouseup', {bubbles: true, cancelable: true, view: window}));
-                btn.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
-
-                // 폴백: 직접 click() 호출
-                btn.click();
-
-                return 'clicked';
-            })()
-        """)
+        // 사용자가 "계속"을 눌러 페이지가 이동할 때까지 대기 (최대 60초)
+        for _ in 0..<120 {
+            let stillOnOTP = try await executeJS("""
+                (function() { return document.querySelector('#code-num01') ? 'yes' : 'no'; })()
+            """)
+            if stillOnOTP == "no" { break }
+            try await Task.sleep(for: .milliseconds(500))
+        }
     }
 
     // MARK: - Wait + Fill (React 호환)
