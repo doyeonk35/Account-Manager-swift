@@ -160,8 +160,8 @@ final class LoginService: NSObject {
         // OTP 입력 완료 안내 — 사용자가 직접 "계속" 버튼을 누르도록 대기
         onStatusUpdate?(.enteringOTP, "OTP 입력 완료. '계속' 버튼을 눌러주세요.")
 
-        // 사용자가 "계속"을 눌러 페이지가 이동할 때까지 대기 (최대 60초)
-        for _ in 0..<120 {
+        // 사용자가 "계속"을 눌러 페이지가 이동할 때까지 대기 (최대 100초)
+        for _ in 0..<200 {
             let stillOnOTP = try await executeJS("""
                 (function() { return document.querySelector('#code-num01') ? 'yes' : 'no'; })()
             """)
