@@ -110,7 +110,17 @@ final class LoginService: NSObject {
     // MARK: - OTP
 
     private func injectOTP(_ code: String) async throws {
+        // #code-num01 필드가 나타날 때까지 대기 (최대 10초)
+        for _ in 0..<20 {
+            let found = try await executeJS("""
+                (function() { return document.querySelector('#code-num01') ? 'found' : 'not_found'; })()
+            """)
+            if found == "found" { break }
+            try await Task.sleep(for: .milliseconds(500))
+        }
+
         // OTP 6자리를 #code-num01 ~ #code-num06 각 필드에 한 자리씩 입력
+        // 이 페이지는 바닐라 JS (oninput="add(this)") 사용
         let digits = Array(code.prefix(6))
         for (i, digit) in digits.enumerated() {
             let fieldId = String(format: "#code-num%02d", i + 1)
@@ -119,17 +129,17 @@ final class LoginService: NSObject {
                     var f = document.querySelector('\(fieldId)');
                     if (f) {
                         f.focus();
-                        var ns = Object.getOwnPropertyDescriptor(
-                            window.HTMLInputElement.prototype, 'value'
-                        ).set;
-                        ns.call(f, '\(String(digit).escapedForJS)');
+                        f.value = '\(String(digit).escapedForJS)';
+                        // oninput="add(this)" 트리거
+                        if (typeof add === 'function') { add(f); }
                         f.dispatchEvent(new Event('input', {bubbles: true}));
-                        f.dispatchEvent(new Event('change', {bubbles: true}));
                     }
                 })()
             """)
+            try await Task.sleep(for: .milliseconds(100))
         }
-        // 확인 버튼 클릭
+
+        // "계속" 버튼 클릭
         try await Task.sleep(for: .milliseconds(500))
         try await clickElement("#confirmBtn")
     }
