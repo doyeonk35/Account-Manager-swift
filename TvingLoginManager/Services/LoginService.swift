@@ -147,20 +147,21 @@ final class LoginService: NSObject {
                     if (f) {
                         f.focus();
                         f.value = '\(String(digit).escapedForJS)';
-                        // oninput="add(this)" 트리거
-                        if (typeof add === 'function') { add(f); }
+                        // oninput="add(this)" 한 번만 트리거
                         f.dispatchEvent(new Event('input', {bubbles: true}));
-                        f.dispatchEvent(new Event('change', {bubbles: true}));
                     }
                 })()
             """)
             try await Task.sleep(for: .milliseconds(150))
         }
 
-        // OTP 입력 완료 안내 — 사용자가 직접 "계속" 버튼을 누르도록 대기
-        onStatusUpdate?(.enteringOTP, "OTP 입력 완료. '계속' 버튼을 눌러주세요.")
+        // "계속" 버튼 자동 클릭
+        try await Task.sleep(for: .milliseconds(500))
+        onStatusUpdate?(.enteringOTP, "Clicking confirm...")
+        try await clickElement("#confirmBtn")
 
-        // 사용자가 "계속"을 눌러 페이지가 이동할 때까지 대기 (최대 100초)
+        // 페이지 이동 대기 (최대 100초, 자동 실패 시 사용자가 직접 클릭 가능)
+        onStatusUpdate?(.enteringOTP, "OTP submitted. Waiting for next page...")
         for _ in 0..<200 {
             let stillOnOTP = try await executeJS("""
                 (function() { return document.querySelector('#code-num01') ? 'yes' : 'no'; })()
