@@ -150,15 +150,39 @@ final class LoginService: NSObject {
                         // oninput="add(this)" 트리거
                         if (typeof add === 'function') { add(f); }
                         f.dispatchEvent(new Event('input', {bubbles: true}));
+                        f.dispatchEvent(new Event('change', {bubbles: true}));
                     }
                 })()
             """)
-            try await Task.sleep(for: .milliseconds(100))
+            try await Task.sleep(for: .milliseconds(150))
         }
 
-        // "계속" 버튼 클릭
-        try await Task.sleep(for: .milliseconds(500))
-        try await clickElement("#confirmBtn")
+        // 버튼이 활성화될 때까지 대기 후 클릭
+        try await Task.sleep(for: .seconds(1))
+
+        // "계속" 버튼 — 여러 방법으로 클릭 시도
+        try await executeJS("""
+            (function() {
+                var btn = document.querySelector('#confirmBtn');
+                if (!btn) return 'not_found';
+
+                // disabled 속성 강제 제거 (add() 검증이 비활성화했을 경우)
+                btn.disabled = false;
+                btn.removeAttribute('disabled');
+                btn.classList.remove('disabled');
+
+                // 포커스 후 전체 마우스 이벤트 시퀀스 시뮬레이션
+                btn.focus();
+                btn.dispatchEvent(new MouseEvent('mousedown', {bubbles: true, cancelable: true, view: window}));
+                btn.dispatchEvent(new MouseEvent('mouseup', {bubbles: true, cancelable: true, view: window}));
+                btn.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
+
+                // 폴백: 직접 click() 호출
+                btn.click();
+
+                return 'clicked';
+            })()
+        """)
     }
 
     // MARK: - Wait + Fill (React 호환)
