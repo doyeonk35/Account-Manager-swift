@@ -102,16 +102,28 @@ final class LoginService: NSObject {
     // MARK: - OTP
 
     private func injectOTP(_ code: String) async throws {
-        try await executeJS("""
-            (function() {
-                var f = document.querySelector('#code-num01');
-                if (f) {
-                    \(reactSetValue("f", code.escapedForJS))
-                    var b = document.querySelector('#confirmBtn');
-                    if (b) b.click();
-                }
-            })()
-        """)
+        // OTP 6자리를 #code-num01 ~ #code-num06 각 필드에 한 자리씩 입력
+        let digits = Array(code.prefix(6))
+        for (i, digit) in digits.enumerated() {
+            let fieldId = String(format: "#code-num%02d", i + 1)
+            try await executeJS("""
+                (function() {
+                    var f = document.querySelector('\(fieldId)');
+                    if (f) {
+                        f.focus();
+                        var ns = Object.getOwnPropertyDescriptor(
+                            window.HTMLInputElement.prototype, 'value'
+                        ).set;
+                        ns.call(f, '\(String(digit).escapedForJS)');
+                        f.dispatchEvent(new Event('input', {bubbles: true}));
+                        f.dispatchEvent(new Event('change', {bubbles: true}));
+                    }
+                })()
+            """)
+        }
+        // 확인 버튼 클릭
+        try await Task.sleep(for: .milliseconds(500))
+        try await clickElement("#confirmBtn")
     }
 
     // MARK: - Wait + Fill (React 호환)
