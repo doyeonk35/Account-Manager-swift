@@ -27,7 +27,7 @@ final class AccountManagerTests: XCTestCase {
     }
 
     func testAddAccount() {
-        manager.addAccount(title: "Test", username: "u", password: "p", accountType: .qc)
+        manager.addAccount(title: "Test", username: "u", password: "p", accountType: .qc, planType: .basic)
         XCTAssertEqual(manager.accounts.count, 1)
         XCTAssertEqual(manager.accounts[0].title, "Test")
         let stored = keychain.loadPassword(forAccountId: manager.accounts[0].id)
@@ -35,16 +35,16 @@ final class AccountManagerTests: XCTestCase {
     }
 
     func testUpdateAccount() {
-        manager.addAccount(title: "Old", username: "u", password: "oldpw", accountType: .qc)
+        manager.addAccount(title: "Old", username: "u", password: "oldpw", accountType: .qc, planType: .basic)
         let id = manager.accounts[0].id
-        manager.updateAccount(id: id, title: "New", username: "u2", password: "newpw", accountType: .qa)
+        manager.updateAccount(id: id, title: "New", username: "u2", password: "newpw", accountType: .qa, planType: .standard)
         XCTAssertEqual(manager.accounts[0].title, "New")
         XCTAssertEqual(manager.accounts[0].accountType, .qa)
         XCTAssertEqual(keychain.loadPassword(forAccountId: id), "newpw")
     }
 
     func testDeleteAccount() {
-        manager.addAccount(title: "A", username: "u", password: "pw", accountType: .qc)
+        manager.addAccount(title: "A", username: "u", password: "pw", accountType: .qc, planType: .basic)
         let id = manager.accounts[0].id
         manager.deleteAccount(id: id)
         XCTAssertTrue(manager.accounts.isEmpty)
@@ -52,7 +52,7 @@ final class AccountManagerTests: XCTestCase {
     }
 
     func testDeleteSelectedAccountClearsSelection() {
-        manager.addAccount(title: "A", username: "u", password: "p", accountType: .qc)
+        manager.addAccount(title: "A", username: "u", password: "p", accountType: .qc, planType: .basic)
         let id = manager.accounts[0].id
         manager.selectedAccountId = id
         manager.deleteAccount(id: id)
