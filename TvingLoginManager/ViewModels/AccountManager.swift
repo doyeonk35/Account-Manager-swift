@@ -46,8 +46,6 @@ final class AccountManager: ObservableObject {
     @AppStorage("loginURL_QC") var qcLoginURL = "https://user.tving.com/"
     @AppStorage("loginURL_QA") var qaLoginURL = "https://userqa.tving.com/tv/login/qrcode.tving"
 
-    // Sidebar
-    @Published var selectedTab: SidebarTab = .accounts
 
     private let storage: StorageService
     private let keychain: KeychainService

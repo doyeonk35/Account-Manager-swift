@@ -2,17 +2,18 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var manager: AccountManager
+    @State private var selectedTab: SidebarTab = .accounts
 
     var body: some View {
         NavigationSplitView {
-            List(SidebarTab.allCases, selection: $manager.selectedTab) { tab in
-                Label(tab.rawValue, systemImage: tab.icon)
+            List(SidebarTab.allCases, selection: $selectedTab) { tab in
+                Label(LocalizedStringKey(tab.rawValue), systemImage: tab.icon)
                     .tag(tab)
             }
             .navigationSplitViewColumnWidth(min: 160, ideal: 180)
         } content: {
             VStack(spacing: 0) {
-                switch manager.selectedTab {
+                switch selectedTab {
                 case .accounts:
                     AccountListView()
                 case .settings:
@@ -33,7 +34,7 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 300, ideal: 400)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    if manager.selectedTab == .accounts {
+                    if selectedTab == .accounts {
                         Button {
                             manager.startAdding()
                         } label: {
@@ -45,16 +46,12 @@ struct ContentView: View {
                 }
             }
         } detail: {
-            if manager.selectedTab == .accounts && manager.isEditing {
+            if selectedTab == .accounts && manager.isEditing {
                 AccountEditView()
-                    .frame(minWidth: 300)
-            } else if manager.selectedTab == .accounts {
-                ContentUnavailableView("No Selection", systemImage: "person.crop.circle",
-                                       description: Text("Add or edit an account"))
                     .frame(minWidth: 300)
             }
         }
-        .onChange(of: manager.selectedTab) {
+        .onChange(of: selectedTab) {
             manager.cancelEditing()
         }
         .sheet(isPresented: $manager.showLoginWebView) {
