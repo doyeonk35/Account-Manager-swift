@@ -43,12 +43,12 @@ struct AccountEditView: View {
 
                 Picker("Plan", selection: $manager.editPlanType) {
                     ForEach(PlanType.allCases, id: \.self) { plan in
-                        Text(plan.rawValue).tag(plan)
+                        Text(plan.displayName).tag(plan)
                     }
                 }
                 .pickerStyle(.radioGroup)
             } header: {
-                Text(manager.editingAccountId != nil ? "Edit Account" : "New Account")
+                Text(manager.editingAccountId != nil ? LocalizedStringKey("Edit Account") : LocalizedStringKey("New Account"))
             }
 
             Section {
@@ -58,7 +58,7 @@ struct AccountEditView: View {
                     }
                     .keyboardShortcut(.escape, modifiers: [])
                     Spacer()
-                    Button(manager.editingAccountId != nil ? "Update" : "Save") {
+                    Button(manager.editingAccountId != nil ? LocalizedStringKey("Update") : LocalizedStringKey("Save")) {
                         manager.saveEdit()
                     }
                     .keyboardShortcut(.return, modifiers: .command)

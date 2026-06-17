@@ -5,6 +5,9 @@ options:
     macOS: "14.0"
   xcodeVersion: "16.0"
   generateEmptyDirectories: true
+  defaultConfig: Debug
+  developmentLanguage: en
+  knownRegions: [en, ko, Base]
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -49,6 +52,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tving.login-manager.tests
         BUNDLE_LOADER: "$(TEST_HOST)"
+        GENERATE_INFOPLIST_FILE: YES
       configs:
         Debug:
           TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TvingLoginManager-Debug.app/Contents/MacOS/TvingLoginManager-Debug"

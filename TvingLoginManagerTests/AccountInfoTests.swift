@@ -59,13 +59,15 @@ final class AccountInfoTests: XCTestCase {
 
     func testLastUsedRelativeJustNow() {
         let account = AccountInfo(title: "T", username: "u", lastUsed: Date())
-        XCTAssertEqual(account.lastUsedRelative, "Just now")
+        let expected = String(localized: "Just now")
+        XCTAssertEqual(account.lastUsedRelative, expected)
     }
 
     func testLastUsedRelativeDaysAgo() {
         let twoDaysAgo = Date().addingTimeInterval(-2 * 86400)
         let account = AccountInfo(title: "T", username: "u", lastUsed: twoDaysAgo)
-        XCTAssertEqual(account.lastUsedRelative, "2 days ago")
+        let expected = String(localized: "\(2) days ago")
+        XCTAssertEqual(account.lastUsedRelative, expected)
     }
 
     func testLoginURLForQC() {

@@ -55,7 +55,7 @@ final class LoginService: NSObject {
 
                 // 사용자가 "티빙 아이디로 로그인"을 직접 클릭할 때까지 대기
                 try Task.checkCancellation()
-                onStatusUpdate?(.clickingLogin, "'티빙 아이디로 로그인' 버튼을 눌러주세요.")
+                onStatusUpdate?(.clickingLogin, String(localized: "Please click 'Login with TVING ID'."))
                 for _ in 0..<200 {
                     try Task.checkCancellation()
                     let found = (try? await executeJS("""
@@ -71,7 +71,7 @@ final class LoginService: NSObject {
 
                 // 아이디 입력
                 try Task.checkCancellation()
-                onStatusUpdate?(.enteringCredentials, "Entering username...")
+                onStatusUpdate?(.enteringCredentials, String(localized: "Entering username..."))
                 let usernameEntered = try await waitAndFill(
                     selectors: [
                         "input[name=\"id\"]",
@@ -81,7 +81,7 @@ final class LoginService: NSObject {
                     value: account.username
                 )
                 guard usernameEntered else {
-                    onComplete?(false, "Could not find username field.")
+                    onComplete?(false, String(localized: "Could not find username field."))
                     return
                 }
                 try Task.checkCancellation()
@@ -89,7 +89,7 @@ final class LoginService: NSObject {
 
                 // 비밀번호 입력
                 try Task.checkCancellation()
-                onStatusUpdate?(.enteringCredentials, "Entering password...")
+                onStatusUpdate?(.enteringCredentials, String(localized: "Entering password..."))
                 let passwordEntered = try await waitAndFill(
                     selectors: [
                         "input[name=\"password\"]",
@@ -99,17 +99,17 @@ final class LoginService: NSObject {
                     value: account.password
                 )
                 guard passwordEntered else {
-                    onComplete?(false, "Could not find password field.")
+                    onComplete?(false, String(localized: "Could not find password field."))
                     return
                 }
 
                 // 자동완성 완료 안내
-                onStatusUpdate?(.enteringCredentials, "ID/PW 입력 완료. 로그인 버튼을 눌러주세요.")
-                onComplete?(true, "Credentials filled: \(account.title)")
+                onStatusUpdate?(.enteringCredentials, String(localized: "Credentials filled. Please click Login."))
+                onComplete?(true, String(localized: "Credentials filled: \(account.title)"))
             } catch is CancellationError {
                 // Sheet dismissed — silently stop
             } catch {
-                onComplete?(false, "Login failed: \(error.localizedDescription)")
+                onComplete?(false, String(localized: "Login failed: \(error.localizedDescription)"))
             }
         }
     }
@@ -149,11 +149,11 @@ final class LoginService: NSObject {
 
         // "계속" 버튼 자동 클릭
         try await Task.sleep(for: .milliseconds(500))
-        onStatusUpdate?(.enteringOTP, "Clicking confirm...")
+        onStatusUpdate?(.enteringOTP, String(localized: "Clicking confirm..."))
         try await clickElement("#confirmBtn")
 
         // 페이지 이동 대기 (최대 100초, 자동 실패 시 사용자가 직접 클릭 가능)
-        onStatusUpdate?(.enteringOTP, "OTP submitted. Waiting for next page...")
+        onStatusUpdate?(.enteringOTP, String(localized: "OTP submitted. Waiting for next page..."))
         for _ in 0..<200 {
             try Task.checkCancellation()
             let stillOnOTP = (try? await executeJS("""

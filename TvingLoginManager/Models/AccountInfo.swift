@@ -10,6 +10,15 @@ enum PlanType: String, Codable, CaseIterable {
     case adSupported = "광고 요금제"
     case standard = "스탠다드"
     case premium = "프리미엄"
+
+    var displayName: String {
+        switch self {
+        case .basic: String(localized: "Basic")
+        case .adSupported: String(localized: "Ad Plan")
+        case .standard: String(localized: "Standard")
+        case .premium: String(localized: "Premium")
+        }
+    }
 }
 
 struct AccountInfo: Identifiable {
@@ -41,10 +50,10 @@ struct AccountInfo: Identifiable {
 
     var lastUsedRelative: String {
         let seconds = Int(Date().timeIntervalSince(lastUsed))
-        if seconds < 60 { return "Just now" }
-        if seconds < 3600 { return "\(seconds / 60) minutes ago" }
-        if seconds < 86400 { return "\(seconds / 3600) hours ago" }
-        return "\(seconds / 86400) days ago"
+        if seconds < 60 { return String(localized: "Just now") }
+        if seconds < 3600 { return String(localized: "\(seconds / 60) minutes ago") }
+        if seconds < 86400 { return String(localized: "\(seconds / 3600) hours ago") }
+        return String(localized: "\(seconds / 86400) days ago")
     }
 
     var loginURL: URL {

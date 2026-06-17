@@ -167,7 +167,7 @@ final class AccountManager: ObservableObject {
     func startLogin(account: AccountInfo) {
         guard !isLoggingIn else { return }
         isLoggingIn = true
-        loginStatus = "Logging in..."
+        loginStatus = String(localized: "Logging in...")
         selectedAccountId = account.id
 
         var loginTarget = account
@@ -190,7 +190,7 @@ final class AccountManager: ObservableObject {
 
     func cancelLogin() {
         isLoggingIn = false
-        loginStatus = "Login cancelled."
+        loginStatus = String(localized: "Login cancelled.")
         showLoginWebView = false
         loginAccount = nil
     }

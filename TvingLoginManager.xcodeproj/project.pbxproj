@@ -18,6 +18,7 @@
 		82C313E08BD9C0050CD70376 /* AccountInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD0DBEFC2724CCA2A4A7E3F /* AccountInfoTests.swift */; };
 		96EF5E548691529BECD5FA45 /* LoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EA0461693FFD2DF2755889 /* LoginService.swift */; };
 		A22F82D967BA8636BF6CF1A2 /* AccountManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC68E68998CE6A63D132F06 /* AccountManagerTests.swift */; };
+		A5F404367AC7754D6F6CDC68 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 39786DEFF3060E01AC731355 /* Localizable.xcstrings */; };
 		B592121B4E02FEC058C0DD3F /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB3FC5C351CA4355E25686A5 /* KeychainService.swift */; };
 		BC92E0CB057509BB718A17E0 /* LoginWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF84013D1BA82F576B418B6 /* LoginWebView.swift */; };
 		C24BB0FB03962CE05D3765DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */; };
@@ -38,6 +39,7 @@
 /* Begin PBXFileReference section */
 		0DCEA8D0FBE8491AB19D5E4E /* AccountInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountInfo.swift; sourceTree = "<group>"; };
 		2EF2EF2D74BDCF2755191CC5 /* TvingLoginManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TvingLoginManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		39786DEFF3060E01AC731355 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		4BE5F51183598AED1109FA33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4CF84013D1BA82F576B418B6 /* LoginWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWebView.swift; sourceTree = "<group>"; };
 		4E028443A00528A1D04D208D /* StorageServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageServiceTests.swift; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 			children = (
 				A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */,
 				4BE5F51183598AED1109FA33 /* Info.plist */,
+				39786DEFF3060E01AC731355 /* Localizable.xcstrings */,
 				9A800A89132BA96919B285AF /* TvingLoginManager.entitlements */,
 				DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */,
 				041146D937E0F6763D9E9048 /* Models */,
@@ -197,6 +200,7 @@
 			knownRegions = (
 				Base,
 				en,
+				ko,
 			);
 			mainGroup = 60B187D9BE7F0085BB1A2169;
 			minimizedProjectReferenceProxies = 1;
@@ -217,6 +221,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C24BB0FB03962CE05D3765DF /* Assets.xcassets in Resources */,
+				A5F404367AC7754D6F6CDC68 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -335,6 +340,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -412,6 +418,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

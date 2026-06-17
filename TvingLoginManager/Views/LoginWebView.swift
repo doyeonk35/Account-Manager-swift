@@ -100,7 +100,7 @@ struct WebViewContainer: NSViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            onComplete(false, "Navigation failed: \(error.localizedDescription)")
+            onComplete(false, String(localized: "Navigation failed: \(error.localizedDescription)"))
         }
 
         func webView(
