@@ -11,9 +11,14 @@ settings:
     MACOSX_DEPLOYMENT_TARGET: "14.0"
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
-    CODE_SIGN_STYLE: Automatic
-    CODE_SIGN_IDENTITY: "-"
-    DEVELOPMENT_TEAM: ""
+  configs:
+    Debug:
+      CODE_SIGN_STYLE: Automatic
+      DEVELOPMENT_TEAM: F64BRNFSBB
+    Release:
+      CODE_SIGN_STYLE: Manual
+      CODE_SIGN_IDENTITY: "-"
+      DEVELOPMENT_TEAM: ""
 targets:
   TvingLoginManager:
     type: application
@@ -27,6 +32,12 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.tving.login-manager
         PRODUCT_NAME: TvingLoginManager
         PRODUCT_MODULE_NAME: TvingLoginManager
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: com.tving.login-manager.debug
+          PRODUCT_NAME: TvingLoginManager-Debug
+          CODE_SIGN_STYLE: Automatic
+          DEVELOPMENT_TEAM: F64BRNFSBB
   TvingLoginManagerTests:
     type: bundle.unit-test
     platform: macOS
@@ -37,5 +48,9 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tving.login-manager.tests
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TvingLoginManager.app/Contents/MacOS/TvingLoginManager"
         BUNDLE_LOADER: "$(TEST_HOST)"
+      configs:
+        Debug:
+          TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TvingLoginManager-Debug.app/Contents/MacOS/TvingLoginManager-Debug"
+        Release:
+          TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TvingLoginManager.app/Contents/MacOS/TvingLoginManager"
