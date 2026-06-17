@@ -8,29 +8,31 @@ struct SettingsView: View {
             Section {
                 TextField("QC Login URL", text: $manager.qcLoginURL)
                     .textFieldStyle(.roundedBorder)
-            } header: {
-                Text("QC Environment")
-            } footer: {
                 Text("Default: https://user.tving.com/")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            } header: {
+                Text("QC Environment")
             }
 
             Section {
                 TextField("QA Login URL", text: $manager.qaLoginURL)
                     .textFieldStyle(.roundedBorder)
-            } header: {
-                Text("QA Environment")
-            } footer: {
                 Text("Default: https://userqa.tving.com/tv/login/qrcode.tving")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            } header: {
+                Text("QA Environment")
             }
 
             Section {
-                Button("Reset to Defaults") {
-                    manager.qcLoginURL = "https://user.tving.com/"
-                    manager.qaLoginURL = "https://userqa.tving.com/tv/login/qrcode.tving"
+                HStack {
+                    Spacer()
+                    Button("Reset to Defaults") {
+                        manager.qcLoginURL = "https://user.tving.com/"
+                        manager.qaLoginURL = "https://userqa.tving.com/tv/login/qrcode.tving"
+                    }
+                    .controlSize(.small)
                 }
             }
         }
