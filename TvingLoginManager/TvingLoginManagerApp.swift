@@ -8,8 +8,8 @@ struct TvingLoginManagerApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(accountManager)
-                .frame(minWidth: 700, minHeight: 500)
+                .frame(minWidth: 900, minHeight: 500)
         }
-        .defaultSize(width: 800, height: 600)
+        .defaultSize(width: 1100, height: 650)
     }
 }
