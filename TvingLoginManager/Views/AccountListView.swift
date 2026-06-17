@@ -5,15 +5,24 @@ struct AccountListView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text("OTP Code:")
-                TextField("Enter OTP", text: $manager.otpCode)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 140)
+            GroupBox {
+                HStack(spacing: 12) {
+                    Label("OTP Code", systemImage: "lock.shield")
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                    TextField("6자리 코드 입력", text: $manager.otpCode)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 160)
+                        .font(.system(.body, design: .monospaced))
+                }
+                .padding(.vertical, 4)
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 12)
             .padding(.top, 12)
-            .padding(.bottom, 4)
+            .padding(.bottom, 8)
+
+            Divider()
+                .padding(.horizontal, 12)
 
             if manager.accounts.isEmpty {
                 ContentUnavailableView {
