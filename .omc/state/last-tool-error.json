@@ -1,7 +1,0 @@
-{
-  "tool_name": "Read",
-  "tool_input_preview": "{\"file_path\":\"/Users/kimdoyeon/Documents/tving-login-manager-master/TvingLoginManager/Views/LoginWebView.swift\"}",
-  "error": "File does not exist. Note: your current working directory is /Users/kimdoyeon/Documents/tving-login-manager-master/TvingLoginManager.",
-  "timestamp": "2026-06-08T07:26:48.640Z",
-  "retry_count": 1
-}

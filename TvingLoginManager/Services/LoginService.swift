@@ -19,6 +19,7 @@ final class LoginService: NSObject {
     private var otpCode: String = ""
     private var onStatusUpdate: ((LoginStep, String) -> Void)?
     private var onComplete: ((Bool, String) -> Void)?
+    private var loginTask: Task<Void, Never>?
 
     func configure(
         webView: WKWebView,
@@ -34,21 +35,29 @@ final class LoginService: NSObject {
         self.onComplete = onComplete
     }
 
+    func cancel() {
+        loginTask?.cancel()
+        loginTask = nil
+    }
+
     func startLoginSequence() {
         guard let account = account else { return }
 
-        Task { @MainActor in
+        loginTask = Task { @MainActor in
             do {
                 // OTP 처리
                 if !otpCode.isEmpty {
+                    try Task.checkCancellation()
                     onStatusUpdate?(.enteringOTP, LoginStep.enteringOTP.rawValue)
                     try await injectOTP(otpCode)
                     try await Task.sleep(for: .seconds(2))
                 }
 
                 // 사용자가 "티빙 아이디로 로그인"을 직접 클릭할 때까지 대기
+                try Task.checkCancellation()
                 onStatusUpdate?(.clickingLogin, "'티빙 아이디로 로그인' 버튼을 눌러주세요.")
                 for _ in 0..<200 {
+                    try Task.checkCancellation()
                     let found = (try? await executeJS("""
                         (function() {
                             var f = document.querySelector('input[name="id"]')
@@ -61,6 +70,7 @@ final class LoginService: NSObject {
                 }
 
                 // 아이디 입력
+                try Task.checkCancellation()
                 onStatusUpdate?(.enteringCredentials, "Entering username...")
                 let usernameEntered = try await waitAndFill(
                     selectors: [
@@ -74,9 +84,11 @@ final class LoginService: NSObject {
                     onComplete?(false, "Could not find username field.")
                     return
                 }
+                try Task.checkCancellation()
                 try await Task.sleep(for: .seconds(1))
 
                 // 비밀번호 입력
+                try Task.checkCancellation()
                 onStatusUpdate?(.enteringCredentials, "Entering password...")
                 let passwordEntered = try await waitAndFill(
                     selectors: [
@@ -94,6 +106,8 @@ final class LoginService: NSObject {
                 // 자동완성 완료 안내
                 onStatusUpdate?(.enteringCredentials, "ID/PW 입력 완료. 로그인 버튼을 눌러주세요.")
                 onComplete?(true, "Credentials filled: \(account.title)")
+            } catch is CancellationError {
+                // Sheet dismissed — silently stop
             } catch {
                 onComplete?(false, "Login failed: \(error.localizedDescription)")
             }
@@ -105,6 +119,7 @@ final class LoginService: NSObject {
     private func injectOTP(_ code: String) async throws {
         // #code-num01 필드가 나타날 때까지 대기 (최대 10초)
         for _ in 0..<20 {
+            try Task.checkCancellation()
             let found = (try? await executeJS("""
                 (function() { return document.querySelector('#code-num01') ? 'found' : 'not_found'; })()
             """)) ?? "not_found"
@@ -116,6 +131,7 @@ final class LoginService: NSObject {
         // 이 페이지는 바닐라 JS (oninput="add(this)") 사용
         let digits = Array(code.prefix(6))
         for (i, digit) in digits.enumerated() {
+            try Task.checkCancellation()
             let fieldId = String(format: "#code-num%02d", i + 1)
             try await executeJS("""
                 (function() {
@@ -139,6 +155,7 @@ final class LoginService: NSObject {
         // 페이지 이동 대기 (최대 100초, 자동 실패 시 사용자가 직접 클릭 가능)
         onStatusUpdate?(.enteringOTP, "OTP submitted. Waiting for next page...")
         for _ in 0..<200 {
+            try Task.checkCancellation()
             let stillOnOTP = (try? await executeJS("""
                 (function() { return document.querySelector('#code-num01') ? 'yes' : 'no'; })()
             """)) ?? "no"
@@ -155,6 +172,7 @@ final class LoginService: NSObject {
 
         // 엘리먼트 대기 (500ms 간격, 최대 20회 = 10초)
         for _ in 0..<20 {
+            try Task.checkCancellation()
             let found = (try? await executeJS("""
                 (function() {
                     var f = \(selectorJS);

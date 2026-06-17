@@ -188,6 +188,13 @@ final class AccountManager: ObservableObject {
         }
     }
 
+    func cancelLogin() {
+        isLoggingIn = false
+        loginStatus = "Login cancelled."
+        showLoginWebView = false
+        loginAccount = nil
+    }
+
     func dismissLoginWebView() {
         showLoginWebView = false
         loginAccount = nil

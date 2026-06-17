@@ -21,7 +21,7 @@ struct LoginWebView: View {
                 }
                 Spacer()
                 Button("Close") {
-                    manager.dismissLoginWebView()
+                    manager.cancelLogin()
                 }
                 .keyboardShortcut(.escape, modifiers: [])
             }
@@ -76,6 +76,10 @@ struct WebViewContainer: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: WKWebView, context: Context) {}
+
+    static func dismantleNSView(_ nsView: WKWebView, coordinator: Coordinator) {
+        coordinator.loginService.cancel()
+    }
 
     class Coordinator: NSObject, WKNavigationDelegate {
         let loginService = LoginService()
