@@ -19,15 +19,20 @@ settings:
       CODE_SIGN_STYLE: Automatic
       DEVELOPMENT_TEAM: F64BRNFSBB
     Release:
-      CODE_SIGN_STYLE: Manual
-      CODE_SIGN_IDENTITY: "-"
-      DEVELOPMENT_TEAM: ""
+      CODE_SIGN_STYLE: Automatic
+      DEVELOPMENT_TEAM: F64BRNFSBB
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.7.0"
 targets:
   TvingLoginManager:
     type: application
     platform: macOS
     sources:
       - TvingLoginManager
+    dependencies:
+      - package: Sparkle
     settings:
       base:
         CODE_SIGN_ENTITLEMENTS: TvingLoginManager/TvingLoginManager.entitlements

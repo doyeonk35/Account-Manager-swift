@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		11E58BF9E64A49E4ADE208A9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7330B3A923B990540C8D233D /* SettingsView.swift */; };
+		29CEAFEBF792DAB8657DD917 /* CheckForUpdatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC69884A6E135C8BC1004153 /* CheckForUpdatesView.swift */; };
 		4981F4E4B078B6F43F1117DE /* AccountInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DCEA8D0FBE8491AB19D5E4E /* AccountInfo.swift */; };
 		5236C3EC02DC440F31C15C34 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6FCA6BA45DEBB82D670ED17 /* ContentView.swift */; };
 		56236DDEC5D90487B8A3D82E /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A82DB157948D9203553CC37 /* StorageService.swift */; };
@@ -22,6 +23,7 @@
 		B592121B4E02FEC058C0DD3F /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB3FC5C351CA4355E25686A5 /* KeychainService.swift */; };
 		BC92E0CB057509BB718A17E0 /* LoginWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF84013D1BA82F576B418B6 /* LoginWebView.swift */; };
 		C24BB0FB03962CE05D3765DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */; };
+		E1C3BEBC3ABDB0BF93B2B2F7 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 267F8EA507D5B47496996D10 /* Sparkle */; };
 		E9D300789705FAEB895607EA /* AccountEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1478CF2C20EB8CA4469FCA8 /* AccountEditView.swift */; };
 		FBDB3685D3F06F65E194E4DD /* StorageServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E028443A00528A1D04D208D /* StorageServiceTests.swift */; };
 /* End PBXBuildFile section */
@@ -55,10 +57,22 @@
 		C1478CF2C20EB8CA4469FCA8 /* AccountEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditView.swift; sourceTree = "<group>"; };
 		D3EA0461693FFD2DF2755889 /* LoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginService.swift; sourceTree = "<group>"; };
 		DB3FC5C351CA4355E25686A5 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		DC69884A6E135C8BC1004153 /* CheckForUpdatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckForUpdatesView.swift; sourceTree = "<group>"; };
 		DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvingLoginManagerApp.swift; sourceTree = "<group>"; };
 		E6FCA6BA45DEBB82D670ED17 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		EAC68E68998CE6A63D132F06 /* AccountManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AE241C23D6D8B641D2BB5A7A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E1C3BEBC3ABDB0BF93B2B2F7 /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		041146D937E0F6763D9E9048 /* Models */ = {
@@ -84,6 +98,7 @@
 			children = (
 				C1478CF2C20EB8CA4469FCA8 /* AccountEditView.swift */,
 				BDF25FE62BE1C92B3B506C8B /* AccountListView.swift */,
+				DC69884A6E135C8BC1004153 /* CheckForUpdatesView.swift */,
 				E6FCA6BA45DEBB82D670ED17 /* ContentView.swift */,
 				4CF84013D1BA82F576B418B6 /* LoginWebView.swift */,
 				7330B3A923B990540C8D233D /* SettingsView.swift */,
@@ -171,6 +186,7 @@
 			buildPhases = (
 				B6BE2436AD50EB164DACCC81 /* Sources */,
 				6409AC9E790E74AB71499BDE /* Resources */,
+				AE241C23D6D8B641D2BB5A7A /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -178,6 +194,7 @@
 			);
 			name = TvingLoginManager;
 			packageProductDependencies = (
+				267F8EA507D5B47496996D10 /* Sparkle */,
 			);
 			productName = TvingLoginManager;
 			productReference = 75AA199178276CF23B85DCB4 /* TvingLoginManager.app */;
@@ -192,6 +209,14 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					D1CC3683BB3DE1415BCA8A3E = {
+						DevelopmentTeam = F64BRNFSBB;
+						ProvisioningStyle = Automatic;
+					};
+					D22DCBFBCE2AAB3D2AF42AF8 = {
+						DevelopmentTeam = F64BRNFSBB;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 99A48F3C9817DC08E6DBED77 /* Build configuration list for PBXProject "TvingLoginManager" */;
@@ -204,6 +229,9 @@
 			);
 			mainGroup = 60B187D9BE7F0085BB1A2169;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				514472D68CD62454106A12E9 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C35692F888AAB0AC8925C578 /* Products */;
 			projectDirPath = "";
@@ -247,6 +275,7 @@
 				4981F4E4B078B6F43F1117DE /* AccountInfo.swift in Sources */,
 				5BE28DDA6410ED68EF4E0BBC /* AccountListView.swift in Sources */,
 				70B41726ACAAD49C8D00DE5D /* AccountManager.swift in Sources */,
+				29CEAFEBF792DAB8657DD917 /* CheckForUpdatesView.swift in Sources */,
 				5236C3EC02DC440F31C15C34 /* ContentView.swift in Sources */,
 				B592121B4E02FEC058C0DD3F /* KeychainService.swift in Sources */,
 				96EF5E548691529BECD5FA45 /* LoginService.swift in Sources */,
@@ -385,12 +414,11 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = F64BRNFSBB;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -499,6 +527,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		514472D68CD62454106A12E9 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		267F8EA507D5B47496996D10 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 514472D68CD62454106A12E9 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E35636C6E26DC7AB2A9C5593 /* Project object */;
 }
