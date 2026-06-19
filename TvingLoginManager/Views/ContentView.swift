@@ -9,6 +9,7 @@ struct ContentView: View {
             List(SidebarTab.allCases, selection: $selectedTab) { tab in
                 Label(LocalizedStringKey(tab.rawValue), systemImage: tab.icon)
                     .tag(tab)
+                    .accessibilityIdentifier("sidebar_\(tab.rawValue.lowercased())")
             }
             .navigationSplitViewColumnWidth(min: 160, ideal: 180)
         } content: {
@@ -40,6 +41,7 @@ struct ContentView: View {
                         } label: {
                             Label("Add Account", systemImage: "plus")
                         }
+                        .accessibilityIdentifier("add_account")
                         .keyboardShortcut("n", modifiers: .command)
                         .disabled(manager.isEditing)
                     }

@@ -13,8 +13,10 @@ struct AccountEditView: View {
         Form {
             Section {
                 TextField("Account Title", text: $manager.editTitle)
+                    .accessibilityIdentifier("edit_title")
                     .focused($focusedField, equals: .title)
                 TextField("TVING ID", text: $manager.editUsername)
+                    .accessibilityIdentifier("edit_username")
                     .focused($focusedField, equals: .username)
                     .textContentType(.username)
                 HStack {
@@ -56,11 +58,13 @@ struct AccountEditView: View {
                     Button("Cancel", role: .cancel) {
                         manager.cancelEditing()
                     }
+                    .accessibilityIdentifier("edit_cancel")
                     .keyboardShortcut(.escape, modifiers: [])
                     Spacer()
                     Button(manager.editingAccountId != nil ? LocalizedStringKey("Update") : LocalizedStringKey("Save")) {
                         manager.saveEdit()
                     }
+                    .accessibilityIdentifier("edit_save")
                     .keyboardShortcut(.return, modifiers: .command)
                     .buttonStyle(.borderedProminent)
                     .disabled(!manager.isEditFormValid)

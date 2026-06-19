@@ -11,6 +11,7 @@ struct AccountListView: View {
                         .foregroundStyle(.secondary)
                         .font(.subheadline)
                     TextField("Enter 6-digit code", text: $manager.otpCode)
+                        .accessibilityIdentifier("otp_field")
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 160)
                         .font(.system(.body, design: .monospaced))
@@ -96,6 +97,7 @@ struct AccountListView: View {
                     Label("Edit", systemImage: "pencil")
                         .labelStyle(.iconOnly)
                 }
+                .accessibilityIdentifier("edit_\(account.title)")
                 .buttonStyle(.borderless)
 
                 Button(role: .destructive) {
@@ -104,16 +106,19 @@ struct AccountListView: View {
                     Label("Delete", systemImage: "trash")
                         .labelStyle(.iconOnly)
                 }
+                .accessibilityIdentifier("delete_\(account.title)")
                 .buttonStyle(.borderless)
 
                 Button("Login") {
                     manager.startLogin(account: account)
                 }
+                .accessibilityIdentifier("login_\(account.title)")
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
                 .disabled(manager.isLoggingIn)
             }
         }
+        .accessibilityIdentifier("account_row_\(account.title)")
         .padding(.vertical, 4)
         .listRowBackground(
             manager.selectedAccountId == account.id

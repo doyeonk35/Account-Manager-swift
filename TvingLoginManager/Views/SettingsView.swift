@@ -7,6 +7,7 @@ struct SettingsView: View {
         Form {
             Section {
                 TextField("QC Login URL", text: $manager.qcLoginURL)
+                    .accessibilityIdentifier("settings_qc_url")
                     .textFieldStyle(.roundedBorder)
                 Text("Default: https://user.tving.com/")
                     .font(.caption)
@@ -17,6 +18,7 @@ struct SettingsView: View {
 
             Section {
                 TextField("QA Login URL", text: $manager.qaLoginURL)
+                    .accessibilityIdentifier("settings_qa_url")
                     .textFieldStyle(.roundedBorder)
                 Text("Default: https://userqa.tving.com/tv/login/qrcode.tving")
                     .font(.caption)
@@ -32,6 +34,7 @@ struct SettingsView: View {
                         manager.qcLoginURL = "https://user.tving.com/"
                         manager.qaLoginURL = "https://userqa.tving.com/tv/login/qrcode.tving"
                     }
+                    .accessibilityIdentifier("settings_reset")
                     .controlSize(.small)
                 }
             }
