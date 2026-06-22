@@ -18,7 +18,7 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>SUFeedURL</key>
-    <string>https://doyeonk35.github.io/TVING-Login-Manager-swift/appcast.xml</string>
+    <string>https://doyeonk35.github.io/Account-Manager-swift/appcast.xml</string>
     <key>SUPublicEDKey</key>
     <string>RgZtpQan1Ne3LilKRJ1x1dnn6vsZnbK+MLyZL7QAr2k=</string>
 </dict>
