@@ -49,6 +49,22 @@ struct AccountEditView: View {
                     }
                 }
                 .pickerStyle(.radioGroup)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    TextEditor(text: $manager.editMemo)
+                        .accessibilityIdentifier("edit_memo")
+                        .frame(height: 80)
+                        .font(.body)
+                        .onChange(of: manager.editMemo) { _, newValue in
+                            if newValue.count > 250 {
+                                manager.editMemo = String(newValue.prefix(250))
+                            }
+                        }
+                    Text("\(manager.editMemo.count)/250")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
             } header: {
                 Text(manager.editingAccountId != nil ? LocalizedStringKey("Edit Account") : LocalizedStringKey("New Account"))
             }

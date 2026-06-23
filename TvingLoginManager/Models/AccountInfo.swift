@@ -14,7 +14,7 @@ enum PlanType: String, Codable, CaseIterable {
     var displayName: String {
         switch self {
         case .basic: String(localized: "Basic")
-        case .adSupported: String(localized: "Ad Plan")
+        case .adSupported: String(localized: "AVOD")
         case .standard: String(localized: "Standard")
         case .premium: String(localized: "Premium")
         }
@@ -28,6 +28,7 @@ struct AccountInfo: Identifiable {
     var password: String      // Memory only — stored in Keychain, NOT in JSON
     var accountType: AccountType
     var planType: PlanType
+    var memo: String
     var lastUsed: Date
 
     init(
@@ -37,6 +38,7 @@ struct AccountInfo: Identifiable {
         password: String = "",
         accountType: AccountType = .qc,
         planType: PlanType = .basic,
+        memo: String = "",
         lastUsed: Date = Date()
     ) {
         self.id = id
@@ -45,7 +47,27 @@ struct AccountInfo: Identifiable {
         self.password = password
         self.accountType = accountType
         self.planType = planType
+        self.memo = memo
         self.lastUsed = lastUsed
+    }
+
+    static func generateRandomTitle() -> String {
+        let adjectives = [
+            "Swift", "Brave", "Calm", "Eager", "Fancy",
+            "Grand", "Happy", "Jolly", "Lucky", "Noble",
+            "Quick", "Sharp", "Vivid", "Warm", "Bold",
+            "Bright", "Clever", "Gentle", "Keen", "Proud"
+        ]
+        let nouns = [
+            "Falcon", "Panda", "Tiger", "Eagle", "Whale",
+            "Phoenix", "Lion", "Dolphin", "Hawk", "Raven",
+            "Wolf", "Fox", "Bear", "Otter", "Crane",
+            "Lynx", "Owl", "Stag", "Heron", "Cobra"
+        ]
+        let adjective = adjectives.randomElement()!
+        let noun = nouns.randomElement()!
+        let number = Int.random(in: 10...99)
+        return "\(adjective)\(noun)\(number)"
     }
 
     var lastUsedRelative: String {
@@ -67,7 +89,7 @@ struct AccountInfo: Identifiable {
 // MARK: - Codable (password excluded from encoding, but readable for Rust migration)
 extension AccountInfo: Codable {
     enum CodingKeys: String, CodingKey {
-        case id, title, username, password
+        case id, title, username, password, memo
         case accountType = "account_type"
         case planType = "plan_type"
         case lastUsed = "last_used"
@@ -81,6 +103,7 @@ extension AccountInfo: Codable {
         // password intentionally NOT encoded — stored in Keychain
         try container.encode(accountType, forKey: .accountType)
         try container.encode(planType, forKey: .planType)
+        try container.encode(memo, forKey: .memo)
         try container.encode(lastUsed, forKey: .lastUsed)
     }
 
@@ -94,6 +117,7 @@ extension AccountInfo: Codable {
         accountType = try container.decode(AccountType.self, forKey: .accountType)
         // Migration: plan_type이 없는 기존 JSON 호환
         planType = (try? container.decode(PlanType.self, forKey: .planType)) ?? .basic
+        memo = (try? container.decode(String.self, forKey: .memo)) ?? ""
         lastUsed = try container.decode(Date.self, forKey: .lastUsed)
     }
 }

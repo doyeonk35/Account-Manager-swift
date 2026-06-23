@@ -29,6 +29,7 @@ final class AccountManager: ObservableObject {
     @Published var editPassword = ""
     @Published var editAccountType: AccountType = .qc
     @Published var editPlanType: PlanType = .basic
+    @Published var editMemo = ""
 
     // Login state
     @Published var loginStatus = ""
@@ -82,22 +83,27 @@ final class AccountManager: ObservableObject {
 
     // MARK: - CRUD
 
-    func addAccount(title: String, username: String, password: String, accountType: AccountType, planType: PlanType) {
+    func addAccount(title: String, username: String, password: String, accountType: AccountType, planType: PlanType, memo: String) {
+        let finalTitle = title.trimmingCharacters(in: .whitespaces).isEmpty
+            ? AccountInfo.generateRandomTitle() : title
         let account = AccountInfo(
-            title: title, username: username, password: password, accountType: accountType, planType: planType
+            title: finalTitle, username: username, password: password,
+            accountType: accountType, planType: planType, memo: memo
         )
         keychain.saveOrUpdate(password: password, forAccountId: account.id)
         accounts.append(account)
         storage.save(accounts: accounts)
     }
 
-    func updateAccount(id: UUID, title: String, username: String, password: String, accountType: AccountType, planType: PlanType) {
+    func updateAccount(id: UUID, title: String, username: String, password: String, accountType: AccountType, planType: PlanType, memo: String) {
         guard let index = accounts.firstIndex(where: { $0.id == id }) else { return }
-        accounts[index].title = title
+        accounts[index].title = title.trimmingCharacters(in: .whitespaces).isEmpty
+            ? AccountInfo.generateRandomTitle() : title
         accounts[index].username = username
         accounts[index].password = password
         accounts[index].accountType = accountType
         accounts[index].planType = planType
+        accounts[index].memo = memo
         keychain.saveOrUpdate(password: password, forAccountId: id)
         storage.save(accounts: accounts)
     }
@@ -113,11 +119,12 @@ final class AccountManager: ObservableObject {
 
     func startAdding() {
         editingAccountId = nil
-        editTitle = ""
+        editTitle = String(localized: "title(Untitled)")
         editUsername = ""
         editPassword = ""
         editAccountType = .qc
         editPlanType = .basic
+        editMemo = ""
         isEditing = true
     }
 
@@ -128,6 +135,7 @@ final class AccountManager: ObservableObject {
         editPassword = account.password
         editAccountType = account.accountType
         editPlanType = account.planType
+        editMemo = account.memo
         isEditing = true
     }
 
@@ -139,17 +147,19 @@ final class AccountManager: ObservableObject {
     func saveEdit() {
         if let id = editingAccountId {
             updateAccount(id: id, title: editTitle, username: editUsername,
-                         password: editPassword, accountType: editAccountType, planType: editPlanType)
+                         password: editPassword, accountType: editAccountType,
+                         planType: editPlanType, memo: editMemo)
         } else {
             addAccount(title: editTitle, username: editUsername,
-                      password: editPassword, accountType: editAccountType, planType: editPlanType)
+                      password: editPassword, accountType: editAccountType,
+                      planType: editPlanType, memo: editMemo)
         }
         isEditing = false
         editingAccountId = nil
     }
 
     var isEditFormValid: Bool {
-        !editTitle.isEmpty && !editUsername.isEmpty && !editPassword.isEmpty
+        !editUsername.isEmpty && !editPassword.isEmpty
     }
 
     // MARK: - Login

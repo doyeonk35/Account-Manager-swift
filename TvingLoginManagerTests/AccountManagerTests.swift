@@ -27,7 +27,7 @@ final class AccountManagerTests: XCTestCase {
     }
 
     func testAddAccount() {
-        manager.addAccount(title: "Test", username: "u", password: "p", accountType: .qc, planType: .basic)
+        manager.addAccount(title: "Test", username: "u", password: "p", accountType: .qc, planType: .basic, memo: "")
         XCTAssertEqual(manager.accounts.count, 1)
         XCTAssertEqual(manager.accounts[0].title, "Test")
         let stored = keychain.loadPassword(forAccountId: manager.accounts[0].id)
@@ -35,16 +35,16 @@ final class AccountManagerTests: XCTestCase {
     }
 
     func testUpdateAccount() {
-        manager.addAccount(title: "Old", username: "u", password: "oldpw", accountType: .qc, planType: .basic)
+        manager.addAccount(title: "Old", username: "u", password: "oldpw", accountType: .qc, planType: .basic, memo: "")
         let id = manager.accounts[0].id
-        manager.updateAccount(id: id, title: "New", username: "u2", password: "newpw", accountType: .qa, planType: .standard)
+        manager.updateAccount(id: id, title: "New", username: "u2", password: "newpw", accountType: .qa, planType: .standard, memo: "updated")
         XCTAssertEqual(manager.accounts[0].title, "New")
         XCTAssertEqual(manager.accounts[0].accountType, .qa)
         XCTAssertEqual(keychain.loadPassword(forAccountId: id), "newpw")
     }
 
     func testDeleteAccount() {
-        manager.addAccount(title: "A", username: "u", password: "pw", accountType: .qc, planType: .basic)
+        manager.addAccount(title: "A", username: "u", password: "pw", accountType: .qc, planType: .basic, memo: "")
         let id = manager.accounts[0].id
         manager.deleteAccount(id: id)
         XCTAssertTrue(manager.accounts.isEmpty)
@@ -52,7 +52,7 @@ final class AccountManagerTests: XCTestCase {
     }
 
     func testDeleteSelectedAccountClearsSelection() {
-        manager.addAccount(title: "A", username: "u", password: "p", accountType: .qc, planType: .basic)
+        manager.addAccount(title: "A", username: "u", password: "p", accountType: .qc, planType: .basic, memo: "")
         let id = manager.accounts[0].id
         manager.selectedAccountId = id
         manager.deleteAccount(id: id)
@@ -64,7 +64,6 @@ final class AccountManagerTests: XCTestCase {
         manager.editUsername = ""
         manager.editPassword = ""
         XCTAssertFalse(manager.isEditFormValid)
-        manager.editTitle = "T"
         manager.editUsername = "U"
         manager.editPassword = "P"
         XCTAssertTrue(manager.isEditFormValid)
