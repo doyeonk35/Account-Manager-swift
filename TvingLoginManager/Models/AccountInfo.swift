@@ -6,6 +6,7 @@ enum AccountType: String, Codable, CaseIterable {
 }
 
 enum PlanType: String, Codable, CaseIterable {
+    case none = "구독 없음"
     case basic = "베이직"
     case adSupported = "광고 요금제"
     case standard = "스탠다드"
@@ -13,6 +14,7 @@ enum PlanType: String, Codable, CaseIterable {
 
     var displayName: String {
         switch self {
+        case .none: String(localized: "None")
         case .basic: String(localized: "Basic")
         case .adSupported: String(localized: "AVOD")
         case .standard: String(localized: "Standard")
@@ -37,7 +39,7 @@ struct AccountInfo: Identifiable {
         username: String,
         password: String = "",
         accountType: AccountType = .qc,
-        planType: PlanType = .basic,
+        planType: PlanType = .none,
         memo: String = "",
         lastUsed: Date = Date()
     ) {

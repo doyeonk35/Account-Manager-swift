@@ -114,6 +114,16 @@
         }
       }
     },
+    "None" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구독 없음"
+          }
+        }
+      }
+    },
     "AVOD" : {
       "extractionState" : "stale",
       "localizations" : {

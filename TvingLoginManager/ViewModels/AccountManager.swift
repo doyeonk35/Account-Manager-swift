@@ -28,7 +28,7 @@ final class AccountManager: ObservableObject {
     @Published var editUsername = ""
     @Published var editPassword = ""
     @Published var editAccountType: AccountType = .qc
-    @Published var editPlanType: PlanType = .basic
+    @Published var editPlanType: PlanType = .none
     @Published var editMemo = ""
 
     // Login state
