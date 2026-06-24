@@ -1,6 +1,10 @@
 # TV Account Manager
 
-[![Download Latest](https://img.shields.io/github/v/release/doyeonk35/Account-Manager-swift?label=Download%20for%20macOS&style=for-the-badge&logo=apple&logoColor=white&color=0071e3)](https://github.com/doyeonk35/Account-Manager-swift/releases/latest)
+<p align="center">
+  <a href="https://github.com/doyeonk35/Account-Manager-swift/releases/latest">
+    <img src="https://img.shields.io/github/v/release/doyeonk35/Account-Manager-swift?label=Download%20for%20macOS&style=for-the-badge&logo=apple&logoColor=white&color=0071e3" alt="Download Latest">
+  </a>
+</p>
 
 [한국어](#한국어) | [English](#english)
 
