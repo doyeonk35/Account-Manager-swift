@@ -43,6 +43,9 @@ xattr -cr /Applications/TVAccountManager.app
 git clone https://github.com/doyeonk35/Account-Manager-swift.git
 cd Account-Manager-swift
 
+# Info.plist 생성 (환경 URL 설정)
+./scripts/setup-plist.sh
+
 # xcodegen 필요 (brew install xcodegen)
 xcodegen generate
 xcodebuild build -scheme TVAccountManager -configuration Release -destination 'platform=macOS'
@@ -151,6 +154,9 @@ xattr -cr /Applications/TVAccountManager.app
 ```bash
 git clone https://github.com/doyeonk35/Account-Manager-swift.git
 cd Account-Manager-swift
+
+# Generate Info.plist (sets environment URLs)
+./scripts/setup-plist.sh
 
 # Requires xcodegen (brew install xcodegen)
 xcodegen generate
