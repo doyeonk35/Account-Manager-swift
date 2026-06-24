@@ -108,13 +108,6 @@ struct SettingsGeneralView: View {
         Form {
             Section {
                 Button {
-                    accountStore.send(.importPresets)
-                } label: {
-                    Label("Import Accounts from File", systemImage: "tray.and.arrow.down")
-                }
-                .accessibilityIdentifier("settings_import_presets")
-
-                Button {
                     let dir = PresetAccount.presetsDirectory
                     try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
                     PresetAccount.generateExampleFileIfNeeded()
@@ -123,6 +116,13 @@ struct SettingsGeneralView: View {
                     Label("Open Import Folder", systemImage: "folder")
                 }
                 .accessibilityIdentifier("settings_open_presets_folder")
+
+                Button {
+                    accountStore.send(.importPresets)
+                } label: {
+                    Label("Import Accounts from File", systemImage: "tray.and.arrow.down")
+                }
+                .accessibilityIdentifier("settings_import_presets")
             } header: {
                 Text("Data")
             } footer: {
