@@ -9,9 +9,50 @@ struct ContentView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @Environment(\.openWindow) private var openWindow
 
+    @State private var showUnsavedAlert = false
+    @State private var pendingTab: SidebarTab?
+    @State private var pendingCategory: SettingsCategory?
+
+    private var isOnEnvironmentSettings: Bool {
+        router.tab == .settings && router.settingsCategory == .environment
+    }
+
+    private var guardedTabBinding: Binding<SidebarTab> {
+        Binding(
+            get: { router.tab },
+            set: { newTab in
+                guard newTab != router.tab else { return }
+                if isOnEnvironmentSettings && settingsStore.state.hasUnsavedChanges {
+                    pendingTab = newTab
+                    pendingCategory = nil
+                    showUnsavedAlert = true
+                } else {
+                    accountStore.send(.cancelEditing)
+                    router.navigateTo(tab: newTab)
+                }
+            }
+        )
+    }
+
+    private var guardedCategoryBinding: Binding<SettingsCategory?> {
+        Binding(
+            get: { router.settingsCategory },
+            set: { newCategory in
+                guard newCategory != router.settingsCategory else { return }
+                if isOnEnvironmentSettings && settingsStore.state.hasUnsavedChanges {
+                    pendingTab = nil
+                    pendingCategory = newCategory
+                    showUnsavedAlert = true
+                } else {
+                    router.settingsCategory = newCategory
+                }
+            }
+        )
+    }
+
     var body: some View {
         NavigationSplitView {
-            List(SidebarTab.allCases, selection: $router.tab) { tab in
+            List(SidebarTab.allCases, selection: guardedTabBinding) { tab in
                 Label(LocalizedStringKey(tab.rawValue), systemImage: tab.icon)
                     .tag(tab)
                     .accessibilityIdentifier("sidebar_\(tab.rawValue.lowercased())")
@@ -23,7 +64,7 @@ struct ContentView: View {
                 case .accounts:
                     AccountListView()
                 case .settings:
-                    SettingsView(selectedCategory: $router.settingsCategory)
+                    SettingsView(selectedCategory: guardedCategoryBinding)
                 }
 
                 Divider()
@@ -65,10 +106,6 @@ struct ContentView: View {
                 }
             }
         }
-        .onChange(of: router.tab) {
-            accountStore.send(.cancelEditing)
-            router.settingsCategory = nil
-        }
         .sheet(isPresented: Binding(
             get: { accountStore.state.showLoginWebView },
             set: { if !$0 { accountStore.send(.dismissLoginWebView) } }
@@ -83,6 +120,22 @@ struct ContentView: View {
                 .frame(minWidth: 900, minHeight: 700)
             }
         }
+        .alert("Unsaved Changes", isPresented: $showUnsavedAlert) {
+            Button("Save", role: .none) {
+                settingsStore.send(.saveChanges)
+                applyPendingNavigation()
+            }
+            Button("Discard", role: .destructive) {
+                settingsStore.send(.discardChanges)
+                applyPendingNavigation()
+            }
+            Button("Cancel", role: .cancel) {
+                pendingTab = nil
+                pendingCategory = nil
+            }
+        } message: {
+            Text("You have unsaved URL changes. Would you like to save them before leaving?")
+        }
         .onAppear {
             if !hasSeenOnboarding {
                 openWindow(id: "onboarding")
@@ -91,6 +144,17 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .showOnboarding)) { _ in
             openWindow(id: "onboarding")
         }
+    }
+
+    private func applyPendingNavigation() {
+        if let tab = pendingTab {
+            accountStore.send(.cancelEditing)
+            router.navigateTo(tab: tab)
+        } else if let category = pendingCategory {
+            router.settingsCategory = category
+        }
+        pendingTab = nil
+        pendingCategory = nil
     }
 }
 

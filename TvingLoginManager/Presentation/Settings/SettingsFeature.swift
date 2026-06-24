@@ -6,8 +6,15 @@ struct SettingsState {
     var qcLoginURL: String
     var qaLoginURL: String
 
+    var draftQcLoginURL: String
+    var draftQaLoginURL: String
+
     static let defaultQcURL = "https://user.tving.com/"
     static let defaultQaURL = "https://userqa.tving.com/tv/login/qrcode.tving"
+
+    var hasUnsavedChanges: Bool {
+        draftQcLoginURL != qcLoginURL || draftQaLoginURL != qaLoginURL
+    }
 
     init(
         qcLoginURL: String = UserDefaults.standard.string(forKey: "loginURL_QC") ?? defaultQcURL,
@@ -15,6 +22,8 @@ struct SettingsState {
     ) {
         self.qcLoginURL = qcLoginURL
         self.qaLoginURL = qaLoginURL
+        self.draftQcLoginURL = qcLoginURL
+        self.draftQaLoginURL = qaLoginURL
     }
 
     static func loginURL(for accountType: AccountType) -> URL {
@@ -30,27 +39,47 @@ struct SettingsState {
 }
 
 enum SettingsAction: Sendable {
-    case setQcLoginURL(String)
-    case setQaLoginURL(String)
+    case beginEditing
+    case setDraftQcLoginURL(String)
+    case setDraftQaLoginURL(String)
+    case saveChanges
+    case discardChanges
     case resetToDefaults
 }
 
 enum SettingsEnvironment {
     static let reducer: @MainActor (inout SettingsState, SettingsAction) -> Effect<SettingsAction> = { state, action in
         switch action {
-        case .setQcLoginURL(let url):
-            state.qcLoginURL = url
-            UserDefaults.standard.set(url, forKey: "loginURL_QC")
+        case .beginEditing:
+            state.draftQcLoginURL = state.qcLoginURL
+            state.draftQaLoginURL = state.qaLoginURL
             return .none
 
-        case .setQaLoginURL(let url):
-            state.qaLoginURL = url
-            UserDefaults.standard.set(url, forKey: "loginURL_QA")
+        case .setDraftQcLoginURL(let url):
+            state.draftQcLoginURL = url
+            return .none
+
+        case .setDraftQaLoginURL(let url):
+            state.draftQaLoginURL = url
+            return .none
+
+        case .saveChanges:
+            state.qcLoginURL = state.draftQcLoginURL
+            state.qaLoginURL = state.draftQaLoginURL
+            UserDefaults.standard.set(state.qcLoginURL, forKey: "loginURL_QC")
+            UserDefaults.standard.set(state.qaLoginURL, forKey: "loginURL_QA")
+            return .none
+
+        case .discardChanges:
+            state.draftQcLoginURL = state.qcLoginURL
+            state.draftQaLoginURL = state.qaLoginURL
             return .none
 
         case .resetToDefaults:
             state.qcLoginURL = SettingsState.defaultQcURL
             state.qaLoginURL = SettingsState.defaultQaURL
+            state.draftQcLoginURL = SettingsState.defaultQcURL
+            state.draftQaLoginURL = SettingsState.defaultQaURL
             UserDefaults.standard.set(SettingsState.defaultQcURL, forKey: "loginURL_QC")
             UserDefaults.standard.set(SettingsState.defaultQaURL, forKey: "loginURL_QA")
             return .none

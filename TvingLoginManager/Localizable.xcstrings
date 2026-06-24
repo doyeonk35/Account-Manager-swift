@@ -835,6 +835,16 @@
         }
       }
     },
+    "Discard" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장 안 함"
+          }
+        }
+      }
+    },
     "Settings" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -900,6 +910,16 @@
         }
       }
     },
+    "Unsaved Changes" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장하지 않은 변경사항"
+          }
+        }
+      }
+    },
     "Updates" : {
       "localizations" : {
         "ko" : {
@@ -917,6 +937,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "버전"
+          }
+        }
+      }
+    },
+    "You have unsaved URL changes. Would you like to save them before leaving?" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장하지 않은 URL 변경사항이 있습니다. 나가기 전에 저장하시겠습니까?"
           }
         }
       }

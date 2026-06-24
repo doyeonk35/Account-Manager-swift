@@ -23,7 +23,7 @@ struct SettingsEnvironmentView: View {
     var body: some View {
         Form {
             Section {
-                TextField("QC Login URL", text: store.binding(\.qcLoginURL, send: SettingsAction.setQcLoginURL))
+                TextField("QC Login URL", text: store.binding(\.draftQcLoginURL, send: SettingsAction.setDraftQcLoginURL))
                     .accessibilityIdentifier("settings_qc_url")
                     .textFieldStyle(.roundedBorder)
                 Text("Default: https://user.tving.com/")
@@ -34,7 +34,7 @@ struct SettingsEnvironmentView: View {
             }
 
             Section {
-                TextField("QA Login URL", text: store.binding(\.qaLoginURL, send: SettingsAction.setQaLoginURL))
+                TextField("QA Login URL", text: store.binding(\.draftQaLoginURL, send: SettingsAction.setDraftQaLoginURL))
                     .accessibilityIdentifier("settings_qa_url")
                     .textFieldStyle(.roundedBorder)
                 Text("Default: https://userqa.tving.com/tv/login/qrcode.tving")
@@ -46,17 +46,28 @@ struct SettingsEnvironmentView: View {
 
             Section {
                 HStack {
-                    Spacer()
                     Button("Reset to Defaults") {
                         store.send(.resetToDefaults)
                     }
                     .accessibilityIdentifier("settings_reset")
                     .controlSize(.small)
+
+                    Spacer()
+
+                    Button("Save") {
+                        store.send(.saveChanges)
+                    }
+                    .accessibilityIdentifier("settings_save")
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!store.state.hasUnsavedChanges)
                 }
             }
         }
         .formStyle(.grouped)
         .navigationTitle("Environment")
+        .onAppear {
+            store.send(.beginEditing)
+        }
     }
 }
 

@@ -6,12 +6,12 @@ import Foundation
 @MainActor
 struct SettingsFeatureTests {
 
-    let store: Store<SettingsState, SettingsAction>
+    let store: SettingsStore
 
     init() {
         UserDefaults.standard.removeObject(forKey: "loginURL_QC")
         UserDefaults.standard.removeObject(forKey: "loginURL_QA")
-        store = Store(
+        store = SettingsStore(
             initialState: SettingsState(
                 qcLoginURL: SettingsState.defaultQcURL,
                 qaLoginURL: SettingsState.defaultQaURL
@@ -20,57 +20,88 @@ struct SettingsFeatureTests {
         )
     }
 
-    // MARK: - QC URL
+    // MARK: - Draft editing
 
-    @Test("QC 로그인 URL을 변경한다")
-    func setQcLoginURL() {
-        let custom = "https://custom-qc.tving.com/"
+    @Test("드래프트 QC URL을 변경한다")
+    func setDraftQcURL() {
+        store.send(.setDraftQcLoginURL("https://custom-qc.tving.com/"))
 
-        store.send(.setQcLoginURL(custom))
-
-        #expect(store.state.qcLoginURL == custom)
-        #expect(UserDefaults.standard.string(forKey: "loginURL_QC") == custom)
+        #expect(store.state.draftQcLoginURL == "https://custom-qc.tving.com/")
+        #expect(store.state.qcLoginURL == SettingsState.defaultQcURL)
+        #expect(store.state.hasUnsavedChanges == true)
     }
 
-    @Test("QC URL을 빈 문자열로 설정 가능하다")
-    func setQcLoginURLEmpty() {
-        store.send(.setQcLoginURL(""))
-        #expect(store.state.qcLoginURL == "")
+    @Test("드래프트 QA URL을 변경한다")
+    func setDraftQaURL() {
+        store.send(.setDraftQaLoginURL("https://custom-qa.tving.com/"))
+
+        #expect(store.state.draftQaLoginURL == "https://custom-qa.tving.com/")
+        #expect(store.state.qaLoginURL == SettingsState.defaultQaURL)
+        #expect(store.state.hasUnsavedChanges == true)
     }
 
-    // MARK: - QA URL
+    @Test("변경 없으면 hasUnsavedChanges가 false이다")
+    func noChangesNoUnsaved() {
+        #expect(store.state.hasUnsavedChanges == false)
+    }
 
-    @Test("QA 로그인 URL을 변경한다")
-    func setQaLoginURL() {
-        let custom = "https://custom-qa.tving.com/"
+    // MARK: - Save
 
-        store.send(.setQaLoginURL(custom))
+    @Test("변경사항을 저장한다")
+    func saveChanges() {
+        store.send(.setDraftQcLoginURL("https://new-qc.com/"))
+        store.send(.setDraftQaLoginURL("https://new-qa.com/"))
 
-        #expect(store.state.qaLoginURL == custom)
-        #expect(UserDefaults.standard.string(forKey: "loginURL_QA") == custom)
+        store.send(.saveChanges)
+
+        #expect(store.state.qcLoginURL == "https://new-qc.com/")
+        #expect(store.state.qaLoginURL == "https://new-qa.com/")
+        #expect(store.state.hasUnsavedChanges == false)
+        #expect(UserDefaults.standard.string(forKey: "loginURL_QC") == "https://new-qc.com/")
+        #expect(UserDefaults.standard.string(forKey: "loginURL_QA") == "https://new-qa.com/")
+    }
+
+    // MARK: - Discard
+
+    @Test("변경사항을 폐기한다")
+    func discardChanges() {
+        store.send(.setDraftQcLoginURL("https://changed.com/"))
+
+        store.send(.discardChanges)
+
+        #expect(store.state.draftQcLoginURL == SettingsState.defaultQcURL)
+        #expect(store.state.hasUnsavedChanges == false)
+    }
+
+    // MARK: - Begin editing
+
+    @Test("편집 시작 시 드래프트를 커밋 값으로 초기화한다")
+    func beginEditing() {
+        store.send(.setDraftQcLoginURL("https://temp.com/"))
+        store.send(.saveChanges)
+        store.send(.setDraftQcLoginURL("https://unsaved.com/"))
+
+        store.send(.beginEditing)
+
+        #expect(store.state.draftQcLoginURL == "https://temp.com/")
+        #expect(store.state.hasUnsavedChanges == false)
     }
 
     // MARK: - Reset
 
-    @Test("기본값으로 초기화한다")
+    @Test("기본값으로 초기화하면 커밋과 드래프트 모두 리셋된다")
     func resetToDefaults() {
-        store.send(.setQcLoginURL("https://changed-qc.com/"))
-        store.send(.setQaLoginURL("https://changed-qa.com/"))
+        store.send(.setDraftQcLoginURL("https://changed-qc.com/"))
+        store.send(.saveChanges)
 
         store.send(.resetToDefaults)
 
         #expect(store.state.qcLoginURL == SettingsState.defaultQcURL)
         #expect(store.state.qaLoginURL == SettingsState.defaultQaURL)
+        #expect(store.state.draftQcLoginURL == SettingsState.defaultQcURL)
+        #expect(store.state.draftQaLoginURL == SettingsState.defaultQaURL)
+        #expect(store.state.hasUnsavedChanges == false)
         #expect(UserDefaults.standard.string(forKey: "loginURL_QC") == SettingsState.defaultQcURL)
-        #expect(UserDefaults.standard.string(forKey: "loginURL_QA") == SettingsState.defaultQaURL)
-    }
-
-    @Test("이미 기본값일 때 초기화해도 문제없다")
-    func resetWhenAlreadyDefault() {
-        store.send(.resetToDefaults)
-
-        #expect(store.state.qcLoginURL == SettingsState.defaultQcURL)
-        #expect(store.state.qaLoginURL == SettingsState.defaultQaURL)
     }
 
     // MARK: - Default values
