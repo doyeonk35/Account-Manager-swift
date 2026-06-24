@@ -159,6 +159,20 @@ struct SettingsGeneralView: View {
                 Text("Updates")
             }
 
+            Section {
+                LabeledContent("Email") {
+                    Text("dyk429@cj.net")
+                        .textSelection(.enabled)
+                }
+                LabeledContent("Slack") {
+                    Text("@김도연")
+                        .textSelection(.enabled)
+                }
+            } header: {
+                Text("Contact")
+            } footer: {
+                Text("For bug reports or inquiries, please reach out via Slack DM or email.")
+            }
         }
         .formStyle(.grouped)
         .navigationTitle("General")

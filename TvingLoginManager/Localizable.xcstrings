@@ -205,6 +205,16 @@
         }
       }
     },
+    "Contact" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "문의"
+          }
+        }
+      }
+    },
     "Could not find password field." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -410,6 +420,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "파일 없음"
+          }
+        }
+      }
+    },
+    "For bug reports or inquiries, please reach out via Slack DM or email." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버그 신고나 문의사항은 슬랙 DM 또는 이메일로 연락해 주세요."
           }
         }
       }
