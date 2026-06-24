@@ -3,6 +3,14 @@
     <channel>
         <title>TVAccountManager</title>
         <item>
+            <title>1.1.2</title>
+            <pubDate>Wed, 24 Jun 2026 15:26:58 +0900</pubDate>
+            <sparkle:version>4</sparkle:version>
+            <sparkle:shortVersionString>1.1.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/doyeonk35/Account-Manager-swift/releases/download/v1.1.2/TVAccountManager-1.1.2.zip" length="7383187" type="application/octet-stream" sparkle:edSignature="A71R4vmiKNUQanAU638lYClq61yyyRUuSemY5WwENkpA9CoXKpkL0mUXHAvGecpmWPskj2SAfXLcC72BUR6VDw=="/>
+        </item>
+        <item>
             <title>1.1.1</title>
             <pubDate>Wed, 24 Jun 2026 15:00:42 +0900</pubDate>
             <sparkle:version>3</sparkle:version>
