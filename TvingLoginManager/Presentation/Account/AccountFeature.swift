@@ -26,6 +26,9 @@ struct AccountState {
     // Delete confirmation
     var accountToDelete: AccountInfo?
 
+    // Preset import result
+    var importResult: PresetLoadResult?
+
     var isEditFormValid: Bool {
         !editUsername.isEmpty && !editPassword.isEmpty
     }
@@ -56,6 +59,10 @@ enum AccountAction: Sendable {
     case cancelLogin
     case dismissLoginWebView
     case setOtpCode(String)
+
+    // Preset import
+    case importPresets
+    case dismissImportResult
 }
 
 enum AccountEnvironment {
@@ -194,6 +201,17 @@ enum AccountEnvironment {
 
             case .setOtpCode(let value):
                 state.otpCode = value
+                return .none
+
+            // MARK: - Preset Import
+
+            case .importPresets:
+                let result = useCase.importPresetAccounts(into: &state.accounts)
+                state.importResult = result
+                return .none
+
+            case .dismissImportResult:
+                state.importResult = nil
                 return .none
             }
         }

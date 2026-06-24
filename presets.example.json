@@ -1,0 +1,18 @@
+[
+  {
+    "title": "QC 베이직",
+    "username": "qc_basic@test.com",
+    "password": "test1234",
+    "account_type": "QC",
+    "plan_type": "베이직",
+    "memo": ""
+  },
+  {
+    "title": "QA 프리미엄",
+    "username": "qa_premium@test.com",
+    "password": "test1234",
+    "account_type": "QA",
+    "plan_type": "프리미엄",
+    "memo": "프리미엄 테스트 계정"
+  }
+]

@@ -275,4 +275,140 @@ struct AccountUseCaseTests {
     func loadPasswordReturnsNilForMissing() {
         #expect(useCase.loadPassword(forAccountId: UUID()) == nil)
     }
+
+    // MARK: - importPresetAccounts
+
+    private func writePresetsFile(_ presets: [PresetAccount]) throws {
+        let dir = PresetAccount.presetsDirectory
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let data = try JSONEncoder().encode(presets)
+        try data.write(to: PresetAccount.presetsFileURL)
+    }
+
+    private func removePresetsFile() {
+        try? FileManager.default.removeItem(at: PresetAccount.presetsFileURL)
+    }
+
+    @Test("프리셋 파일이 없으면 fileNotFound를 반환한다")
+    func importPresetsFileNotFound() {
+        removePresetsFile()
+        var accounts: [AccountInfo] = []
+
+        let result = useCase.importPresetAccounts(into: &accounts)
+
+        guard case .fileNotFound = result else {
+            Issue.record("Expected .fileNotFound, got \(result)")
+            return
+        }
+        #expect(accounts.isEmpty)
+    }
+
+    @Test("프리셋 계정을 빈 목록에 모두 불러온다")
+    func importPresetsIntoEmptyList() throws {
+        let presets = [
+            PresetAccount(title: "QC Basic", username: "qc@test.com", password: "pw1", accountType: .qc, planType: .basic),
+            PresetAccount(title: "QA Basic", username: "qa@test.com", password: "pw2", accountType: .qa, planType: .basic),
+        ]
+        try writePresetsFile(presets)
+        defer { removePresetsFile() }
+
+        var accounts: [AccountInfo] = []
+        let result = useCase.importPresetAccounts(into: &accounts)
+
+        guard case .success(let imported, let skipped) = result else {
+            Issue.record("Expected .success, got \(result)")
+            return
+        }
+        #expect(imported == 2)
+        #expect(skipped == 0)
+        #expect(accounts.count == 2)
+        #expect(repository.saveAccountsCallCount == 1)
+        #expect(repository.savePasswordCallCount == 2)
+    }
+
+    @Test("중복 계정은 건너뛴다")
+    func importPresetsSkipsDuplicates() throws {
+        let presets = [
+            PresetAccount(title: "QC Basic", username: "qc@test.com", password: "pw1", accountType: .qc),
+            PresetAccount(title: "QA Basic", username: "qa@test.com", password: "pw2", accountType: .qa),
+        ]
+        try writePresetsFile(presets)
+        defer { removePresetsFile() }
+
+        var accounts = [
+            AccountInfo(title: "Existing", username: "qc@test.com", accountType: .qc)
+        ]
+
+        let result = useCase.importPresetAccounts(into: &accounts)
+
+        guard case .success(let imported, let skipped) = result else {
+            Issue.record("Expected .success")
+            return
+        }
+        #expect(imported == 1)
+        #expect(skipped == 1)
+        #expect(accounts.first?.title == "Existing")
+    }
+
+    @Test("모든 프리셋이 이미 존재하면 저장하지 않는다")
+    func importPresetsAllDuplicatesNoSave() throws {
+        let presets = [
+            PresetAccount(title: "A", username: "u1@test.com", password: "pw", accountType: .qc),
+        ]
+        try writePresetsFile(presets)
+        defer { removePresetsFile() }
+
+        var accounts = [
+            AccountInfo(title: "A", username: "u1@test.com", accountType: .qc)
+        ]
+
+        let result = useCase.importPresetAccounts(into: &accounts)
+
+        guard case .success(let imported, let skipped) = result else {
+            Issue.record("Expected .success")
+            return
+        }
+        #expect(imported == 0)
+        #expect(skipped == 1)
+        #expect(repository.saveAccountsCallCount == 0)
+    }
+
+    @Test("같은 아이디라도 다른 환경(QC/QA)이면 별도로 등록한다")
+    func importPresetsDistinguishesByAccountType() throws {
+        let presets = [
+            PresetAccount(title: "QC ver", username: "same@test.com", password: "pw", accountType: .qc),
+        ]
+        try writePresetsFile(presets)
+        defer { removePresetsFile() }
+
+        var accounts = [
+            AccountInfo(title: "QA ver", username: "same@test.com", accountType: .qa)
+        ]
+
+        let result = useCase.importPresetAccounts(into: &accounts)
+
+        guard case .success(let imported, let skipped) = result else {
+            Issue.record("Expected .success")
+            return
+        }
+        #expect(imported == 1)
+        #expect(skipped == 0)
+    }
+
+    @Test("잘못된 JSON이면 parseError를 반환한다")
+    func importPresetsInvalidJSON() throws {
+        let dir = PresetAccount.presetsDirectory
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try "not valid json".data(using: .utf8)!.write(to: PresetAccount.presetsFileURL)
+        defer { removePresetsFile() }
+
+        var accounts: [AccountInfo] = []
+        let result = useCase.importPresetAccounts(into: &accounts)
+
+        guard case .parseError = result else {
+            Issue.record("Expected .parseError, got \(result)")
+            return
+        }
+        #expect(accounts.isEmpty)
+    }
 }

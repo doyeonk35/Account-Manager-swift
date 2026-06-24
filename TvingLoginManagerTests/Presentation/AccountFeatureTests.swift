@@ -354,4 +354,57 @@ struct AccountFeatureTests {
         store.send(.setOtpCode("123456"))
         #expect(store.state.otpCode == "123456")
     }
+
+    // MARK: - Preset Import
+
+    private func writePresetsFile(_ presets: [PresetAccount]) throws {
+        let dir = PresetAccount.presetsDirectory
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let data = try JSONEncoder().encode(presets)
+        try data.write(to: PresetAccount.presetsFileURL)
+    }
+
+    private func removePresetsFile() {
+        try? FileManager.default.removeItem(at: PresetAccount.presetsFileURL)
+    }
+
+    @Test("프리셋 불러오기 후 결과 상태를 설정한다")
+    func importPresetsShowsResult() throws {
+        let presets = [
+            PresetAccount(title: "Test", username: "t@test.com", password: "pw", accountType: .qc),
+        ]
+        try writePresetsFile(presets)
+        defer { removePresetsFile() }
+
+        store.send(.importPresets)
+
+        guard case .success(let imported, _) = store.state.importResult else {
+            Issue.record("Expected .success")
+            return
+        }
+        #expect(imported == 1)
+        #expect(store.state.accounts.count == 1)
+    }
+
+    @Test("프리셋 파일 없을 때 fileNotFound 결과를 설정한다")
+    func importPresetsFileNotFound() {
+        removePresetsFile()
+
+        store.send(.importPresets)
+
+        guard case .fileNotFound = store.state.importResult else {
+            Issue.record("Expected .fileNotFound")
+            return
+        }
+    }
+
+    @Test("프리셋 결과 닫기를 처리한다")
+    func dismissImportResult() {
+        removePresetsFile()
+        store.send(.importPresets)
+        #expect(store.state.importResult != nil)
+
+        store.send(.dismissImportResult)
+        #expect(store.state.importResult == nil)
+    }
 }

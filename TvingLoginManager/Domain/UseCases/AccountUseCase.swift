@@ -71,4 +71,45 @@ final class AccountUseCase: Sendable {
     func loadPassword(forAccountId id: UUID) -> String? {
         repository.loadPassword(forAccountId: id)
     }
+
+    func importPresetAccounts(into accounts: inout [AccountInfo]) -> PresetLoadResult {
+        let result = PresetAccount.loadFromFile()
+
+        switch result {
+        case .failure(.fileNotFound):
+            return .fileNotFound
+        case .failure(.parseError(let message)):
+            return .parseError(message)
+        case .success(let presets):
+            var imported = 0
+            var skipped = 0
+
+            for preset in presets {
+                let isDuplicate = accounts.contains {
+                    $0.username == preset.username && $0.accountType == preset.accountType
+                }
+                if isDuplicate {
+                    skipped += 1
+                } else {
+                    let account = AccountInfo(
+                        title: preset.title,
+                        username: preset.username,
+                        password: preset.password,
+                        accountType: preset.accountType,
+                        planType: preset.planType,
+                        memo: preset.memo
+                    )
+                    repository.savePassword(preset.password, forAccountId: account.id)
+                    accounts.append(account)
+                    imported += 1
+                }
+            }
+
+            if imported > 0 {
+                repository.saveAccounts(accounts)
+            }
+
+            return .success(imported: imported, skipped: skipped)
+        }
+    }
 }
