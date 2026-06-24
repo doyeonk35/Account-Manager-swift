@@ -80,12 +80,6 @@ struct AccountInfo: Identifiable {
         return String(localized: "\(seconds / 86400) days ago")
     }
 
-    var loginURL: URL {
-        switch accountType {
-        case .qc: URL(string: "https://user.tving.com/")!
-        case .qa: URL(string: "https://userqa.tving.com/tv/login/qrcode.tving")!
-        }
-    }
 }
 
 // MARK: - Codable (password excluded from encoding, but readable for Rust migration)

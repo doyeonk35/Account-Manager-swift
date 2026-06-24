@@ -78,15 +78,4 @@ struct AccountInfoTests {
         #expect(account.lastUsedRelative == expected)
     }
 
-    @Test("QC 계정의 로그인 URL")
-    func loginURLForQC() {
-        let account = AccountInfo(title: "T", username: "u", accountType: .qc)
-        #expect(account.loginURL.absoluteString == "https://user.tving.com/")
-    }
-
-    @Test("QA 계정의 로그인 URL")
-    func loginURLForQA() {
-        let account = AccountInfo(title: "T", username: "u", accountType: .qa)
-        #expect(account.loginURL.absoluteString == "https://userqa.tving.com/tv/login/qrcode.tving")
-    }
 }
