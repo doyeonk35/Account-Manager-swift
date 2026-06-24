@@ -22,8 +22,51 @@ struct AccountListView: View {
             .padding(.top, 12)
             .padding(.bottom, 8)
 
+            HStack(spacing: 0) {
+                ForEach(AccountFilterTab.allCases, id: \.self) { tab in
+                    Button {
+                        store.send(.setFilterTab(tab))
+                    } label: {
+                        Text(tab.displayName)
+                            .font(.subheadline)
+                            .fontWeight(store.state.filterTab == tab ? .semibold : .regular)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 7)
+                            .background(store.state.filterTab == tab ? Color.accentColor.opacity(0.15) : Color.clear)
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 6)
+
             Divider()
                 .padding(.horizontal, 12)
+
+            HStack(spacing: 8) {
+                Picker("Sort", selection: store.binding(\.sortField, send: AccountAction.setSortField)) {
+                    ForEach(AccountSortField.allCases, id: \.self) { field in
+                        Text(field.displayName).tag(field)
+                    }
+                }
+                .pickerStyle(.menu)
+                .frame(maxWidth: 140)
+
+                Button {
+                    store.send(.toggleSortDirection)
+                } label: {
+                    Image(systemName: store.state.sortAscending ? "arrow.up" : "arrow.down")
+                        .font(.caption)
+                }
+                .buttonStyle(.borderless)
+                .help(store.state.sortAscending ? String(localized: "Ascending") : String(localized: "Descending"))
+
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 4)
 
             if store.state.accounts.isEmpty {
                 ContentUnavailableView {
@@ -36,7 +79,7 @@ struct AccountListView: View {
                 }
                 .frame(maxHeight: .infinity)
             } else {
-                List(store.state.accounts) { account in
+                List(store.state.sortedAccounts) { account in
                     accountRow(account)
                 }
                 .listStyle(.inset(alternatesRowBackgrounds: true))
@@ -62,6 +105,11 @@ struct AccountListView: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(alignment: .firstTextBaseline) {
+                    if account.isPinned {
+                        Image(systemName: "pin.fill")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
                     Text(account.title)
                         .font(.headline)
                     Text(account.lastUsedRelative)

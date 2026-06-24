@@ -32,6 +32,9 @@ struct AccountInfo: Identifiable {
     var planType: PlanType
     var memo: String
     var lastUsed: Date
+    var createdAt: Date
+    var isPinned: Bool
+    var pinnedAt: Date?
 
     init(
         id: UUID = UUID(),
@@ -41,7 +44,10 @@ struct AccountInfo: Identifiable {
         accountType: AccountType = .qc,
         planType: PlanType = .none,
         memo: String = "",
-        lastUsed: Date = Date()
+        lastUsed: Date = Date(),
+        createdAt: Date = Date(),
+        isPinned: Bool = false,
+        pinnedAt: Date? = nil
     ) {
         self.id = id
         self.title = title
@@ -51,6 +57,9 @@ struct AccountInfo: Identifiable {
         self.planType = planType
         self.memo = memo
         self.lastUsed = lastUsed
+        self.createdAt = createdAt
+        self.isPinned = isPinned
+        self.pinnedAt = pinnedAt
     }
 
     static func generateRandomTitle() -> String {
@@ -89,6 +98,9 @@ extension AccountInfo: Codable {
         case accountType = "account_type"
         case planType = "plan_type"
         case lastUsed = "last_used"
+        case createdAt = "created_at"
+        case isPinned = "is_pinned"
+        case pinnedAt = "pinned_at"
     }
 
     func encode(to encoder: Encoder) throws {
@@ -101,6 +113,9 @@ extension AccountInfo: Codable {
         try container.encode(planType, forKey: .planType)
         try container.encode(memo, forKey: .memo)
         try container.encode(lastUsed, forKey: .lastUsed)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(isPinned, forKey: .isPinned)
+        try container.encodeIfPresent(pinnedAt, forKey: .pinnedAt)
     }
 
     init(from decoder: Decoder) throws {
@@ -115,5 +130,8 @@ extension AccountInfo: Codable {
         planType = (try? container.decode(PlanType.self, forKey: .planType)) ?? .basic
         memo = (try? container.decode(String.self, forKey: .memo)) ?? ""
         lastUsed = try container.decode(Date.self, forKey: .lastUsed)
+        createdAt = (try? container.decode(Date.self, forKey: .createdAt)) ?? lastUsed
+        isPinned = (try? container.decode(Bool.self, forKey: .isPinned)) ?? false
+        pinnedAt = try? container.decode(Date.self, forKey: .pinnedAt)
     }
 }

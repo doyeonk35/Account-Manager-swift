@@ -2,9 +2,58 @@ import Foundation
 
 typealias AccountStore = Store<AccountState, AccountAction>
 
+enum AccountFilterTab: String, CaseIterable {
+    case all
+    case qc
+    case qa
+    case pinned
+
+    var displayName: String {
+        switch self {
+        case .all: String(localized: "All")
+        case .qc: "QC"
+        case .qa: "QA"
+        case .pinned: String(localized: "Favorites")
+        }
+    }
+}
+
+enum AccountSortField: String, CaseIterable {
+    case name
+    case username
+    case plan
+    case createdAt
+    case accountType
+
+    var displayName: String {
+        switch self {
+        case .name: String(localized: "Name")
+        case .username: String(localized: "ID")
+        case .plan: String(localized: "Subscribe Plan")
+        case .createdAt: String(localized: "Date Added")
+        case .accountType: String(localized: "Env Type")
+        }
+    }
+}
+
+enum PlanSortIndex {
+    static func index(of plan: PlanType) -> Int {
+        switch plan {
+        case .none: 0
+        case .adSupported: 1
+        case .basic: 2
+        case .standard: 3
+        case .premium: 4
+        }
+    }
+}
+
 struct AccountState {
     var accounts: [AccountInfo] = []
     var selectedAccountId: UUID?
+    var filterTab: AccountFilterTab = .all
+    var sortField: AccountSortField = .name
+    var sortAscending = true
 
     // Edit form
     var isEditing = false
@@ -15,6 +64,7 @@ struct AccountState {
     var editAccountType: AccountType = .qc
     var editPlanType: PlanType = .none
     var editMemo = ""
+    var editIsPinned = false
 
     // Login
     var loginStatus = ""
@@ -32,6 +82,48 @@ struct AccountState {
     var isEditFormValid: Bool {
         !editUsername.isEmpty && !editPassword.isEmpty
     }
+
+    var sortedAccounts: [AccountInfo] {
+        let filtered: [AccountInfo]
+        switch filterTab {
+        case .all: filtered = accounts
+        case .qc: filtered = accounts.filter { $0.accountType == .qc }
+        case .qa: filtered = accounts.filter { $0.accountType == .qa }
+        case .pinned: filtered = accounts.filter(\.isPinned)
+        }
+
+        let pinned = filtered.filter(\.isPinned).sorted {
+            ($0.pinnedAt ?? .distantPast) < ($1.pinnedAt ?? .distantPast)
+        }
+        let unpinned = filtered.filter { !$0.isPinned }.sorted { a, b in
+            let result = fieldCompare(a, b)
+            return sortAscending ? result : !result
+        }
+        return pinned + unpinned
+    }
+
+    private func fieldCompare(_ a: AccountInfo, _ b: AccountInfo) -> Bool {
+        switch sortField {
+        case .name:
+            return a.title.localizedCaseInsensitiveCompare(b.title) == .orderedAscending
+        case .username:
+            return a.username.localizedCaseInsensitiveCompare(b.username) == .orderedAscending
+        case .plan:
+            let ai = PlanSortIndex.index(of: a.planType)
+            let bi = PlanSortIndex.index(of: b.planType)
+            if ai != bi { return ai < bi }
+            return a.title.localizedCaseInsensitiveCompare(b.title) == .orderedAscending
+        case .createdAt:
+            return a.createdAt < b.createdAt
+        case .accountType:
+            if a.accountType != b.accountType { return a.accountType.rawValue < b.accountType.rawValue }
+            return a.title.localizedCaseInsensitiveCompare(b.title) == .orderedAscending
+        }
+    }
+
+    var pinnedCount: Int {
+        accounts.filter(\.isPinned).count
+    }
 }
 
 enum AccountAction: Sendable {
@@ -40,6 +132,11 @@ enum AccountAction: Sendable {
     case delete(UUID)
     case confirmDelete(AccountInfo)
     case cancelDelete
+
+    // Filter & Sort
+    case setFilterTab(AccountFilterTab)
+    case setSortField(AccountSortField)
+    case toggleSortDirection
 
     // Edit form
     case startAdding
@@ -52,6 +149,7 @@ enum AccountAction: Sendable {
     case setEditAccountType(AccountType)
     case setEditPlanType(PlanType)
     case setEditMemo(String)
+    case setEditIsPinned(Bool)
 
     // Login
     case startLogin(AccountInfo)
@@ -91,6 +189,20 @@ enum AccountEnvironment {
                 state.accountToDelete = nil
                 return .none
 
+            // MARK: - Filter & Sort
+
+            case .setFilterTab(let tab):
+                state.filterTab = tab
+                return .none
+
+            case .setSortField(let field):
+                state.sortField = field
+                return .none
+
+            case .toggleSortDirection:
+                state.sortAscending.toggle()
+                return .none
+
             // MARK: - Edit Form
 
             case .startAdding:
@@ -101,6 +213,7 @@ enum AccountEnvironment {
                 state.editAccountType = .qc
                 state.editPlanType = .basic
                 state.editMemo = ""
+                state.editIsPinned = false
                 state.isEditing = true
                 return .none
 
@@ -112,6 +225,7 @@ enum AccountEnvironment {
                 state.editAccountType = account.accountType
                 state.editPlanType = account.planType
                 state.editMemo = account.memo
+                state.editIsPinned = account.isPinned
                 state.isEditing = true
                 return .none
 
@@ -126,14 +240,16 @@ enum AccountEnvironment {
                         in: &state.accounts, id: id,
                         title: state.editTitle, username: state.editUsername,
                         password: state.editPassword, accountType: state.editAccountType,
-                        planType: state.editPlanType, memo: state.editMemo
+                        planType: state.editPlanType, memo: state.editMemo,
+                        isPinned: state.editIsPinned
                     )
                 } else {
                     useCase.addAccount(
                         to: &state.accounts,
                         title: state.editTitle, username: state.editUsername,
                         password: state.editPassword, accountType: state.editAccountType,
-                        planType: state.editPlanType, memo: state.editMemo
+                        planType: state.editPlanType, memo: state.editMemo,
+                        isPinned: state.editIsPinned
                     )
                 }
                 state.isEditing = false
@@ -163,6 +279,18 @@ enum AccountEnvironment {
             case .setEditMemo(let value):
                 let trimmed = value.count > 250 ? String(value.prefix(250)) : value
                 state.editMemo = trimmed
+                return .none
+
+            case .setEditIsPinned(let value):
+                if value && !state.editIsPinned {
+                    let currentPinCount = state.pinnedCount
+                    let isEditingAlreadyPinned = state.editingAccountId.flatMap { id in
+                        state.accounts.first { $0.id == id }
+                    }?.isPinned ?? false
+                    let effectiveCount = isEditingAlreadyPinned ? currentPinCount - 1 : currentPinCount
+                    guard effectiveCount < 2 else { return .none }
+                }
+                state.editIsPinned = value
                 return .none
 
             // MARK: - Login

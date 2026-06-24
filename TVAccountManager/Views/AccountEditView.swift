@@ -60,6 +60,12 @@ struct AccountEditView: View {
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
+
+                Toggle(isOn: store.binding(\.editIsPinned, send: AccountAction.setEditIsPinned)) {
+                    Label("Pin to Top", systemImage: "pin.fill")
+                }
+                .disabled(!store.state.editIsPinned && store.state.pinnedCount >= 2)
+                .accessibilityIdentifier("edit_pin")
             } header: {
                 Text(store.state.editingAccountId != nil ? LocalizedStringKey("Edit Account") : LocalizedStringKey("New Account"))
             }
