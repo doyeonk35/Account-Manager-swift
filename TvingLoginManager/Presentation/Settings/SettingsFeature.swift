@@ -9,8 +9,8 @@ struct SettingsState {
     var draftQcLoginURL: String
     var draftQaLoginURL: String
 
-    static let defaultQcURL = "https://user.tving.com/"
-    static let defaultQaURL = "https://userqa.tving.com/tv/login/qrcode.tving"
+    static let defaultQcURL = Bundle.main.object(forInfoDictionaryKey: "DefaultQCLoginURL") as? String ?? ""
+    static let defaultQaURL = Bundle.main.object(forInfoDictionaryKey: "DefaultQALoginURL") as? String ?? ""
 
     var hasUnsavedChanges: Bool {
         draftQcLoginURL != qcLoginURL || draftQaLoginURL != qaLoginURL

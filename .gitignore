@@ -7,7 +7,9 @@ DerivedData/
 xcuserdata/
 *.xcworkspace/xcuserdata/
 .omc
+.claude/
 CLAUDE.md
 screenshots/
 releases/
 .build/
+TvingLoginManager/Info.plist

@@ -17,6 +17,10 @@
     <string>14.0</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+    <key>DefaultQCLoginURL</key>
+    <string>__DEFAULT_QC_LOGIN_URL__</string>
+    <key>DefaultQALoginURL</key>
+    <string>__DEFAULT_QA_LOGIN_URL__</string>
     <key>SUFeedURL</key>
     <string>https://doyeonk35.github.io/Account-Manager-swift/appcast.xml</string>
     <key>SUPublicEDKey</key>

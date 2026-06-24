@@ -26,7 +26,7 @@ struct SettingsEnvironmentView: View {
                 TextField("QC Login URL", text: store.binding(\.draftQcLoginURL, send: SettingsAction.setDraftQcLoginURL))
                     .accessibilityIdentifier("settings_qc_url")
                     .textFieldStyle(.roundedBorder)
-                Text("Default: https://user.tving.com/")
+                Text("Default: \(SettingsState.defaultQcURL)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } header: {
@@ -37,7 +37,7 @@ struct SettingsEnvironmentView: View {
                 TextField("QA Login URL", text: store.binding(\.draftQaLoginURL, send: SettingsAction.setDraftQaLoginURL))
                     .accessibilityIdentifier("settings_qa_url")
                     .textFieldStyle(.roundedBorder)
-                Text("Default: https://userqa.tving.com/tv/login/qrcode.tving")
+                Text("Default: \(SettingsState.defaultQaURL)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } header: {
