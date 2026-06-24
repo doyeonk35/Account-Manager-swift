@@ -50,13 +50,18 @@ final class LoginService: NSObject {
                     try Task.checkCancellation()
                     onStatusUpdate?(.enteringOTP, LoginStep.enteringOTP.rawValue)
                     try await injectOTP(otpCode)
-                    try await Task.sleep(for: .seconds(2))
+                    try await Task.sleep(for: .seconds(1))
                 }
 
-                // 사용자가 "티빙 아이디로 로그인"을 직접 클릭할 때까지 대기
+                // "티빙 아이디로 로그인" 버튼 자동 클릭 시도
                 try Task.checkCancellation()
-                onStatusUpdate?(.clickingLogin, String(localized: "Please click 'Login with TVING ID'."))
-                for _ in 0..<200 {
+                onStatusUpdate?(.clickingLogin, String(localized: "Looking for TVING ID login button..."))
+                try await autoClickLoginMethod()
+
+                // ID 입력 필드가 나타날 때까지 대기
+                try Task.checkCancellation()
+                onStatusUpdate?(.clickingLogin, String(localized: "Waiting for login form..."))
+                for _ in 0..<500 {
                     try Task.checkCancellation()
                     let found = (try? await executeJS("""
                         (function() {
@@ -66,7 +71,7 @@ final class LoginService: NSObject {
                         })()
                     """)) ?? "not_found"
                     if found == "found" { break }
-                    try await Task.sleep(for: .milliseconds(500))
+                    try await Task.sleep(for: .milliseconds(300))
                 }
 
                 // 아이디 입력
@@ -85,7 +90,7 @@ final class LoginService: NSObject {
                     return
                 }
                 try Task.checkCancellation()
-                try await Task.sleep(for: .seconds(1))
+                try await Task.sleep(for: .milliseconds(300))
 
                 // 비밀번호 입력
                 try Task.checkCancellation()
@@ -103,9 +108,19 @@ final class LoginService: NSObject {
                     return
                 }
 
-                // 자동완성 완료 안내
-                onStatusUpdate?(.enteringCredentials, String(localized: "Credentials filled. Please click Login."))
-                onComplete?(true, String(localized: "Credentials filled: \(account.title)"))
+                // "로그인" 버튼 자동 클릭 시도
+                try Task.checkCancellation()
+                try await Task.sleep(for: .milliseconds(300))
+                onStatusUpdate?(.submitting, String(localized: "Clicking login button..."))
+                let loginClicked = try await autoClickLoginSubmit()
+
+                if loginClicked {
+                    onStatusUpdate?(.verifying, String(localized: "Login submitted for \(account.title)"))
+                    onComplete?(true, String(localized: "Login submitted: \(account.title)"))
+                } else {
+                    onStatusUpdate?(.enteringCredentials, String(localized: "Credentials filled. Please click Login."))
+                    onComplete?(true, String(localized: "Credentials filled: \(account.title)"))
+                }
             } catch is CancellationError {
                 // Sheet dismissed — silently stop
             } catch {
@@ -162,6 +177,65 @@ final class LoginService: NSObject {
             if stillOnOTP == "no" { break }
             try await Task.sleep(for: .milliseconds(500))
         }
+    }
+
+    // MARK: - Auto-click login method ("티빙 아이디로 로그인")
+
+    private func autoClickLoginMethod() async throws {
+        for _ in 0..<75 {
+            try Task.checkCancellation()
+            let result = (try? await executeJS("""
+                (function() {
+                    var link = document.querySelector('a[data-sentry-component="TvingIdLoginButton"]');
+                    if (link) { link.click(); return 'clicked'; }
+                    var btn = document.querySelector('button[aria-label="티빙 아이디로 로그인"]');
+                    if (btn) { btn.click(); return 'clicked'; }
+                    var byHref = document.querySelector('a[href*="/account/login/tving"]');
+                    if (byHref) { byHref.click(); return 'clicked'; }
+                    var els = document.querySelectorAll('a, button');
+                    for (var i = 0; i < els.length; i++) {
+                        var t = (els[i].textContent || '').trim();
+                        if (t.includes('티빙 아이디') && t.includes('로그인')) {
+                            els[i].click();
+                            return 'clicked';
+                        }
+                    }
+                    return 'not_found';
+                })()
+            """)) ?? "not_found"
+            if result == "clicked" { return }
+            try await Task.sleep(for: .milliseconds(300))
+        }
+    }
+
+    // MARK: - Auto-click login submit ("로그인")
+
+    private func autoClickLoginSubmit() async throws -> Bool {
+        for _ in 0..<25 {
+            try Task.checkCancellation()
+            let result = (try? await executeJS("""
+                (function() {
+                    var submit = document.querySelector('button[type="submit"][data-sentry-source-file="LoginLayer.tsx"]');
+                    if (submit) { submit.click(); return 'clicked'; }
+                    submit = document.querySelector('form button[type="submit"]');
+                    if (submit) { submit.click(); return 'clicked'; }
+                    submit = document.querySelector('button[type="submit"]');
+                    if (submit) { submit.click(); return 'clicked'; }
+                    var btns = document.querySelectorAll('button');
+                    for (var i = 0; i < btns.length; i++) {
+                        var t = (btns[i].textContent || '').trim();
+                        if (t === '로그인' || t === 'Login') {
+                            btns[i].click();
+                            return 'clicked';
+                        }
+                    }
+                    return 'not_found';
+                })()
+            """)) ?? "not_found"
+            if result == "clicked" { return true }
+            try await Task.sleep(for: .milliseconds(300))
+        }
+        return false
     }
 
     // MARK: - Wait + Fill (React 호환)
