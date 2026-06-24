@@ -12,7 +12,7 @@ if [ ! -f "$TEMPLATE" ]; then
     exit 1
 fi
 
-QC_URL="${DEFAULT_QC_LOGIN_URL:-https://user.tving.com/}"
+QC_URL="${DEFAULT_QC_LOGIN_URL:-https://userqc.tving.com/tv/login/qrcode.tving}"
 QA_URL="${DEFAULT_QA_LOGIN_URL:-https://userqa.tving.com/tv/login/qrcode.tving}"
 
 sed -e "s|__DEFAULT_QC_LOGIN_URL__|$QC_URL|g" \
