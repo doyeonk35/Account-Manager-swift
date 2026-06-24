@@ -8,16 +8,18 @@ struct AccountListView: View {
             GroupBox {
                 HStack(spacing: 12) {
                     Label("OTP Code", systemImage: "lock.shield")
-                        .foregroundStyle(.secondary)
-                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                        .font(.body.bold())
                     TextField("Enter 6-digit code", text: store.binding(\.otpCode, send: AccountAction.setOtpCode))
                         .accessibilityIdentifier("otp_field")
                         .textFieldStyle(.roundedBorder)
-                        .frame(width: 160)
-                        .font(.system(.body, design: .monospaced))
+                        .frame(maxWidth: .infinity)
+                        .font(.system(.title3, design: .monospaced).bold())
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, 10)
+                .padding(.horizontal, 4)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 12)
             .padding(.top, 12)
             .padding(.bottom, 8)
@@ -44,21 +46,24 @@ struct AccountListView: View {
 
             Divider()
                 .padding(.horizontal, 12)
+                .padding(.bottom)
 
             HStack(spacing: 8) {
                 Picker("Sort", selection: store.binding(\.sortField, send: AccountAction.setSortField)) {
                     ForEach(AccountSortField.allCases, id: \.self) { field in
-                        Text(field.displayName).tag(field)
+                        Text(field.displayName)
+                            .tag(field)
+                            .padding()
                     }
                 }
                 .pickerStyle(.menu)
-                .frame(maxWidth: 140)
 
                 Button {
                     store.send(.toggleSortDirection)
                 } label: {
                     Image(systemName: store.state.sortAscending ? "arrow.up" : "arrow.down")
                         .font(.caption)
+                        .foregroundStyle(.black)
                 }
                 .buttonStyle(.borderless)
                 .help(store.state.sortAscending ? String(localized: "Ascending") : String(localized: "Descending"))
@@ -66,7 +71,6 @@ struct AccountListView: View {
                 Spacer()
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 4)
 
             if store.state.accounts.isEmpty {
                 ContentUnavailableView {
