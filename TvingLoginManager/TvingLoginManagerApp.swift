@@ -12,7 +12,7 @@ struct TvingLoginManagerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(updater: updaterController.updater)
                 .environmentObject(accountManager)
                 .frame(minWidth: 900, minHeight: 500)
         }

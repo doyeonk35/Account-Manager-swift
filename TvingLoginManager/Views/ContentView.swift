@@ -1,8 +1,11 @@
 import SwiftUI
+import Sparkle
 
 struct ContentView: View {
     @EnvironmentObject var manager: AccountManager
+    let updater: SPUUpdater
     @State private var selectedTab: SidebarTab = .accounts
+    @State private var selectedSettingsCategory: SettingsCategory?
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @Environment(\.openWindow) private var openWindow
 
@@ -20,7 +23,7 @@ struct ContentView: View {
                 case .accounts:
                     AccountListView()
                 case .settings:
-                    SettingsView()
+                    SettingsView(selectedCategory: $selectedSettingsCategory)
                 }
 
                 Divider()
@@ -53,10 +56,18 @@ struct ContentView: View {
             if selectedTab == .accounts && manager.isEditing {
                 AccountEditView()
                     .frame(minWidth: 300)
+            } else if selectedTab == .settings, let category = selectedSettingsCategory {
+                switch category {
+                case .environment:
+                    SettingsEnvironmentView()
+                case .general:
+                    SettingsGeneralView(updater: updater)
+                }
             }
         }
         .onChange(of: selectedTab) {
             manager.cancelEditing()
+            selectedSettingsCategory = nil
         }
         .sheet(isPresented: $manager.showLoginWebView) {
             if let account = manager.loginAccount {
