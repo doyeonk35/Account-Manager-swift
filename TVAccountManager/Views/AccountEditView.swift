@@ -51,10 +51,18 @@ struct AccountEditView: View {
                 .pickerStyle(.radioGroup)
 
                 VStack(alignment: .leading, spacing: 4) {
+                    Text("Memo")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                     TextEditor(text: store.binding(\.editMemo, send: AccountAction.setEditMemo))
                         .accessibilityIdentifier("edit_memo")
                         .frame(height: 80)
                         .font(.body)
+                        .foregroundStyle(.primary)
+                        .scrollContentBackground(.hidden)
+                        .padding(4)
+                        .background(Color.gray.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                     Text("\(store.state.editMemo.count)/250")
                         .font(.caption)
                         .foregroundStyle(.secondary)
