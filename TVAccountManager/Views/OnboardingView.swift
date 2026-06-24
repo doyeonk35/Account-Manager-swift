@@ -99,7 +99,7 @@ struct OnboardingView: View {
             }
             .padding(.bottom, 24)
         }
-        .frame(width: 720, height: 560)
+        .frame(minWidth: 600, idealWidth: 720, minHeight: 480, idealHeight: 560)
         .onKeyPress(.leftArrow) {
             if currentPage > 0 {
                 withAnimation { currentPage -= 1 }
@@ -120,20 +120,20 @@ struct OnboardingView: View {
             Image(page.imageName)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(maxHeight: 300)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
 
             Text(LocalizedStringKey(page.titleKey))
-                .font(.title2)
+                .font(.title)
                 .fontWeight(.semibold)
 
             Text(LocalizedStringKey(page.descriptionKey))
-                .font(.callout)
+                .font(.title3)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
                 .lineSpacing(5)
-                .frame(maxWidth: 480)
+                .frame(maxWidth: 520)
         }
         .transition(.opacity)
         .id(page.id)
