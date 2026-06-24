@@ -79,6 +79,11 @@ struct AccountState {
     // Preset import result
     var importResult: PresetLoadResult?
 
+    var selectedAccount: AccountInfo? {
+        guard let id = selectedAccountId else { return nil }
+        return accounts.first { $0.id == id }
+    }
+
     var isEditFormValid: Bool {
         !editUsername.isEmpty && !editPassword.isEmpty
     }
@@ -132,6 +137,9 @@ enum AccountAction: Sendable {
     case delete(UUID)
     case confirmDelete(AccountInfo)
     case cancelDelete
+
+    // Selection
+    case selectAccount(UUID?)
 
     // Filter & Sort
     case setFilterTab(AccountFilterTab)
@@ -187,6 +195,12 @@ enum AccountEnvironment {
 
             case .cancelDelete:
                 state.accountToDelete = nil
+                return .none
+
+            // MARK: - Selection
+
+            case .selectAccount(let id):
+                state.selectedAccountId = id
                 return .none
 
             // MARK: - Filter & Sort

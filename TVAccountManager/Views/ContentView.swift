@@ -97,6 +97,9 @@ struct ContentView: View {
             if router.tab == .accounts && accountStore.state.isEditing {
                 AccountEditView()
                     .frame(minWidth: 300)
+            } else if router.tab == .accounts, let account = accountStore.state.selectedAccount {
+                AccountDetailView(account: account)
+                    .frame(minWidth: 300)
             } else if router.tab == .settings, let category = router.settingsCategory {
                 switch category {
                 case .environment:

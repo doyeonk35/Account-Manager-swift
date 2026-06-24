@@ -89,6 +89,13 @@ struct AccountListView: View {
                 .listStyle(.inset(alternatesRowBackgrounds: true))
             }
         }
+        .onKeyPress(.delete) {
+            if let account = store.state.selectedAccount {
+                store.send(.confirmDelete(account))
+                return .handled
+            }
+            return .ignored
+        }
         .confirmationDialog(
             "Delete Account",
             isPresented: Binding(
@@ -170,6 +177,10 @@ struct AccountListView: View {
             }
         }
         .accessibilityIdentifier("account_row_\(account.title)")
+        .contentShape(Rectangle())
+        .onTapGesture {
+            store.send(.selectAccount(account.id))
+        }
         .padding(.vertical, 4)
         .listRowBackground(
             store.state.selectedAccountId == account.id
