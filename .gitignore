@@ -12,4 +12,5 @@ CLAUDE.md
 screenshots/
 releases/
 .build/
+*.xcodeproj
 TVAccountManager/Info.plist
