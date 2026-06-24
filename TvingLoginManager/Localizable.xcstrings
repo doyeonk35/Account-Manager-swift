@@ -114,16 +114,6 @@
         }
       }
     },
-    "None" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "구독 없음"
-          }
-        }
-      }
-    },
     "AVOD" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -276,6 +266,16 @@
         }
       }
     },
+    "Don't show again" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 보지 않기"
+          }
+        }
+      }
+    },
     "Edit" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -327,6 +327,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "아이디 입력 중..."
+          }
+        }
+      }
+    },
+    "Help" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "도움말"
           }
         }
       }
@@ -462,6 +472,170 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "선택 없음"
+          }
+        }
+      }
+    },
+    "None" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구독 없음"
+          }
+        }
+      }
+    },
+    "onboarding.addAccount.description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click the + button in the toolbar to add a new account.\nEnter a title, TVING ID, password,\naccount type (QC/QA), and plan type."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "툴바의 + 버튼을 클릭하여 새 계정을 추가하세요.\n제목, TVING ID, 비밀번호,\n계정 유형(QC/QA), 요금제를 입력합니다."
+          }
+        }
+      }
+    },
+    "onboarding.addAccount.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Account"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계정 등록"
+          }
+        }
+      }
+    },
+    "onboarding.login.description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click the Login button next to any account.\nA browser window opens and automatically\nfills in your ID and password."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계정 옆의 Login 버튼을 클릭하세요.\n브라우저 창이 열리고 자동으로\nID와 비밀번호가 입력됩니다."
+          }
+        }
+      }
+    },
+    "onboarding.login.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto Login"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자동 로그인"
+          }
+        }
+      }
+    },
+    "onboarding.otp.description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter a 6-digit OTP code at the top of the account list.\nThe code is automatically applied\nwhen logging in to accounts that require OTP."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계정 목록 상단에 6자리 OTP 코드를 입력하세요.\nOTP가 필요한 계정 로그인 시\n자동으로 코드가 적용됩니다."
+          }
+        }
+      }
+    },
+    "onboarding.otp.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OTP Code"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OTP 코드"
+          }
+        }
+      }
+    },
+    "onboarding.settings.description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go to the Settings tab to customize\nQC and QA login URLs.\nUse this when the login page address changes."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정 탭에서 QC, QA 로그인 URL을\n변경할 수 있습니다.\n로그인 페이지 주소가 변경될 때 사용하세요."
+          }
+        }
+      }
+    },
+    "onboarding.settings.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정"
+          }
+        }
+      }
+    },
+    "onboarding.welcome.description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TVING Login Manager helps you manage\nmultiple QC/QA test accounts and\nauto-login with one click."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TVING Login Manager는 여러 QC/QA\n테스트 계정을 관리하고 원클릭으로\n자동 로그인할 수 있는 도구입니다."
           }
         }
       }
@@ -679,6 +853,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "업데이트"
+          }
+        }
+      }
+    },
+    "View Usage Guide" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용법 가이드 보기"
+          }
+        }
+      }
+    },
+    "Welcome" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "환영합니다"
           }
         }
       }

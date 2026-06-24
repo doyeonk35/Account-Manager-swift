@@ -3,6 +3,8 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var manager: AccountManager
     @State private var selectedTab: SidebarTab = .accounts
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         NavigationSplitView {
@@ -63,5 +65,17 @@ struct ContentView: View {
                     .frame(minWidth: 900, minHeight: 700)
             }
         }
+        .onAppear {
+            if !hasSeenOnboarding {
+                openWindow(id: "onboarding")
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showOnboarding)) { _ in
+            openWindow(id: "onboarding")
+        }
     }
+}
+
+extension Notification.Name {
+    static let showOnboarding = Notification.Name("showOnboarding")
 }

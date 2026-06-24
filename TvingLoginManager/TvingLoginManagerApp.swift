@@ -26,5 +26,11 @@ struct TvingLoginManagerApp: App {
                 )
             }
         }
+
+        Window("Usage Guide", id: "onboarding") {
+            OnboardingView()
+        }
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
     }
 }

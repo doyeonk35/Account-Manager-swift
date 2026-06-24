@@ -28,6 +28,17 @@ struct SettingsView: View {
             }
 
             Section {
+                Button {
+                    NotificationCenter.default.post(name: .showOnboarding, object: nil)
+                } label: {
+                    Label("View Usage Guide", systemImage: "questionmark.circle")
+                }
+                .accessibilityIdentifier("settings_show_guide")
+            } header: {
+                Text("Help")
+            }
+
+            Section {
                 HStack {
                     Spacer()
                     Button("Reset to Defaults") {

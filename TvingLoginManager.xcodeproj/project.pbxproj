@@ -13,6 +13,7 @@
 		5236C3EC02DC440F31C15C34 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6FCA6BA45DEBB82D670ED17 /* ContentView.swift */; };
 		56236DDEC5D90487B8A3D82E /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A82DB157948D9203553CC37 /* StorageService.swift */; };
 		5BE28DDA6410ED68EF4E0BBC /* AccountListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF25FE62BE1C92B3B506C8B /* AccountListView.swift */; };
+		60E885620B4DF7D39974D0C9 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41509035DC46D79CD7B8C407 /* OnboardingView.swift */; };
 		64A653A3A19EE715E3C1B0B6 /* TvingLoginManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */; };
 		65481ACE8DDF61B89B7010F6 /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 754D17A5AF778A9D470E3ED7 /* KeychainServiceTests.swift */; };
 		70B41726ACAAD49C8D00DE5D /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183FB7A9FFB349092341B88 /* AccountManager.swift */; };
@@ -42,6 +43,7 @@
 		0DCEA8D0FBE8491AB19D5E4E /* AccountInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountInfo.swift; sourceTree = "<group>"; };
 		2EF2EF2D74BDCF2755191CC5 /* TvingLoginManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TvingLoginManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		39786DEFF3060E01AC731355 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		41509035DC46D79CD7B8C407 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		4BE5F51183598AED1109FA33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4CF84013D1BA82F576B418B6 /* LoginWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWebView.swift; sourceTree = "<group>"; };
 		4E028443A00528A1D04D208D /* StorageServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageServiceTests.swift; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 				DC69884A6E135C8BC1004153 /* CheckForUpdatesView.swift */,
 				E6FCA6BA45DEBB82D670ED17 /* ContentView.swift */,
 				4CF84013D1BA82F576B418B6 /* LoginWebView.swift */,
+				41509035DC46D79CD7B8C407 /* OnboardingView.swift */,
 				7330B3A923B990540C8D233D /* SettingsView.swift */,
 			);
 			path = Views;
@@ -280,6 +283,7 @@
 				B592121B4E02FEC058C0DD3F /* KeychainService.swift in Sources */,
 				96EF5E548691529BECD5FA45 /* LoginService.swift in Sources */,
 				BC92E0CB057509BB718A17E0 /* LoginWebView.swift in Sources */,
+				60E885620B4DF7D39974D0C9 /* OnboardingView.swift in Sources */,
 				11E58BF9E64A49E4ADE208A9 /* SettingsView.swift in Sources */,
 				56236DDEC5D90487B8A3D82E /* StorageService.swift in Sources */,
 				64A653A3A19EE715E3C1B0B6 /* TvingLoginManagerApp.swift in Sources */,
