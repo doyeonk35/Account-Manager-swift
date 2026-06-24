@@ -1,6 +1,6 @@
-name: TvingLoginManager
+name: TVAccountManager
 options:
-  bundleIdPrefix: com.tving
+  bundleIdPrefix: com.tv
   deploymentTarget:
     macOS: "14.0"
   xcodeVersion: "16.0"
@@ -26,40 +26,40 @@ packages:
     url: https://github.com/sparkle-project/Sparkle
     from: "2.7.0"
 targets:
-  TvingLoginManager:
+  TVAccountManager:
     type: application
     platform: macOS
     sources:
-      - TvingLoginManager
+      - TVAccountManager
     dependencies:
       - package: Sparkle
     settings:
       base:
-        CODE_SIGN_ENTITLEMENTS: TvingLoginManager/TvingLoginManager.entitlements
-        INFOPLIST_FILE: TvingLoginManager/Info.plist
-        PRODUCT_BUNDLE_IDENTIFIER: com.tving.login-manager
-        PRODUCT_NAME: TvingLoginManager
-        PRODUCT_MODULE_NAME: TvingLoginManager
+        CODE_SIGN_ENTITLEMENTS: TVAccountManager/TVAccountManager.entitlements
+        INFOPLIST_FILE: TVAccountManager/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.tv.account-manager
+        PRODUCT_NAME: TVAccountManager
+        PRODUCT_MODULE_NAME: TVAccountManager
       configs:
         Debug:
-          PRODUCT_BUNDLE_IDENTIFIER: com.tving.login-manager.debug
-          PRODUCT_NAME: TvingLoginManager-Debug
+          PRODUCT_BUNDLE_IDENTIFIER: com.tv.account-manager.debug
+          PRODUCT_NAME: TVAccountManager-Debug
           CODE_SIGN_STYLE: Automatic
           DEVELOPMENT_TEAM: F64BRNFSBB
-  TvingLoginManagerTests:
+  TVAccountManagerTests:
     type: bundle.unit-test
     platform: macOS
     sources:
-      - TvingLoginManagerTests
+      - TVAccountManagerTests
     dependencies:
-      - target: TvingLoginManager
+      - target: TVAccountManager
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.tving.login-manager.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.tv.account-manager.tests
         BUNDLE_LOADER: "$(TEST_HOST)"
         GENERATE_INFOPLIST_FILE: YES
       configs:
         Debug:
-          TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TvingLoginManager-Debug.app/Contents/MacOS/TvingLoginManager-Debug"
+          TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TVAccountManager-Debug.app/Contents/MacOS/TVAccountManager-Debug"
         Release:
-          TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TvingLoginManager.app/Contents/MacOS/TvingLoginManager"
+          TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TVAccountManager.app/Contents/MacOS/TVAccountManager"

@@ -1,5 +1,5 @@
 #!/bin/bash
-# TvingLoginManager 릴리즈 스크립트
+# TVAccountManager 릴리즈 스크립트
 # 사용법: ./scripts/release.sh <version>
 # 예시: ./scripts/release.sh 1.1.0
 
@@ -14,9 +14,9 @@ fi
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 RELEASE_DIR="${PROJECT_DIR}/releases/${VERSION}"
-APP_NAME="TvingLoginManager"
-SCHEME="TvingLoginManager"
-SPARKLE_BIN="${HOME}/Library/Developer/Xcode/DerivedData/TvingLoginManager-*/SourcePackages/artifacts/sparkle/Sparkle/bin"
+APP_NAME="TVAccountManager"
+SCHEME="TVAccountManager"
+SPARKLE_BIN="${HOME}/Library/Developer/Xcode/DerivedData/TVAccountManager-*/SourcePackages/artifacts/sparkle/Sparkle/bin"
 REPO="doyeonk35/Account-Manager-swift"
 
 log() { echo "🚀 $1"; }
@@ -32,14 +32,14 @@ GENERATE_APPCAST=$(find ${SPARKLE_BIN} -name "generate_appcast" -maxdepth 1 2>/d
 log "버전을 ${VERSION}으로 업데이트..."
 cd "$PROJECT_DIR"
 sed -i '' "s/MARKETING_VERSION: .*/MARKETING_VERSION: \"${VERSION}\"/" project.yml
-sed -i '' "s/<string>[0-9]*\.[0-9]*\.[0-9]*<\/string>/<string>${VERSION}<\/string>/" TvingLoginManager/Info.plist
+sed -i '' "s/<string>[0-9]*\.[0-9]*\.[0-9]*<\/string>/<string>${VERSION}<\/string>/" TVAccountManager/Info.plist
 
 # 빌드 번호 증가
 CURRENT_BUILD=$(grep "CURRENT_PROJECT_VERSION" project.yml | head -1 | sed 's/.*: *"\{0,1\}\([0-9]*\)"\{0,1\}/\1/')
 NEW_BUILD=$((CURRENT_BUILD + 1))
 sed -i '' "s/CURRENT_PROJECT_VERSION: .*/CURRENT_PROJECT_VERSION: \"${NEW_BUILD}\"/" project.yml
-sed -i '' "s/<key>CFBundleVersion<\/key>/<key>CFBundleVersion<\/key>/" TvingLoginManager/Info.plist
-sed -i '' "/<key>CFBundleVersion<\/key>/{n;s/<string>[0-9]*<\/string>/<string>${NEW_BUILD}<\/string>/;}" TvingLoginManager/Info.plist
+sed -i '' "s/<key>CFBundleVersion<\/key>/<key>CFBundleVersion<\/key>/" TVAccountManager/Info.plist
+sed -i '' "/<key>CFBundleVersion<\/key>/{n;s/<string>[0-9]*<\/string>/<string>${NEW_BUILD}<\/string>/;}" TVAccountManager/Info.plist
 log "버전: ${VERSION} (빌드 ${NEW_BUILD})"
 
 # 2. XcodeGen

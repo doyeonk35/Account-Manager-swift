@@ -2,7 +2,7 @@ import SwiftUI
 import Sparkle
 
 @main
-struct TvingLoginManagerApp: App {
+struct TVAccountManagerApp: App {
     @StateObject private var accountStore: AccountStore
     @StateObject private var settingsStore: SettingsStore
     @StateObject private var router = AppRouter()

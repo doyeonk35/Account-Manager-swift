@@ -4,8 +4,8 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-TEMPLATE="$PROJECT_DIR/TvingLoginManager/Info.plist.template"
-OUTPUT="$PROJECT_DIR/TvingLoginManager/Info.plist"
+TEMPLATE="$PROJECT_DIR/TVAccountManager/Info.plist.template"
+OUTPUT="$PROJECT_DIR/TVAccountManager/Info.plist"
 
 if [ ! -f "$TEMPLATE" ]; then
     echo "Error: Info.plist.template not found at $TEMPLATE"

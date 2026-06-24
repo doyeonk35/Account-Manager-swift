@@ -1,13 +1,13 @@
 #!/bin/bash
-# Build TvingLoginManager for release distribution
+# Build TVAccountManager for release distribution
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-SCHEME="TvingLoginManager"
+SCHEME="TVAccountManager"
 BUILD_DIR="$(pwd)/build"
 DIST_DIR="$(pwd)/dist"
-APP_NAME="TvingLoginManager"
+APP_NAME="TVAccountManager"
 
 echo "=== Cleaning ==="
 rm -rf "${BUILD_DIR}" "${DIST_DIR}"
@@ -15,7 +15,7 @@ mkdir -p "${BUILD_DIR}" "${DIST_DIR}"
 
 echo "=== Building Release ==="
 xcodebuild build \
-    -project TvingLoginManager.xcodeproj \
+    -project TVAccountManager.xcodeproj \
     -scheme "${SCHEME}" \
     -configuration Release \
     -destination 'platform=macOS' \

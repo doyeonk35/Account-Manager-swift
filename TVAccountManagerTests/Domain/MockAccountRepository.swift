@@ -1,5 +1,5 @@
 import Foundation
-@testable import TvingLoginManager
+@testable import TVAccountManager
 
 @MainActor
 final class MockAccountRepository: AccountRepository {

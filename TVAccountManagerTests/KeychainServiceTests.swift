@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import TvingLoginManager
+@testable import TVAccountManager
 
 @Suite("KeychainService")
 struct KeychainServiceTests {

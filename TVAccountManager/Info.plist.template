@@ -4,11 +4,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>TVING Login Manager</string>
+    <string>TV Account Manager</string>
     <key>CFBundleDisplayName</key>
-    <string>TVING Login Manager</string>
+    <string>TV Account Manager</string>
     <key>CFBundleIdentifier</key>
-    <string>com.tving.login-manager</string>
+    <string>com.tv.account-manager</string>
     <key>CFBundleVersion</key>
     <string>2</string>
     <key>CFBundleShortVersionString</key>

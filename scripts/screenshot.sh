@@ -1,12 +1,12 @@
 #!/bin/bash
-# TvingLoginManager 스크린샷 자동 생성 스크립트
+# TVAccountManager 스크린샷 자동 생성 스크립트
 # macOS 앱용 — screencapture + System Events
 #
 # 사용법: ./scripts/screenshot.sh [OUTPUT_DIR]
 
 set -euo pipefail
 
-APP_NAME="TvingLoginManager"
+APP_NAME="TVAccountManager"
 OUTPUT_DIR="${1:-./screenshots}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 OUTPUT_DIR="${OUTPUT_DIR}/${TIMESTAMP}"
@@ -141,13 +141,13 @@ capture_window() {
 
 # --- 메인 ---
 
-log "=== TvingLoginManager 스크린샷 자동 생성 ==="
+log "=== TVAccountManager 스크린샷 자동 생성 ==="
 log "출력: $OUTPUT_DIR"
 log ""
 
 if ! pgrep -x "$APP_NAME" > /dev/null 2>&1; then
     log "앱 실행 중..."
-    open -a "$APP_NAME" 2>/dev/null || open "$(dirname "$0")/../dist/TvingLoginManager.app"
+    open -a "$APP_NAME" 2>/dev/null || open "$(dirname "$0")/../dist/TVAccountManager.app"
 else
     log "앱이 이미 실행 중"
 fi
