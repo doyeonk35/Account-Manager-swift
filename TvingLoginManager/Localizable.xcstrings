@@ -648,6 +648,38 @@
         }
       }
     },
+    "onboarding.import.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go to Settings > General and click Open Import Folder.\nUse presets.example.json as a template —\nrename it to presets.json, fill in your accounts,\nthen click Import. Duplicates are automatically skipped."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정 > 일반에서 불러오기 폴더 열기를 클릭하세요.\npresets.example.json을 양식으로 활용하여\npresets.json으로 이름을 바꾸고 계정을 입력한 뒤\n불러오기를 클릭하면 됩니다. 중복 계정은 자동으로 건너뜁니다."
+          }
+        }
+      }
+    },
+    "onboarding.import.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bulk Import"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계정 일괄 등록"
+          }
+        }
+      }
+    },
     "onboarding.login.description" : {
       "extractionState" : "stale",
       "localizations" : {

@@ -38,6 +38,12 @@ private let onboardingPages: [OnboardingPage] = [
         titleKey: "onboarding.settings.title",
         descriptionKey: "onboarding.settings.description"
     ),
+    OnboardingPage(
+        id: 5,
+        imageName: "onboarding_presets",
+        titleKey: "onboarding.import.title",
+        descriptionKey: "onboarding.import.description"
+    ),
 ]
 
 struct OnboardingView: View {
