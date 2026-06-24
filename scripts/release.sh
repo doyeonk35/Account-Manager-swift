@@ -69,7 +69,7 @@ log "Extended attributes 및 Apple Double 파일 제거..."
 xattr -cr "${APP_PATH}"
 find "${APP_PATH}" -name '._*' -delete
 log "코드 재서명..."
-codesign --deep --force --sign "Apple Development" --timestamp=none "${APP_PATH}"
+codesign --deep --force --sign "Apple Development: dyk429@icloud.com (85PD2LNC6M)" --timestamp=none "${APP_PATH}"
 log "ZIP 생성: ${ZIP_NAME}"
 cd "$BUILD_DIR"
 export COPYFILE_DISABLE=1
