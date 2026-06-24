@@ -65,9 +65,16 @@ log "빌드 완료: ${APP_PATH}"
 mkdir -p "$RELEASE_DIR"
 ZIP_NAME="${APP_NAME}-${VERSION}.zip"
 ZIP_PATH="${RELEASE_DIR}/${ZIP_NAME}"
+log "Extended attributes 및 Apple Double 파일 제거..."
+xattr -cr "${APP_PATH}"
+find "${APP_PATH}" -name '._*' -delete
+log "코드 재서명..."
+codesign --deep --force --sign "Apple Development" --timestamp=none "${APP_PATH}"
 log "ZIP 생성: ${ZIP_NAME}"
 cd "$BUILD_DIR"
-ditto -c -k --keepParent "${APP_NAME}.app" "$ZIP_PATH"
+export COPYFILE_DISABLE=1
+ditto -c -k --norsrc --keepParent "${APP_NAME}.app" "$ZIP_PATH"
+unset COPYFILE_DISABLE
 cd "$PROJECT_DIR"
 
 # 5. EdDSA 서명

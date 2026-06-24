@@ -32,9 +32,15 @@ if [ -z "${APP_PATH}" ]; then
     exit 1
 fi
 
+echo "=== Removing extended attributes and Apple Double files ==="
+xattr -cr "${APP_PATH}"
+find "${APP_PATH}" -name '._*' -delete
+
 cp -R "${APP_PATH}" "${DIST_DIR}/"
 cd "${DIST_DIR}"
+export COPYFILE_DISABLE=1
 zip -r "${APP_NAME}.zip" "${APP_NAME}.app"
+unset COPYFILE_DISABLE
 
 echo ""
 echo "=== Done ==="
