@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>TvingLoginManager</title>
+        <item>
+            <title>1.1.0</title>
+            <pubDate>Wed, 24 Jun 2026 14:16:31 +0900</pubDate>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/doyeonk35/Account-Manager-swift/releases/download/v1.1.0/TvingLoginManager-1.1.0.zip" length="7381652" type="application/octet-stream" sparkle:edSignature="boQzxYiAq0yclfn7fNXbHOLT5HpduyoD7vb2hQ2b2CQa7xt98l+V+T7LU42hBoSFr813G3Y/lsZS4YQALqyUAg=="/>
+        </item>
+    </channel>
+</rss>
