@@ -144,9 +144,6 @@ struct SettingsGeneralView: View {
                 LabeledContent("Version") {
                     Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "-")
                 }
-                LabeledContent("Build") {
-                    Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "-")
-                }
             } header: {
                 Text("App Info")
             }
