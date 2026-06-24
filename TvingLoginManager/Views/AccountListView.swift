@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AccountListView: View {
-    @EnvironmentObject var manager: AccountManager
+    @EnvironmentObject var store: AccountStore
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -10,7 +10,7 @@ struct AccountListView: View {
                     Label("OTP Code", systemImage: "lock.shield")
                         .foregroundStyle(.secondary)
                         .font(.subheadline)
-                    TextField("Enter 6-digit code", text: $manager.otpCode)
+                    TextField("Enter 6-digit code", text: store.binding(\.otpCode, send: AccountAction.setOtpCode))
                         .accessibilityIdentifier("otp_field")
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 160)
@@ -25,18 +25,18 @@ struct AccountListView: View {
             Divider()
                 .padding(.horizontal, 12)
 
-            if manager.accounts.isEmpty {
+            if store.state.accounts.isEmpty {
                 ContentUnavailableView {
                     Label("No Accounts", systemImage: "person.crop.circle.badge.questionmark")
                 } description: {
                     Text("Add an account to get started.")
                 } actions: {
-                    Button("Add Account") { manager.startAdding() }
+                    Button("Add Account") { store.send(.startAdding) }
                         .buttonStyle(.borderedProminent)
                 }
                 .frame(maxHeight: .infinity)
             } else {
-                List(manager.accounts) { account in
+                List(store.state.accounts) { account in
                     accountRow(account)
                 }
                 .listStyle(.inset(alternatesRowBackgrounds: true))
@@ -45,14 +45,13 @@ struct AccountListView: View {
         .confirmationDialog(
             "Delete Account",
             isPresented: Binding(
-                get: { manager.accountToDelete != nil },
-                set: { if !$0 { manager.accountToDelete = nil } }
+                get: { store.state.accountToDelete != nil },
+                set: { if !$0 { store.send(.cancelDelete) } }
             ),
-            presenting: manager.accountToDelete
+            presenting: store.state.accountToDelete
         ) { account in
             Button("Delete \"\(account.title)\"", role: .destructive) {
-                manager.deleteAccount(id: account.id)
-                manager.accountToDelete = nil
+                store.send(.delete(account.id))
             }
         } message: { account in
             Text("This will permanently delete the account and its stored password.")
@@ -92,7 +91,7 @@ struct AccountListView: View {
 
             HStack(spacing: 8) {
                 Button {
-                    manager.startEditing(account: account)
+                    store.send(.startEditing(account))
                 } label: {
                     Label("Edit", systemImage: "pencil")
                         .labelStyle(.iconOnly)
@@ -101,7 +100,7 @@ struct AccountListView: View {
                 .buttonStyle(.borderless)
 
                 Button(role: .destructive) {
-                    manager.accountToDelete = account
+                    store.send(.confirmDelete(account))
                 } label: {
                     Label("Delete", systemImage: "trash")
                         .labelStyle(.iconOnly)
@@ -110,18 +109,18 @@ struct AccountListView: View {
                 .buttonStyle(.borderless)
 
                 Button("Login") {
-                    manager.startLogin(account: account)
+                    store.send(.startLogin(account))
                 }
                 .accessibilityIdentifier("login_\(account.title)")
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
-                .disabled(manager.isLoggingIn)
+                .disabled(store.state.isLoggingIn)
             }
         }
         .accessibilityIdentifier("account_row_\(account.title)")
         .padding(.vertical, 4)
         .listRowBackground(
-            manager.selectedAccountId == account.id
+            store.state.selectedAccountId == account.id
                 ? Color.accentColor.opacity(0.15)
                 : Color.clear
         )

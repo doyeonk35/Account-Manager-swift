@@ -1,44 +1,50 @@
-import XCTest
+import Testing
+import Foundation
 @testable import TvingLoginManager
 
-final class AccountInfoTests: XCTestCase {
+@Suite("AccountInfo")
+struct AccountInfoTests {
 
-    func testAccountTypeDefaultIsQC() {
+    @Test("기본 AccountType은 QC이다")
+    func accountTypeDefaultIsQC() {
         let account = AccountInfo(title: "Test", username: "user")
-        XCTAssertEqual(account.accountType, .qc)
+        #expect(account.accountType == .qc)
     }
 
-    func testEncodeExcludesPassword() {
+    @Test("인코딩 시 비밀번호를 제외한다")
+    func encodeExcludesPassword() throws {
         let account = AccountInfo(title: "A", username: "u", password: "secret123")
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        let data = try! encoder.encode(account)
+        let data = try encoder.encode(account)
         let json = String(data: data, encoding: .utf8)!
-        XCTAssertFalse(json.contains("secret123"))
-        XCTAssertFalse(json.contains("password"))
-        XCTAssertTrue(json.contains("title"))
-        XCTAssertTrue(json.contains("username"))
+        #expect(!json.contains("secret123"))
+        #expect(!json.contains("password"))
+        #expect(json.contains("title"))
+        #expect(json.contains("username"))
     }
 
-    func testDecodeRoundTrip() {
+    @Test("인코딩/디코딩 라운드트립이 정상 동작한다")
+    func decodeRoundTrip() throws {
         let original = AccountInfo(
             title: "QC Account", username: "testuser",
             accountType: .qa, lastUsed: Date(timeIntervalSince1970: 1700000000)
         )
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        let data = try! encoder.encode(original)
+        let data = try encoder.encode(original)
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        let decoded = try! decoder.decode(AccountInfo.self, from: data)
-        XCTAssertEqual(decoded.id, original.id)
-        XCTAssertEqual(decoded.title, original.title)
-        XCTAssertEqual(decoded.username, original.username)
-        XCTAssertEqual(decoded.accountType, original.accountType)
-        XCTAssertEqual(decoded.password, "")
+        let decoded = try decoder.decode(AccountInfo.self, from: data)
+        #expect(decoded.id == original.id)
+        #expect(decoded.title == original.title)
+        #expect(decoded.username == original.username)
+        #expect(decoded.accountType == original.accountType)
+        #expect(decoded.password == "")
     }
 
-    func testDecodeFromRustFormatWithPassword() {
+    @Test("Rust 포맷 JSON에서 비밀번호를 읽는다")
+    func decodeFromRustFormatWithPassword() throws {
         let rustJSON = """
         {
             "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -51,32 +57,36 @@ final class AccountInfoTests: XCTestCase {
         """.data(using: .utf8)!
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        let account = try! decoder.decode(AccountInfo.self, from: rustJSON)
-        XCTAssertEqual(account.title, "My QC Account")
-        XCTAssertEqual(account.accountType, .qc)
-        XCTAssertEqual(account.password, "old_plain_password")
+        let account = try decoder.decode(AccountInfo.self, from: rustJSON)
+        #expect(account.title == "My QC Account")
+        #expect(account.accountType == .qc)
+        #expect(account.password == "old_plain_password")
     }
 
-    func testLastUsedRelativeJustNow() {
+    @Test("방금 사용한 계정은 'Just now'을 반환한다")
+    func lastUsedRelativeJustNow() {
         let account = AccountInfo(title: "T", username: "u", lastUsed: Date())
         let expected = String(localized: "Just now")
-        XCTAssertEqual(account.lastUsedRelative, expected)
+        #expect(account.lastUsedRelative == expected)
     }
 
-    func testLastUsedRelativeDaysAgo() {
+    @Test("2일 전 계정은 '2 days ago'를 반환한다")
+    func lastUsedRelativeDaysAgo() {
         let twoDaysAgo = Date().addingTimeInterval(-2 * 86400)
         let account = AccountInfo(title: "T", username: "u", lastUsed: twoDaysAgo)
         let expected = String(localized: "\(2) days ago")
-        XCTAssertEqual(account.lastUsedRelative, expected)
+        #expect(account.lastUsedRelative == expected)
     }
 
-    func testLoginURLForQC() {
+    @Test("QC 계정의 로그인 URL")
+    func loginURLForQC() {
         let account = AccountInfo(title: "T", username: "u", accountType: .qc)
-        XCTAssertEqual(account.loginURL.absoluteString, "https://user.tving.com/")
+        #expect(account.loginURL.absoluteString == "https://user.tving.com/")
     }
 
-    func testLoginURLForQA() {
+    @Test("QA 계정의 로그인 URL")
+    func loginURLForQA() {
         let account = AccountInfo(title: "T", username: "u", accountType: .qa)
-        XCTAssertEqual(account.loginURL.absoluteString, "https://userqa.tving.com/tv/login/qrcode.tving")
+        #expect(account.loginURL.absoluteString == "https://userqa.tving.com/tv/login/qrcode.tving")
     }
 }

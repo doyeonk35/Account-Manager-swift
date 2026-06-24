@@ -1,25 +1,22 @@
-import XCTest
+import Testing
+import Foundation
 @testable import TvingLoginManager
 
-final class StorageServiceTests: XCTestCase {
+@Suite("StorageService")
+struct StorageServiceTests {
 
-    var service: StorageService!
-    var tempDir: URL!
+    let service: StorageService
+    let tempDir: URL
 
-    override func setUp() {
-        super.setUp()
+    init() throws {
         tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
-        try! FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
         service = StorageService(directory: tempDir)
     }
 
-    override func tearDown() {
-        try? FileManager.default.removeItem(at: tempDir)
-        super.tearDown()
-    }
-
-    func testSaveAndLoad() {
+    @Test("계정을 저장하고 로드한다")
+    func saveAndLoad() {
         let accounts = [
             AccountInfo(title: "A1", username: "u1", accountType: .qc),
             AccountInfo(title: "A2", username: "u2", accountType: .qa),
@@ -27,33 +24,37 @@ final class StorageServiceTests: XCTestCase {
         service.save(accounts: accounts)
         let loaded = service.loadAccounts()
 
-        XCTAssertEqual(loaded.count, 2)
-        XCTAssertEqual(loaded[0].title, "A1")
-        XCTAssertEqual(loaded[1].accountType, .qa)
+        #expect(loaded.count == 2)
+        #expect(loaded[0].title == "A1")
+        #expect(loaded[1].accountType == .qa)
     }
 
-    func testSavedJSONDoesNotContainPassword() {
+    @Test("저장된 JSON에 비밀번호가 포함되지 않는다")
+    func savedJSONDoesNotContainPassword() {
         let accounts = [AccountInfo(title: "A", username: "u", password: "secret")]
         service.save(accounts: accounts)
 
         let fileURL = tempDir.appendingPathComponent("accounts.json")
         let json = try! String(contentsOf: fileURL, encoding: .utf8)
 
-        XCTAssertFalse(json.contains("secret"))
-        XCTAssertFalse(json.contains("password"))
+        #expect(!json.contains("secret"))
+        #expect(!json.contains("password"))
     }
 
-    func testLoadFromEmptyReturnsEmpty() {
-        XCTAssertTrue(service.loadAccounts().isEmpty)
+    @Test("빈 디렉토리에서 빈 배열을 반환한다")
+    func loadFromEmptyReturnsEmpty() {
+        #expect(service.loadAccounts().isEmpty)
     }
 
-    func testLoadCorruptedFileReturnsEmpty() {
+    @Test("손상된 파일에서 빈 배열을 반환한다")
+    func loadCorruptedFileReturnsEmpty() {
         let fileURL = tempDir.appendingPathComponent("accounts.json")
         try! "not valid json".write(to: fileURL, atomically: true, encoding: .utf8)
-        XCTAssertTrue(service.loadAccounts().isEmpty)
+        #expect(service.loadAccounts().isEmpty)
     }
 
-    func testLoadRustFormatWithPasswordField() {
+    @Test("Rust 포맷 JSON에서 비밀번호 필드를 읽는다")
+    func loadRustFormatWithPasswordField() {
         let rustJSON = """
         [{
             "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -68,8 +69,8 @@ final class StorageServiceTests: XCTestCase {
         try! rustJSON.write(to: fileURL, atomically: true, encoding: .utf8)
 
         let loaded = service.loadAccounts()
-        XCTAssertEqual(loaded.count, 1)
-        XCTAssertEqual(loaded[0].title, "Rust Account")
-        XCTAssertEqual(loaded[0].password, "plain_text_pw")
+        #expect(loaded.count == 1)
+        #expect(loaded[0].title == "Rust Account")
+        #expect(loaded[0].password == "plain_text_pw")
     }
 }

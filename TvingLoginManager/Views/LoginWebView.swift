@@ -2,9 +2,10 @@ import SwiftUI
 import WebKit
 
 struct LoginWebView: View {
-    @EnvironmentObject var manager: AccountManager
+    @EnvironmentObject var store: AccountStore
     let account: AccountInfo
     let otpCode: String
+    let loginURL: URL
 
     @State private var currentStep = "Preparing..."
     @State private var isLoginDone = false
@@ -21,7 +22,7 @@ struct LoginWebView: View {
                 }
                 Spacer()
                 Button("Close") {
-                    manager.cancelLogin()
+                    store.send(.cancelLogin)
                 }
                 .keyboardShortcut(.escape, modifiers: [])
             }
@@ -30,7 +31,7 @@ struct LoginWebView: View {
             Divider()
 
             WebViewContainer(
-                url: manager.loginURL(for: account.accountType),
+                url: loginURL,
                 account: account,
                 otpCode: otpCode,
                 onStatusUpdate: { _, message in
@@ -39,7 +40,7 @@ struct LoginWebView: View {
                 onComplete: { success, message in
                     isLoginDone = true
                     currentStep = message
-                    manager.loginCompleted(success: success, message: message)
+                    store.send(.loginCompleted(success: success, message: message))
                 }
             )
         }

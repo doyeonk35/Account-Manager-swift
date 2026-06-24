@@ -1,20 +1,6 @@
 import Foundation
 import SwiftUI
 
-enum SidebarTab: String, CaseIterable, Identifiable {
-    case accounts = "Accounts"
-    case settings = "Settings"
-
-    var id: String { rawValue }
-
-    var icon: String {
-        switch self {
-        case .accounts: "person.2"
-        case .settings: "gearshape"
-        }
-    }
-}
-
 @MainActor
 final class AccountManager: ObservableObject {
 

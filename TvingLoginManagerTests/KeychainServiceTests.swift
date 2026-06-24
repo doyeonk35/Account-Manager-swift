@@ -1,52 +1,55 @@
-import XCTest
+import Testing
+import Foundation
 @testable import TvingLoginManager
 
-final class KeychainServiceTests: XCTestCase {
+@Suite("KeychainService")
+struct KeychainServiceTests {
 
     let service = KeychainService()
-    var testAccountId: UUID!
 
-    override func setUp() {
-        super.setUp()
-        testAccountId = UUID()
+    @Test("비밀번호를 저장하고 로드한다")
+    func saveAndLoad() {
+        let id = UUID()
+        defer { service.deletePassword(forAccountId: id) }
+
+        let saved = service.savePassword("mySecret123", forAccountId: id)
+        #expect(saved == true)
+        #expect(service.loadPassword(forAccountId: id) == "mySecret123")
     }
 
-    override func tearDown() {
-        service.deletePassword(forAccountId: testAccountId)
-        super.tearDown()
+    @Test("존재하지 않는 비밀번호는 nil을 반환한다")
+    func loadNonExistent() {
+        #expect(service.loadPassword(forAccountId: UUID()) == nil)
     }
 
-    func testSaveAndLoad() {
-        let saved = service.savePassword("mySecret123", forAccountId: testAccountId)
-        XCTAssertTrue(saved)
-        let loaded = service.loadPassword(forAccountId: testAccountId)
-        XCTAssertEqual(loaded, "mySecret123")
+    @Test("비밀번호를 업데이트한다")
+    func update() {
+        let id = UUID()
+        defer { service.deletePassword(forAccountId: id) }
+
+        service.savePassword("old", forAccountId: id)
+        let updated = service.updatePassword("new", forAccountId: id)
+        #expect(updated == true)
+        #expect(service.loadPassword(forAccountId: id) == "new")
     }
 
-    func testLoadNonExistent() {
-        let loaded = service.loadPassword(forAccountId: UUID())
-        XCTAssertNil(loaded)
+    @Test("비밀번호를 삭제한다")
+    func delete() {
+        let id = UUID()
+
+        service.savePassword("toDelete", forAccountId: id)
+        service.deletePassword(forAccountId: id)
+        #expect(service.loadPassword(forAccountId: id) == nil)
     }
 
-    func testUpdate() {
-        service.savePassword("old", forAccountId: testAccountId)
-        let updated = service.updatePassword("new", forAccountId: testAccountId)
-        XCTAssertTrue(updated)
-        let loaded = service.loadPassword(forAccountId: testAccountId)
-        XCTAssertEqual(loaded, "new")
-    }
+    @Test("saveOrUpdate로 생성 및 업데이트한다")
+    func saveOrUpdateCreatesAndUpdates() {
+        let id = UUID()
+        defer { service.deletePassword(forAccountId: id) }
 
-    func testDelete() {
-        service.savePassword("toDelete", forAccountId: testAccountId)
-        service.deletePassword(forAccountId: testAccountId)
-        let loaded = service.loadPassword(forAccountId: testAccountId)
-        XCTAssertNil(loaded)
-    }
-
-    func testSaveOrUpdateCreatesIfNotExist() {
-        service.saveOrUpdate(password: "first", forAccountId: testAccountId)
-        XCTAssertEqual(service.loadPassword(forAccountId: testAccountId), "first")
-        service.saveOrUpdate(password: "second", forAccountId: testAccountId)
-        XCTAssertEqual(service.loadPassword(forAccountId: testAccountId), "second")
+        service.saveOrUpdate(password: "first", forAccountId: id)
+        #expect(service.loadPassword(forAccountId: id) == "first")
+        service.saveOrUpdate(password: "second", forAccountId: id)
+        #expect(service.loadPassword(forAccountId: id) == "second")
     }
 }

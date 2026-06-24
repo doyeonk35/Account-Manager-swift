@@ -1,20 +1,6 @@
 import SwiftUI
 import Sparkle
 
-enum SettingsCategory: String, CaseIterable, Identifiable {
-    case general = "General"
-    case environment = "Environment"
-
-    var id: String { rawValue }
-
-    var icon: String {
-        switch self {
-        case .general: "gearshape"
-        case .environment: "link"
-        }
-    }
-}
-
 struct SettingsView: View {
     @Binding var selectedCategory: SettingsCategory?
 
@@ -32,12 +18,12 @@ struct SettingsView: View {
 // MARK: - Environment Settings
 
 struct SettingsEnvironmentView: View {
-    @EnvironmentObject var manager: AccountManager
+    @EnvironmentObject var store: SettingsStore
 
     var body: some View {
         Form {
             Section {
-                TextField("QC Login URL", text: $manager.qcLoginURL)
+                TextField("QC Login URL", text: store.binding(\.qcLoginURL, send: SettingsAction.setQcLoginURL))
                     .accessibilityIdentifier("settings_qc_url")
                     .textFieldStyle(.roundedBorder)
                 Text("Default: https://user.tving.com/")
@@ -48,7 +34,7 @@ struct SettingsEnvironmentView: View {
             }
 
             Section {
-                TextField("QA Login URL", text: $manager.qaLoginURL)
+                TextField("QA Login URL", text: store.binding(\.qaLoginURL, send: SettingsAction.setQaLoginURL))
                     .accessibilityIdentifier("settings_qa_url")
                     .textFieldStyle(.roundedBorder)
                 Text("Default: https://userqa.tving.com/tv/login/qrcode.tving")
@@ -62,8 +48,7 @@ struct SettingsEnvironmentView: View {
                 HStack {
                     Spacer()
                     Button("Reset to Defaults") {
-                        manager.qcLoginURL = "https://user.tving.com/"
-                        manager.qaLoginURL = "https://userqa.tving.com/tv/login/qrcode.tving"
+                        store.send(.resetToDefaults)
                     }
                     .accessibilityIdentifier("settings_reset")
                     .controlSize(.small)

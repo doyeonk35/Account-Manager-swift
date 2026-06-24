@@ -1,75 +1,76 @@
-import XCTest
+import Testing
+import Foundation
 @testable import TvingLoginManager
 
+@Suite("AccountManager")
 @MainActor
-final class AccountManagerTests: XCTestCase {
+struct AccountManagerTests {
 
-    var manager: AccountManager!
-    var tempDir: URL!
-    var keychain: KeychainService!
+    let manager: AccountManager
+    let keychain: KeychainService
+    let tempDir: URL
 
-    override func setUp() {
-        super.setUp()
+    init() throws {
         tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
-        try! FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
         keychain = KeychainService()
         let storage = StorageService(directory: tempDir)
         manager = AccountManager(storage: storage, keychain: keychain)
     }
 
-    override func tearDown() {
-        for account in manager.accounts {
-            keychain.deletePassword(forAccountId: account.id)
-        }
-        try? FileManager.default.removeItem(at: tempDir)
-        super.tearDown()
-    }
-
-    func testAddAccount() {
+    @Test("계정을 추가한다")
+    func addAccount() {
         manager.addAccount(title: "Test", username: "u", password: "p", accountType: .qc, planType: .basic, memo: "")
-        XCTAssertEqual(manager.accounts.count, 1)
-        XCTAssertEqual(manager.accounts[0].title, "Test")
+        #expect(manager.accounts.count == 1)
+        #expect(manager.accounts[0].title == "Test")
         let stored = keychain.loadPassword(forAccountId: manager.accounts[0].id)
-        XCTAssertEqual(stored, "p")
+        #expect(stored == "p")
+        keychain.deletePassword(forAccountId: manager.accounts[0].id)
     }
 
-    func testUpdateAccount() {
+    @Test("계정을 수정한다")
+    func updateAccount() {
         manager.addAccount(title: "Old", username: "u", password: "oldpw", accountType: .qc, planType: .basic, memo: "")
         let id = manager.accounts[0].id
         manager.updateAccount(id: id, title: "New", username: "u2", password: "newpw", accountType: .qa, planType: .standard, memo: "updated")
-        XCTAssertEqual(manager.accounts[0].title, "New")
-        XCTAssertEqual(manager.accounts[0].accountType, .qa)
-        XCTAssertEqual(keychain.loadPassword(forAccountId: id), "newpw")
+        #expect(manager.accounts[0].title == "New")
+        #expect(manager.accounts[0].accountType == .qa)
+        #expect(keychain.loadPassword(forAccountId: id) == "newpw")
+        keychain.deletePassword(forAccountId: id)
     }
 
-    func testDeleteAccount() {
+    @Test("계정을 삭제한다")
+    func deleteAccount() {
         manager.addAccount(title: "A", username: "u", password: "pw", accountType: .qc, planType: .basic, memo: "")
         let id = manager.accounts[0].id
         manager.deleteAccount(id: id)
-        XCTAssertTrue(manager.accounts.isEmpty)
-        XCTAssertNil(keychain.loadPassword(forAccountId: id))
+        #expect(manager.accounts.isEmpty)
+        #expect(keychain.loadPassword(forAccountId: id) == nil)
     }
 
-    func testDeleteSelectedAccountClearsSelection() {
+    @Test("선택된 계정을 삭제하면 선택이 해제된다")
+    func deleteSelectedAccountClearsSelection() {
         manager.addAccount(title: "A", username: "u", password: "p", accountType: .qc, planType: .basic, memo: "")
         let id = manager.accounts[0].id
         manager.selectedAccountId = id
         manager.deleteAccount(id: id)
-        XCTAssertNil(manager.selectedAccountId)
+        #expect(manager.selectedAccountId == nil)
     }
 
-    func testEditFormValidation() {
+    @Test("편집 폼 유효성 검증")
+    func editFormValidation() {
         manager.editTitle = ""
         manager.editUsername = ""
         manager.editPassword = ""
-        XCTAssertFalse(manager.isEditFormValid)
+        #expect(manager.isEditFormValid == false)
         manager.editUsername = "U"
         manager.editPassword = "P"
-        XCTAssertTrue(manager.isEditFormValid)
+        #expect(manager.isEditFormValid == true)
     }
 
-    func testMigrationFromRustJSON() {
+    @Test("Rust JSON에서 마이그레이션한다")
+    func migrationFromRustJSON() {
         let rustJSON = """
         [{
             "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -86,16 +87,15 @@ final class AccountManagerTests: XCTestCase {
         let storage = StorageService(directory: tempDir)
         let migratedManager = AccountManager(storage: storage, keychain: keychain)
 
-        XCTAssertEqual(migratedManager.accounts.count, 1)
-        XCTAssertEqual(migratedManager.accounts[0].title, "Rust Acct")
+        #expect(migratedManager.accounts.count == 1)
+        #expect(migratedManager.accounts[0].title == "Rust Acct")
 
         let accountId = UUID(uuidString: "550e8400-e29b-41d4-a716-446655440000")!
-        XCTAssertEqual(keychain.loadPassword(forAccountId: accountId), "rust_password")
+        #expect(keychain.loadPassword(forAccountId: accountId) == "rust_password")
 
         let reloadedJSON = try! String(contentsOf: fileURL, encoding: .utf8)
-        XCTAssertFalse(reloadedJSON.contains("rust_password"))
+        #expect(!reloadedJSON.contains("rust_password"))
 
-        // Cleanup migrated keychain entry
         keychain.deletePassword(forAccountId: accountId)
     }
 }

@@ -7,17 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		075051A17410437A0E58A4FF /* AccountFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99245916F8F193375AE6EBCD /* AccountFeature.swift */; };
 		11E58BF9E64A49E4ADE208A9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7330B3A923B990540C8D233D /* SettingsView.swift */; };
 		29CEAFEBF792DAB8657DD917 /* CheckForUpdatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC69884A6E135C8BC1004153 /* CheckForUpdatesView.swift */; };
 		4981F4E4B078B6F43F1117DE /* AccountInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DCEA8D0FBE8491AB19D5E4E /* AccountInfo.swift */; };
+		4E2719C415A9E29E54E86FF2 /* AccountRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF05E333775C0B7298BAAAC0 /* AccountRepository.swift */; };
 		5236C3EC02DC440F31C15C34 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6FCA6BA45DEBB82D670ED17 /* ContentView.swift */; };
+		528B3DD7CD465842FDDCF74D /* AccountUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 380BAA0EE14FDF7A20966FE3 /* AccountUseCase.swift */; };
 		56236DDEC5D90487B8A3D82E /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A82DB157948D9203553CC37 /* StorageService.swift */; };
 		5BE28DDA6410ED68EF4E0BBC /* AccountListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF25FE62BE1C92B3B506C8B /* AccountListView.swift */; };
 		60E885620B4DF7D39974D0C9 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41509035DC46D79CD7B8C407 /* OnboardingView.swift */; };
 		64A653A3A19EE715E3C1B0B6 /* TvingLoginManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */; };
 		65481ACE8DDF61B89B7010F6 /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 754D17A5AF778A9D470E3ED7 /* KeychainServiceTests.swift */; };
+		6A0AC1FE02ADE6E1ACB08D29 /* SettingsFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B38B25B6A5E9E708E45DEB6 /* SettingsFeatureTests.swift */; };
+		6ABCFDB636C96CC05E82DA51 /* AccountRepositoryImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C307864DA1239AFD37F83004 /* AccountRepositoryImpl.swift */; };
+		6D2BADF034E650A9A98B4274 /* SettingsFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9215AE15D63719BFAA6C8D13 /* SettingsFeature.swift */; };
+		6DAE509C7A83E778965FD72E /* MockAccountRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8DA1ED07BE1A1050FE222A /* MockAccountRepository.swift */; };
 		70B41726ACAAD49C8D00DE5D /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183FB7A9FFB349092341B88 /* AccountManager.swift */; };
+		7BEB4636037EC69110BCD9E1 /* AccountRepositoryImplTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A114FF7609369ACA86967FC5 /* AccountRepositoryImplTests.swift */; };
 		82C313E08BD9C0050CD70376 /* AccountInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD0DBEFC2724CCA2A4A7E3F /* AccountInfoTests.swift */; };
+		841AC8A5F06581AE37813277 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53857C9665929D8B69BF5050 /* Store.swift */; };
+		88D5A662C1122F534A268BB5 /* AccountFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35AF7E6A288C21BB1B1FDE6E /* AccountFeatureTests.swift */; };
+		8DC7D76FEE06BA206F7FE9D3 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 481B96439B314D1D61AC9A07 /* AppRouter.swift */; };
+		95E66E2C32A2ED3FFB23D850 /* AccountUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE33BEC2566C1850DE9A1F6F /* AccountUseCaseTests.swift */; };
 		96EF5E548691529BECD5FA45 /* LoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EA0461693FFD2DF2755889 /* LoginService.swift */; };
 		A22F82D967BA8636BF6CF1A2 /* AccountManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC68E68998CE6A63D132F06 /* AccountManagerTests.swift */; };
 		A5F404367AC7754D6F6CDC68 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 39786DEFF3060E01AC731355 /* Localizable.xcstrings */; };
@@ -40,23 +52,35 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0D8DA1ED07BE1A1050FE222A /* MockAccountRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAccountRepository.swift; sourceTree = "<group>"; };
 		0DCEA8D0FBE8491AB19D5E4E /* AccountInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountInfo.swift; sourceTree = "<group>"; };
+		2B38B25B6A5E9E708E45DEB6 /* SettingsFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsFeatureTests.swift; sourceTree = "<group>"; };
 		2EF2EF2D74BDCF2755191CC5 /* TvingLoginManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TvingLoginManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		35AF7E6A288C21BB1B1FDE6E /* AccountFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountFeatureTests.swift; sourceTree = "<group>"; };
+		380BAA0EE14FDF7A20966FE3 /* AccountUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountUseCase.swift; sourceTree = "<group>"; };
 		39786DEFF3060E01AC731355 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		41509035DC46D79CD7B8C407 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		481B96439B314D1D61AC9A07 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
 		4BE5F51183598AED1109FA33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4CF84013D1BA82F576B418B6 /* LoginWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWebView.swift; sourceTree = "<group>"; };
 		4E028443A00528A1D04D208D /* StorageServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageServiceTests.swift; sourceTree = "<group>"; };
+		53857C9665929D8B69BF5050 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
 		6183FB7A9FFB349092341B88 /* AccountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManager.swift; sourceTree = "<group>"; };
 		6AD0DBEFC2724CCA2A4A7E3F /* AccountInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountInfoTests.swift; sourceTree = "<group>"; };
 		7330B3A923B990540C8D233D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		754D17A5AF778A9D470E3ED7 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
 		75AA199178276CF23B85DCB4 /* TvingLoginManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TvingLoginManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A82DB157948D9203553CC37 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
+		9215AE15D63719BFAA6C8D13 /* SettingsFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsFeature.swift; sourceTree = "<group>"; };
+		99245916F8F193375AE6EBCD /* AccountFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountFeature.swift; sourceTree = "<group>"; };
 		9A800A89132BA96919B285AF /* TvingLoginManager.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TvingLoginManager.entitlements; sourceTree = "<group>"; };
 		A0C0FEDE5BFCFE754D167453 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A114FF7609369ACA86967FC5 /* AccountRepositoryImplTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRepositoryImplTests.swift; sourceTree = "<group>"; };
 		BDF25FE62BE1C92B3B506C8B /* AccountListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountListView.swift; sourceTree = "<group>"; };
 		C1478CF2C20EB8CA4469FCA8 /* AccountEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditView.swift; sourceTree = "<group>"; };
+		C307864DA1239AFD37F83004 /* AccountRepositoryImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRepositoryImpl.swift; sourceTree = "<group>"; };
+		CE33BEC2566C1850DE9A1F6F /* AccountUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountUseCaseTests.swift; sourceTree = "<group>"; };
+		CF05E333775C0B7298BAAAC0 /* AccountRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRepository.swift; sourceTree = "<group>"; };
 		D3EA0461693FFD2DF2755889 /* LoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginService.swift; sourceTree = "<group>"; };
 		DB3FC5C351CA4355E25686A5 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		DC69884A6E135C8BC1004153 /* CheckForUpdatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckForUpdatesView.swift; sourceTree = "<group>"; };
@@ -85,6 +109,15 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		1D19F61ABCBCF0F874145078 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				35AF7E6A288C21BB1B1FDE6E /* AccountFeatureTests.swift */,
+				2B38B25B6A5E9E708E45DEB6 /* SettingsFeatureTests.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
 		1D8C938B80E0A2A01EF4F716 /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -93,6 +126,14 @@
 				7A82DB157948D9203553CC37 /* StorageService.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		2D478E4524618940B10355C1 /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				481B96439B314D1D61AC9A07 /* AppRouter.swift */,
+			);
+			path = Navigation;
 			sourceTree = "<group>";
 		};
 		469DA30C0F77E0443CEBF0C3 /* Views */ = {
@@ -117,6 +158,16 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
+		58CC42D6176D356D84F4EAE0 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				EE051EE33BA7AADC14E18626 /* Account */,
+				E6CDC9B94010D91A56EADB29 /* App */,
+				6B3E3E750320FC7ABCC39387 /* Settings */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
 		60B187D9BE7F0085BB1A2169 = {
 			isa = PBXGroup;
 			children = (
@@ -124,6 +175,14 @@
 				EE68A00E106765BCBBA728D3 /* TvingLoginManagerTests */,
 				C35692F888AAB0AC8925C578 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		6B3E3E750320FC7ABCC39387 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				9215AE15D63719BFAA6C8D13 /* SettingsFeature.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		6E30CB79F0D8A35C397E4319 /* TvingLoginManager */ = {
@@ -134,12 +193,51 @@
 				39786DEFF3060E01AC731355 /* Localizable.xcstrings */,
 				9A800A89132BA96919B285AF /* TvingLoginManager.entitlements */,
 				DFCADE1931DB67DE83640F65 /* TvingLoginManagerApp.swift */,
+				8858FE579DA9B4C568A4E307 /* Core */,
+				C459DB399FF2BC9D19F65319 /* Data */,
+				B61F19EEB1D5021CB7EB34AD /* Domain */,
 				041146D937E0F6763D9E9048 /* Models */,
+				2D478E4524618940B10355C1 /* Navigation */,
+				58CC42D6176D356D84F4EAE0 /* Presentation */,
 				1D8C938B80E0A2A01EF4F716 /* Services */,
 				570D3E51E1416C58091B5AAC /* ViewModels */,
 				469DA30C0F77E0443CEBF0C3 /* Views */,
 			);
 			path = TvingLoginManager;
+			sourceTree = "<group>";
+		};
+		8858FE579DA9B4C568A4E307 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				53857C9665929D8B69BF5050 /* Store.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		92B140B2C8190E896E0F5A44 /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				C307864DA1239AFD37F83004 /* AccountRepositoryImpl.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		B61F19EEB1D5021CB7EB34AD /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				C6B2D01C72BC600336EE96E9 /* Repositories */,
+				D023AB310A11250249A48C18 /* UseCases */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		C14E5FA366533A0E1C240448 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				CE33BEC2566C1850DE9A1F6F /* AccountUseCaseTests.swift */,
+				0D8DA1ED07BE1A1050FE222A /* MockAccountRepository.swift */,
+			);
+			path = Domain;
 			sourceTree = "<group>";
 		};
 		C35692F888AAB0AC8925C578 /* Products */ = {
@@ -151,6 +249,45 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		C459DB399FF2BC9D19F65319 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				92B140B2C8190E896E0F5A44 /* Repositories */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		C6B2D01C72BC600336EE96E9 /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				CF05E333775C0B7298BAAAC0 /* AccountRepository.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		D023AB310A11250249A48C18 /* UseCases */ = {
+			isa = PBXGroup;
+			children = (
+				380BAA0EE14FDF7A20966FE3 /* AccountUseCase.swift */,
+			);
+			path = UseCases;
+			sourceTree = "<group>";
+		};
+		E6CDC9B94010D91A56EADB29 /* App */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		EE051EE33BA7AADC14E18626 /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				99245916F8F193375AE6EBCD /* AccountFeature.swift */,
+			);
+			path = Account;
+			sourceTree = "<group>";
+		};
 		EE68A00E106765BCBBA728D3 /* TvingLoginManagerTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -158,8 +295,19 @@
 				EAC68E68998CE6A63D132F06 /* AccountManagerTests.swift */,
 				754D17A5AF778A9D470E3ED7 /* KeychainServiceTests.swift */,
 				4E028443A00528A1D04D208D /* StorageServiceTests.swift */,
+				FC236DC5D0D5675E537CD67D /* Data */,
+				C14E5FA366533A0E1C240448 /* Domain */,
+				1D19F61ABCBCF0F874145078 /* Presentation */,
 			);
 			path = TvingLoginManagerTests;
+			sourceTree = "<group>";
+		};
+		FC236DC5D0D5675E537CD67D /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				A114FF7609369ACA86967FC5 /* AccountRepositoryImplTests.swift */,
+			);
+			path = Data;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -263,9 +411,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				88D5A662C1122F534A268BB5 /* AccountFeatureTests.swift in Sources */,
 				82C313E08BD9C0050CD70376 /* AccountInfoTests.swift in Sources */,
 				A22F82D967BA8636BF6CF1A2 /* AccountManagerTests.swift in Sources */,
+				7BEB4636037EC69110BCD9E1 /* AccountRepositoryImplTests.swift in Sources */,
+				95E66E2C32A2ED3FFB23D850 /* AccountUseCaseTests.swift in Sources */,
 				65481ACE8DDF61B89B7010F6 /* KeychainServiceTests.swift in Sources */,
+				6DAE509C7A83E778965FD72E /* MockAccountRepository.swift in Sources */,
+				6A0AC1FE02ADE6E1ACB08D29 /* SettingsFeatureTests.swift in Sources */,
 				FBDB3685D3F06F65E194E4DD /* StorageServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -275,17 +428,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				E9D300789705FAEB895607EA /* AccountEditView.swift in Sources */,
+				075051A17410437A0E58A4FF /* AccountFeature.swift in Sources */,
 				4981F4E4B078B6F43F1117DE /* AccountInfo.swift in Sources */,
 				5BE28DDA6410ED68EF4E0BBC /* AccountListView.swift in Sources */,
 				70B41726ACAAD49C8D00DE5D /* AccountManager.swift in Sources */,
+				4E2719C415A9E29E54E86FF2 /* AccountRepository.swift in Sources */,
+				6ABCFDB636C96CC05E82DA51 /* AccountRepositoryImpl.swift in Sources */,
+				528B3DD7CD465842FDDCF74D /* AccountUseCase.swift in Sources */,
+				8DC7D76FEE06BA206F7FE9D3 /* AppRouter.swift in Sources */,
 				29CEAFEBF792DAB8657DD917 /* CheckForUpdatesView.swift in Sources */,
 				5236C3EC02DC440F31C15C34 /* ContentView.swift in Sources */,
 				B592121B4E02FEC058C0DD3F /* KeychainService.swift in Sources */,
 				96EF5E548691529BECD5FA45 /* LoginService.swift in Sources */,
 				BC92E0CB057509BB718A17E0 /* LoginWebView.swift in Sources */,
 				60E885620B4DF7D39974D0C9 /* OnboardingView.swift in Sources */,
+				6D2BADF034E650A9A98B4274 /* SettingsFeature.swift in Sources */,
 				11E58BF9E64A49E4ADE208A9 /* SettingsView.swift in Sources */,
 				56236DDEC5D90487B8A3D82E /* StorageService.swift in Sources */,
+				841AC8A5F06581AE37813277 /* Store.swift in Sources */,
 				64A653A3A19EE715E3C1B0B6 /* TvingLoginManagerApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

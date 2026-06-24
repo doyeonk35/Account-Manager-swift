@@ -2,16 +2,16 @@ import SwiftUI
 import Sparkle
 
 struct ContentView: View {
-    @EnvironmentObject var manager: AccountManager
+    @EnvironmentObject var accountStore: AccountStore
+    @EnvironmentObject var settingsStore: SettingsStore
+    @EnvironmentObject var router: AppRouter
     let updater: SPUUpdater
-    @State private var selectedTab: SidebarTab = .accounts
-    @State private var selectedSettingsCategory: SettingsCategory?
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         NavigationSplitView {
-            List(SidebarTab.allCases, selection: $selectedTab) { tab in
+            List(SidebarTab.allCases, selection: $router.tab) { tab in
                 Label(LocalizedStringKey(tab.rawValue), systemImage: tab.icon)
                     .tag(tab)
                     .accessibilityIdentifier("sidebar_\(tab.rawValue.lowercased())")
@@ -19,19 +19,19 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 160, ideal: 180)
         } content: {
             VStack(spacing: 0) {
-                switch selectedTab {
+                switch router.tab {
                 case .accounts:
                     AccountListView()
                 case .settings:
-                    SettingsView(selectedCategory: $selectedSettingsCategory)
+                    SettingsView(selectedCategory: $router.settingsCategory)
                 }
 
                 Divider()
 
                 HStack {
-                    Text(manager.loginStatus)
+                    Text(accountStore.state.loginStatus)
                         .font(.footnote)
-                        .foregroundStyle(manager.isLoggingIn ? .orange : .secondary)
+                        .foregroundStyle(accountStore.state.isLoggingIn ? .orange : .secondary)
                     Spacer()
                 }
                 .padding(.horizontal)
@@ -40,23 +40,23 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 300, ideal: 400)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    if selectedTab == .accounts {
+                    if router.tab == .accounts {
                         Button {
-                            manager.startAdding()
+                            accountStore.send(.startAdding)
                         } label: {
                             Label("Add Account", systemImage: "plus")
                         }
                         .accessibilityIdentifier("add_account")
                         .keyboardShortcut("n", modifiers: .command)
-                        .disabled(manager.isEditing)
+                        .disabled(accountStore.state.isEditing)
                     }
                 }
             }
         } detail: {
-            if selectedTab == .accounts && manager.isEditing {
+            if router.tab == .accounts && accountStore.state.isEditing {
                 AccountEditView()
                     .frame(minWidth: 300)
-            } else if selectedTab == .settings, let category = selectedSettingsCategory {
+            } else if router.tab == .settings, let category = router.settingsCategory {
                 switch category {
                 case .environment:
                     SettingsEnvironmentView()
@@ -65,15 +65,22 @@ struct ContentView: View {
                 }
             }
         }
-        .onChange(of: selectedTab) {
-            manager.cancelEditing()
-            selectedSettingsCategory = nil
+        .onChange(of: router.tab) {
+            accountStore.send(.cancelEditing)
+            router.settingsCategory = nil
         }
-        .sheet(isPresented: $manager.showLoginWebView) {
-            if let account = manager.loginAccount {
-                LoginWebView(account: account, otpCode: manager.otpCode)
-                    .environmentObject(manager)
-                    .frame(minWidth: 900, minHeight: 700)
+        .sheet(isPresented: Binding(
+            get: { accountStore.state.showLoginWebView },
+            set: { if !$0 { accountStore.send(.dismissLoginWebView) } }
+        )) {
+            if let account = accountStore.state.loginAccount {
+                LoginWebView(
+                    account: account,
+                    otpCode: accountStore.state.otpCode,
+                    loginURL: SettingsState.loginURL(for: account.accountType)
+                )
+                .environmentObject(accountStore)
+                .frame(minWidth: 900, minHeight: 700)
             }
         }
         .onAppear {

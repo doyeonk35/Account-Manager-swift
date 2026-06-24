@@ -103,6 +103,16 @@
         }
       }
     },
+    "App Info" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱 정보"
+          }
+        }
+      }
+    },
     "App Language" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -132,6 +142,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "베이직"
+          }
+        }
+      }
+    },
+    "Build" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "빌드"
           }
         }
       }
@@ -332,6 +353,7 @@
       }
     },
     "Environment" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -342,51 +364,12 @@
       }
     },
     "General" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "일반"
-          }
-        }
-      }
-    },
-    "App Info" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "앱 정보"
-          }
-        }
-      }
-    },
-    "Version" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "버전"
-          }
-        }
-      }
-    },
-    "Build" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "빌드"
-          }
-        }
-      }
-    },
-    "Updates" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "업데이트"
           }
         }
       }
@@ -913,6 +896,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "업데이트"
+          }
+        }
+      }
+    },
+    "Updates" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업데이트"
+          }
+        }
+      }
+    },
+    "Version" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버전"
           }
         }
       }
