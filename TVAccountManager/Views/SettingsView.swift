@@ -45,6 +45,26 @@ struct SettingsEnvironmentView: View {
             }
 
             Section {
+                Button {
+                    store.send(.useProductionURL)
+                } label: {
+                    HStack {
+                        Label("Use Production URL", systemImage: "globe")
+                        Spacer()
+                        if store.state.isUsingProdURL {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                        }
+                    }
+                }
+                .disabled(store.state.isUsingProdURL)
+            } header: {
+                Text("Quick Switch")
+            } footer: {
+                Text("Switches QC login URL to production (user.tving.com). Use 'Reset to Defaults' to restore.")
+            }
+
+            Section {
                 HStack {
                     Button("Reset to Defaults") {
                         store.send(.resetToDefaults)

@@ -11,6 +11,11 @@ struct SettingsState {
 
     static let defaultQcURL = Bundle.main.object(forInfoDictionaryKey: "DefaultQCLoginURL") as? String ?? ""
     static let defaultQaURL = Bundle.main.object(forInfoDictionaryKey: "DefaultQALoginURL") as? String ?? ""
+    static let prodURL = "https://user.tving.com/tv/login/qrcode.tving"
+
+    var isUsingProdURL: Bool {
+        qcLoginURL == Self.prodURL
+    }
 
     var hasUnsavedChanges: Bool {
         draftQcLoginURL != qcLoginURL || draftQaLoginURL != qaLoginURL
@@ -45,6 +50,7 @@ enum SettingsAction: Sendable {
     case saveChanges
     case discardChanges
     case resetToDefaults
+    case useProductionURL
 }
 
 enum SettingsEnvironment {
@@ -82,6 +88,12 @@ enum SettingsEnvironment {
             state.draftQaLoginURL = SettingsState.defaultQaURL
             UserDefaults.standard.set(SettingsState.defaultQcURL, forKey: "loginURL_QC")
             UserDefaults.standard.set(SettingsState.defaultQaURL, forKey: "loginURL_QA")
+            return .none
+
+        case .useProductionURL:
+            state.qcLoginURL = SettingsState.prodURL
+            state.draftQcLoginURL = SettingsState.prodURL
+            UserDefaults.standard.set(SettingsState.prodURL, forKey: "loginURL_QC")
             return .none
         }
     }

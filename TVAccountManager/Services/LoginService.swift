@@ -8,8 +8,8 @@ enum LoginStep: String {
     case enteringCredentials = "Entering credentials..."
     case submitting = "Submitting..."
     case verifying = "Verifying..."
-    case success = "Login successful"
-    case failed = "Login failed"
+    case success = "Login successful!"
+    case failed = "Login failed."
 }
 
 @MainActor
@@ -55,7 +55,7 @@ final class LoginService: NSObject {
 
                 // "티빙 아이디로 로그인" 버튼 자동 클릭 시도
                 try Task.checkCancellation()
-                onStatusUpdate?(.clickingLogin, String(localized: "Looking for TVING ID login button..."))
+                onStatusUpdate?(.clickingLogin, String(localized: "[\(account.accountType.rawValue.uppercased())] Looking for TVING ID login button..."))
                 try await autoClickLoginMethod()
 
                 // ID 입력 필드가 나타날 때까지 대기
@@ -114,17 +114,19 @@ final class LoginService: NSObject {
                 onStatusUpdate?(.submitting, String(localized: "Clicking login button..."))
                 let loginClicked = try await autoClickLoginSubmit()
 
+                let env = account.accountType.rawValue.uppercased()
                 if loginClicked {
-                    onStatusUpdate?(.verifying, String(localized: "Login submitted for \(account.title)"))
-                    onComplete?(true, String(localized: "Login submitted: \(account.title)"))
+                    onStatusUpdate?(.success, String(localized: "[\(env)] \(account.title) — Login submitted"))
+                    onComplete?(true, String(localized: "[\(env)] \(account.title) — Login submitted"))
                 } else {
-                    onStatusUpdate?(.enteringCredentials, String(localized: "Credentials filled. Please click Login."))
-                    onComplete?(true, String(localized: "Credentials filled: \(account.title)"))
+                    onStatusUpdate?(.enteringCredentials, String(localized: "[\(env)] \(account.title) — Credentials filled. Please click Login."))
+                    onComplete?(true, String(localized: "[\(env)] \(account.title) — Credentials filled"))
                 }
             } catch is CancellationError {
                 // Sheet dismissed — silently stop
             } catch {
-                onComplete?(false, String(localized: "Login failed: \(error.localizedDescription)"))
+                let env = account.accountType.rawValue.uppercased()
+                onComplete?(false, String(localized: "[\(env)] \(account.title) — Login failed: \(error.localizedDescription)"))
             }
         }
     }
