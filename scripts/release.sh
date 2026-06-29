@@ -68,8 +68,8 @@ ZIP_PATH="${RELEASE_DIR}/${ZIP_NAME}"
 log "Extended attributes 및 Apple Double 파일 제거..."
 xattr -cr "${APP_PATH}"
 find "${APP_PATH}" -name '._*' -delete
-log "코드 재서명..."
-codesign --deep --force --sign "Apple Development: dyk429@icloud.com (85PD2LNC6M)" --timestamp=none "${APP_PATH}"
+log "코드 재서명 (엔타이틀먼트 보존)..."
+codesign --deep --force --sign "Apple Development: dyk429@icloud.com (85PD2LNC6M)" --timestamp=none --preserve-metadata=entitlements "${APP_PATH}"
 log "ZIP 생성: ${ZIP_NAME}"
 cd "$BUILD_DIR"
 export COPYFILE_DISABLE=1
@@ -82,11 +82,51 @@ log "EdDSA 서명..."
 SIGNATURE=$("$SIGN_UPDATE" "$ZIP_PATH" 2>&1)
 log "서명 정보: ${SIGNATURE}"
 
-# 6. appcast.xml 생성
-log "appcast.xml 생성..."
+# 6. appcast.xml 업데이트 (기존 버전 유지)
+log "appcast.xml 업데이트..."
 mkdir -p docs
-"$GENERATE_APPCAST" --download-url-prefix "https://github.com/${REPO}/releases/download/v${VERSION}/" -o docs/appcast.xml "$RELEASE_DIR"
-log "appcast.xml 생성 완료"
+ZIP_SIZE=$(stat -f%z "$ZIP_PATH")
+ED_SIG=$(echo "$SIGNATURE" | grep -o 'sparkle:edSignature="[^"]*"' | sed 's/sparkle:edSignature="//;s/"//')
+PUB_DATE=$(date -R)
+MIN_SYS="14.0"
+DOWNLOAD_URL="https://github.com/${REPO}/releases/download/v${VERSION}/${ZIP_NAME}"
+
+NEW_ITEM="        <item>
+            <title>${VERSION}</title>
+            <pubDate>${PUB_DATE}</pubDate>
+            <sparkle:version>${NEW_BUILD}</sparkle:version>
+            <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>${MIN_SYS}</sparkle:minimumSystemVersion>
+            <enclosure url=\"${DOWNLOAD_URL}\" length=\"${ZIP_SIZE}\" type=\"application/octet-stream\" sparkle:edSignature=\"${ED_SIG}\"/>
+        </item>"
+
+ITEM_FILE=$(mktemp)
+echo "$NEW_ITEM" > "$ITEM_FILE"
+
+if [ -f docs/appcast.xml ]; then
+    python3 - "$VERSION" "$ITEM_FILE" << 'PYEOF'
+import re, sys
+version = sys.argv[1]
+new_item = open(sys.argv[2]).read().rstrip('\n')
+xml = open('docs/appcast.xml').read()
+pattern = r'\s*<item>.*?<sparkle:shortVersionString>' + re.escape(version) + r'</sparkle:shortVersionString>.*?</item>'
+xml = re.sub(pattern, '', xml, flags=re.DOTALL)
+xml = xml.replace('</title>\n', '</title>\n' + new_item + '\n', 1)
+open('docs/appcast.xml', 'w').write(xml)
+PYEOF
+else
+    cat > docs/appcast.xml << XMLEOF
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>TVAccountManager</title>
+${NEW_ITEM}
+    </channel>
+</rss>
+XMLEOF
+fi
+rm -f "$ITEM_FILE"
+log "appcast.xml 업데이트 완료"
 
 # 7. .build 정리
 rm -rf "${PROJECT_DIR}/.build"
