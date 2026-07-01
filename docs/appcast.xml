@@ -8,7 +8,7 @@
             <sparkle:version>13</sparkle:version>
             <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/doyeonk35/Account-Manager-swift/releases/download/v1.2.1/TVAccountManager-1.2.1.zip" length="7456902" type="application/octet-stream" sparkle:edSignature="RuYUE7eLeZ9/EykGOUqc7/IC6N4EQxMDM5WhMCFDAieeM4kMcZfdbApnIjbZVlBRY7chB0cWsykJdHjUSNdiCg=="/>
+            <enclosure url="https://github.com/doyeonk35/Account-Manager-swift/releases/download/v1.2.1/TVAccountManager-1.2.1.zip" length="7458470" type="application/octet-stream" sparkle:edSignature="PZiD0LR45Aqm45JqXvvlohiipf8Z6/cjkIb5lo8uNRs3M7ORMeEqg5TLPoLAPkiwrx5AddPHP+xF3DfERdJTCQ=="/>
         </item>
         <item>
             <title>1.2.0</title>
