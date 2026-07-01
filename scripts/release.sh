@@ -68,8 +68,9 @@ ZIP_PATH="${RELEASE_DIR}/${ZIP_NAME}"
 log "Extended attributes 및 Apple Double 파일 제거..."
 xattr -cr "${APP_PATH}"
 find "${APP_PATH}" -name '._*' -delete
-log "코드 재서명 (엔타이틀먼트 보존)..."
-codesign --deep --force --sign "Apple Development: dyk429@icloud.com (85PD2LNC6M)" --timestamp=none --preserve-metadata=entitlements "${APP_PATH}"
+log "코드 재서명 (Developer ID + Hardened Runtime)..."
+codesign --deep --force --sign "Developer ID Application: Tving Co.,Ltd (635U6G6DF4)" --timestamp --options runtime "${APP_PATH}"
+codesign --force --sign "Developer ID Application: Tving Co.,Ltd (635U6G6DF4)" --timestamp --options runtime --entitlements "${PROJECT_DIR}/TVAccountManager/TVAccountManager.entitlements" "${APP_PATH}"
 log "ZIP 생성: ${ZIP_NAME}"
 cd "$BUILD_DIR"
 export COPYFILE_DISABLE=1
