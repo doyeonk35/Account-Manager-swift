@@ -71,6 +71,12 @@ find "${APP_PATH}" -name '._*' -delete
 log "코드 재서명 (Developer ID + Hardened Runtime)..."
 codesign --deep --force --sign "Developer ID Application: Tving Co.,Ltd (635U6G6DF4)" --timestamp --options runtime "${APP_PATH}"
 codesign --force --sign "Developer ID Application: Tving Co.,Ltd (635U6G6DF4)" --timestamp --options runtime --entitlements "${PROJECT_DIR}/TVAccountManager/TVAccountManager.entitlements" "${APP_PATH}"
+log "Notarization 제출..."
+ditto -c -k --norsrc --keepParent "${APP_PATH}" "${RELEASE_DIR}/${ZIP_NAME}.tmp"
+xcrun notarytool submit "${RELEASE_DIR}/${ZIP_NAME}.tmp" --keychain-profile "notarytool" --wait
+rm -f "${RELEASE_DIR}/${ZIP_NAME}.tmp"
+log "Notarization 티켓 스테이플..."
+xcrun stapler staple "${APP_PATH}"
 log "ZIP 생성: ${ZIP_NAME}"
 cd "$BUILD_DIR"
 export COPYFILE_DISABLE=1
