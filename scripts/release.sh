@@ -70,7 +70,7 @@ xattr -cr "${APP_PATH}"
 find "${APP_PATH}" -name '._*' -delete
 log "코드 재서명 (Developer ID + Hardened Runtime)..."
 codesign --deep --force --sign "Developer ID Application: Tving Co.,Ltd (635U6G6DF4)" --timestamp --options runtime "${APP_PATH}"
-codesign --force --sign "Developer ID Application: Tving Co.,Ltd (635U6G6DF4)" --timestamp --options runtime --entitlements "${PROJECT_DIR}/TVAccountManager/TVAccountManager.entitlements" "${APP_PATH}"
+codesign --force --sign "Developer ID Application: Tving Co.,Ltd (635U6G6DF4)" --timestamp --options runtime --entitlements "${PROJECT_DIR}/TVAccountManager/TVAccountManager.release.entitlements" "${APP_PATH}"
 log "Notarization 제출..."
 ditto -c -k --norsrc --keepParent "${APP_PATH}" "${RELEASE_DIR}/${ZIP_NAME}.tmp"
 xcrun notarytool submit "${RELEASE_DIR}/${ZIP_NAME}.tmp" --keychain-profile "notarytool" --wait
