@@ -122,4 +122,14 @@ final class AccountUseCase: Sendable {
             return .success(imported: imported, skipped: skipped)
         }
     }
+
+    func exportAccounts(_ accounts: [AccountInfo], includePasswords: Bool) -> PresetExportResult {
+        let presets = accounts.map { PresetAccount(from: $0, includePassword: includePasswords) }
+        do {
+            let url = try PresetAccount.export(presets)
+            return .success(url: url, count: presets.count, includedPasswords: includePasswords)
+        } catch {
+            return .failure(error.localizedDescription)
+        }
+    }
 }

@@ -407,4 +407,55 @@ struct AccountFeatureTests {
         store.send(.dismissImportResult)
         #expect(store.state.importResult == nil)
     }
+
+    // MARK: - Export
+
+    @Test("내보내기를 시작하면 확인 알럿 상태가 켜진다")
+    func startExportOpensConfirmation() {
+        store.send(.startExport)
+
+        #expect(store.state.isConfirmingExport)
+    }
+
+    @Test("내보내기를 취소하면 확인 알럿 상태가 꺼진다")
+    func cancelExportClosesConfirmation() {
+        store.send(.startExport)
+
+        store.send(.cancelExport)
+
+        #expect(!store.state.isConfirmingExport)
+    }
+
+    @Test("내보내기를 실행하면 확인 알럿이 닫히고 결과와 파일 위치가 남는다")
+    func exportAccountsProducesFileURL() {
+        repository.storedAccounts = [AccountInfo(title: "A1", username: "u1")]
+        store.send(.load)
+        store.send(.startExport)
+
+        store.send(.exportAccounts(includePasswords: false))
+
+        #expect(!store.state.isConfirmingExport)
+        guard case .success(let url, let count, let includedPasswords) = store.state.exportResult else {
+            Issue.record("Expected .success, got \(String(describing: store.state.exportResult))")
+            return
+        }
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        #expect(count == 1)
+        #expect(!includedPasswords)
+        #expect(store.state.exportedFileURL == url)
+        #expect(FileManager.default.fileExists(atPath: url.path))
+    }
+
+    @Test("내보내기 결과를 닫으면 결과와 파일 위치가 지워진다")
+    func dismissExportResultClearsState() {
+        store.send(.exportAccounts(includePasswords: false))
+        let url = store.state.exportedFileURL
+        defer { if let url { try? FileManager.default.removeItem(at: url) } }
+
+        store.send(.dismissExportResult)
+
+        #expect(store.state.exportResult == nil)
+        #expect(store.state.exportedFileURL == nil)
+    }
 }

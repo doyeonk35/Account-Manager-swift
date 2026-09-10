@@ -124,6 +124,26 @@ struct SettingsGeneralView: View {
         }
     }
 
+    private var exportAlertTitle: LocalizedStringKey {
+        guard let result = accountStore.state.exportResult else { return "" }
+        switch result {
+        case .success: return "Export Complete"
+        case .failure: return "Export Failed"
+        }
+    }
+
+    private var exportAlertMessage: LocalizedStringKey {
+        guard let result = accountStore.state.exportResult else { return "" }
+        switch result {
+        case .success(let url, let count, let includedPasswords):
+            return includedPasswords
+                ? "\(count) accounts exported with passwords to \(url.lastPathComponent)."
+                : "\(count) accounts exported without passwords to \(url.lastPathComponent)."
+        case .failure(let message):
+            return "Failed to write the export file: \(message)"
+        }
+    }
+
     var body: some View {
         Form {
             Section {
@@ -143,6 +163,50 @@ struct SettingsGeneralView: View {
                     Label("Import Accounts from File", systemImage: "tray.and.arrow.down")
                 }
                 .accessibilityIdentifier("settings_import_presets")
+
+                Button {
+                    accountStore.send(.startExport)
+                } label: {
+                    Label("Export Accounts to File", systemImage: "square.and.arrow.up")
+                }
+                .accessibilityIdentifier("settings_export_accounts")
+                .disabled(accountStore.state.accounts.isEmpty)
+                .confirmationDialog("Export Accounts?",
+                                    isPresented: Binding(
+                                        get: { accountStore.state.isConfirmingExport },
+                                        set: { if !$0 { accountStore.send(.cancelExport) } }
+                                    ),
+                                    titleVisibility: .visible
+                ) {
+                    Button("Include Passwords") {
+                        accountStore.send(.exportAccounts(includePasswords: true))
+                    }
+                    Button("Exclude Passwords") {
+                        accountStore.send(.exportAccounts(includePasswords: false))
+                    }
+                    Button("Cancel", role: .cancel) {
+                        accountStore.send(.cancelExport)
+                    }
+                } message: {
+                    Text("Including passwords writes them to the file as plain text.")
+                }
+                .alert(exportAlertTitle,
+                       isPresented: Binding(
+                           get: { accountStore.state.exportResult != nil },
+                           set: { if !$0 { accountStore.send(.dismissExportResult) } }
+                       )
+                ) {
+                    Button("OK", role: .cancel) {
+                        // 알럿을 닫은 뒤에 드러낸다 — Finder가 먼저 올라오면 알럿이 뒤로 밀린다
+                        let url = accountStore.state.exportedFileURL
+                        accountStore.send(.dismissExportResult)
+                        if let url {
+                            NSWorkspace.shared.activateFileViewerSelecting([url])
+                        }
+                    }
+                } message: {
+                    Text(exportAlertMessage)
+                }
             } header: {
                 Text("Data")
             } footer: {

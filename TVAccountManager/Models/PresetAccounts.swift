@@ -90,3 +90,47 @@ extension PresetAccount {
         }
     }
 }
+
+// MARK: - Export
+
+enum PresetExportResult {
+    case success(url: URL, count: Int, includedPasswords: Bool)
+    case failure(String)
+}
+
+extension PresetAccount {
+    init(from account: AccountInfo, includePassword: Bool) {
+        self.init(
+            title: account.title,
+            username: account.username,
+            password: includePassword ? account.password : "",
+            accountType: account.accountType,
+            planType: account.planType,
+            memo: account.memo
+        )
+    }
+
+    /// 초 단위 타임스탬프를 붙여 같은 날 여러 번 내보내도 파일이 겹치지 않는다.
+    static func exportFileName(date: Date = Date()) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd-HHmmss"
+        return "accounts-export-\(formatter.string(from: date)).json"
+    }
+
+    static func export(
+        _ presets: [PresetAccount],
+        to directory: URL = presetsDirectory,
+        date: Date = Date()
+    ) throws -> URL {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(presets)
+
+        let url = directory.appendingPathComponent(exportFileName(date: date))
+        try data.write(to: url)
+        return url
+    }
+}

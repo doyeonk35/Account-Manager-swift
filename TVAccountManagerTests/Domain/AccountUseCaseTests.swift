@@ -411,4 +411,102 @@ struct AccountUseCaseTests {
         }
         #expect(accounts.isEmpty)
     }
+
+    // MARK: - exportAccounts
+
+    @Test("비밀번호를 포함해 내보내면 파일에 비밀번호가 담긴다")
+    func exportAccountsWithPasswords() throws {
+        let accounts = [
+            AccountInfo(title: "QC 베이직", username: "u1", password: "p1",
+                        accountType: .qc, planType: .basic, memo: "m1"),
+            AccountInfo(title: "QA 프리미엄", username: "u2", password: "p2",
+                        accountType: .qa, planType: .premium),
+        ]
+
+        let result = useCase.exportAccounts(accounts, includePasswords: true)
+
+        guard case .success(let url, let count, let includedPasswords) = result else {
+            Issue.record("Expected .success, got \(result)")
+            return
+        }
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        #expect(count == 2)
+        #expect(includedPasswords)
+
+        let decoded = try JSONDecoder().decode([PresetAccount].self, from: Data(contentsOf: url))
+        #expect(decoded.count == 2)
+        #expect(decoded[0].title == "QC 베이직")
+        #expect(decoded[0].username == "u1")
+        #expect(decoded[0].password == "p1")
+        #expect(decoded[0].accountType == .qc)
+        #expect(decoded[0].planType == .basic)
+        #expect(decoded[0].memo == "m1")
+        #expect(decoded[1].password == "p2")
+    }
+
+    @Test("비밀번호를 제외해 내보내면 비밀번호가 빈 문자열이다")
+    func exportAccountsWithoutPasswords() throws {
+        let accounts = [
+            AccountInfo(title: "QC 베이직", username: "u1", password: "p1", accountType: .qc)
+        ]
+
+        let result = useCase.exportAccounts(accounts, includePasswords: false)
+
+        guard case .success(let url, let count, let includedPasswords) = result else {
+            Issue.record("Expected .success, got \(result)")
+            return
+        }
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        #expect(count == 1)
+        #expect(!includedPasswords)
+
+        let decoded = try JSONDecoder().decode([PresetAccount].self, from: Data(contentsOf: url))
+        #expect(decoded[0].username == "u1")
+        #expect(decoded[0].password.isEmpty)
+    }
+
+    @Test("계정이 없으면 빈 배열 JSON을 내보낸다")
+    func exportAccountsWhenEmpty() throws {
+        let result = useCase.exportAccounts([], includePasswords: false)
+
+        guard case .success(let url, let count, _) = result else {
+            Issue.record("Expected .success, got \(result)")
+            return
+        }
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        #expect(count == 0)
+        let decoded = try JSONDecoder().decode([PresetAccount].self, from: Data(contentsOf: url))
+        #expect(decoded.isEmpty)
+    }
+
+    @Test("내보낸 파일은 그대로 다시 불러올 수 있다")
+    func exportedFileCanBeImportedBack() throws {
+        let exported = [
+            AccountInfo(title: "QC 베이직", username: "u1", password: "p1", accountType: .qc, planType: .basic)
+        ]
+        let result = useCase.exportAccounts(exported, includePasswords: true)
+        guard case .success(let url, _, _) = result else {
+            Issue.record("Expected .success, got \(result)")
+            return
+        }
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        try FileManager.default.copyItem(at: url, to: PresetAccount.presetsFileURL)
+        defer { removePresetsFile() }
+
+        var accounts: [AccountInfo] = []
+        let importResult = useCase.importPresetAccounts(into: &accounts)
+
+        guard case .success(let imported, let skipped) = importResult else {
+            Issue.record("Expected .success, got \(importResult)")
+            return
+        }
+        #expect(imported == 1)
+        #expect(skipped == 0)
+        #expect(accounts[0].username == "u1")
+        #expect(accounts[0].planType == .basic)
+    }
 }

@@ -79,6 +79,10 @@ struct AccountState {
     // Preset import result
     var importResult: PresetLoadResult?
 
+    // Export
+    var isConfirmingExport = false
+    var exportResult: PresetExportResult?
+
     var selectedAccount: AccountInfo? {
         guard let id = selectedAccountId else { return nil }
         return accounts.first { $0.id == id }
@@ -129,6 +133,11 @@ struct AccountState {
     var pinnedCount: Int {
         accounts.filter(\.isPinned).count
     }
+
+    var exportedFileURL: URL? {
+        guard case .success(let url, _, _) = exportResult else { return nil }
+        return url
+    }
 }
 
 enum AccountAction: Sendable {
@@ -169,6 +178,12 @@ enum AccountAction: Sendable {
     // Preset import
     case importPresets
     case dismissImportResult
+
+    // Export
+    case startExport
+    case exportAccounts(includePasswords: Bool)
+    case cancelExport
+    case dismissExportResult
 }
 
 enum AccountEnvironment {
@@ -354,6 +369,26 @@ enum AccountEnvironment {
 
             case .dismissImportResult:
                 state.importResult = nil
+                return .none
+
+            case .startExport:
+                state.isConfirmingExport = true
+                return .none
+
+            case .exportAccounts(let includePasswords):
+                state.isConfirmingExport = false
+                state.exportResult = useCase.exportAccounts(
+                    state.accounts,
+                    includePasswords: includePasswords
+                )
+                return .none
+
+            case .cancelExport:
+                state.isConfirmingExport = false
+                return .none
+
+            case .dismissExportResult:
+                state.exportResult = nil
                 return .none
             }
         }
