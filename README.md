@@ -18,6 +18,7 @@ TVING QC/QA 환경을 위한 macOS 계정 관리 및 자동 로그인 앱입니�
 
 - **멀티 계정 관리** — 추가 / 수정 / 삭제
 - **계정 일괄 등록** — JSON 파일에서 여러 계정을 한번에 불러오기 (중복 자동 건너뜀)
+- **계정 내보내기** — 현재 계정 목록을 JSON 파일로 저장 (비밀번호 포함/제외 선택, 저장 후 Finder로 열기)
 - **환경 구분** — QC / QA 로그인 URL 분리, 명시적 저장 버튼
 - **요금제 태그** — 구독 없음 / 베이직 / 광고 요금제 / 스탠다드 / 프리미엄
 - **OTP 자동 입력** — 6자리 코드 자동 분배 입력
@@ -130,6 +131,7 @@ A macOS account management and auto-login app for TVING QC/QA environments.
 
 - **Multi-account management** — Add / Edit / Delete
 - **Bulk import** — Import multiple accounts from a JSON file (duplicates auto-skipped)
+- **Export** — Save the account list to a JSON file (choose whether to include passwords, revealed in Finder when done)
 - **Environment separation** — QC / QA login URLs with explicit save
 - **Plan tags** — None / Basic / Ad-supported / Standard / Premium
 - **OTP auto-fill** — Distributes 6 digits across individual input fields
