@@ -46,14 +46,16 @@ log "버전: ${VERSION} (빌드 ${NEW_BUILD})"
 log "프로젝트 재생성..."
 xcodegen generate
 
-# 3. Release 빌드
-log "Release 빌드 중..."
+# 3. Release 빌드 (unsigned — 아래 4단계에서 회사 Developer ID로 재서명)
+log "Release 빌드 중 (unsigned)..."
 xcodebuild build \
     -scheme "$SCHEME" \
     -configuration Release \
     -destination 'platform=macOS' \
-    -allowProvisioningUpdates \
     -derivedDataPath "${PROJECT_DIR}/.build" \
+    CODE_SIGN_IDENTITY="-" \
+    CODE_SIGNING_REQUIRED=NO \
+    CODE_SIGNING_ALLOWED=NO \
     2>&1 | tail -5
 
 BUILD_DIR="${PROJECT_DIR}/.build/Build/Products/Release"
