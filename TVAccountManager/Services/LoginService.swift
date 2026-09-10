@@ -7,6 +7,7 @@ enum LoginStep: String {
     case clickingLogin = "Opening login page..."
     case enteringCredentials = "Entering credentials..."
     case submitting = "Submitting..."
+    case selectingProfile = "Selecting profile..."
     case verifying = "Verifying..."
     case success = "Login successful!"
     case failed = "Login failed."
@@ -126,8 +127,22 @@ final class LoginService: NSObject {
 
                 let env = account.accountType.rawValue.uppercased()
                 if loginClicked {
-                    onStatusUpdate?(.success, String(localized: "[\(env)] \(account.title) — Login submitted"))
-                    onComplete?(true, String(localized: "[\(env)] \(account.title) — Login submitted"))
+                    // 프로필이 여러 개면 프로필 선택까지 끝내야 로그인이 완료된다
+                    onStatusUpdate?(.selectingProfile, String(localized: "Checking for profile selection..."))
+                    switch try await autoSelectProfile() {
+                    case .notShown:
+                        onStatusUpdate?(.success, String(localized: "[\(env)] \(account.title) — Login submitted"))
+                        onComplete?(true, String(localized: "[\(env)] \(account.title) — Login submitted"))
+                    case .selected(let name):
+                        onStatusUpdate?(.success, String(localized: "[\(env)] \(account.title) — Profile \(name) selected"))
+                        onComplete?(true, String(localized: "[\(env)] \(account.title) — Profile \(name) selected"))
+                    case .allLocked:
+                        onStatusUpdate?(.selectingProfile, String(localized: "All profiles are locked. Please select one yourself."))
+                        onComplete?(true, String(localized: "[\(env)] \(account.title) — All profiles locked, select one yourself"))
+                    case .selectFailed:
+                        onStatusUpdate?(.selectingProfile, String(localized: "Could not select a profile. Please select one yourself."))
+                        onComplete?(true, String(localized: "[\(env)] \(account.title) — Profile not selected, select one yourself"))
+                    }
                 } else {
                     onStatusUpdate?(.enteringCredentials, String(localized: "[\(env)] \(account.title) — Credentials filled. Please click Login."))
                     onComplete?(true, String(localized: "[\(env)] \(account.title) — Credentials filled"))
@@ -382,6 +397,134 @@ final class LoginService: NSObject {
         \(varName).dispatchEvent(new Event('change', {bubbles: true}));
         """
     }
+
+    // MARK: - Profile selection
+
+    private enum ProfileSelection {
+        case notShown          // 프로필이 1개거나 선택 화면이 안 뜬 경우
+        case selected(String)
+        case allLocked         // 잠긴 프로필만 있음 — 자동 선택 포기
+        case selectFailed      // 클릭이 화면을 넘기지 못함
+    }
+
+    /// 잠금 없는 프로필 중 연령 제한 없는 쪽을 우선해 고른다. 전부 잠겼으면 nil.
+    nonisolated static func pickProfile(from candidates: [ProfileCandidate]) -> Int? {
+        let unlocked = candidates.enumerated().filter { !$0.element.locked }
+        guard !unlocked.isEmpty else { return nil }
+        return (unlocked.first { !$0.element.restricted } ?? unlocked[0]).offset
+    }
+
+    /// 잠금 없는 프로필을 하나 골라 클릭한다. 연령 제한 프로필은 후순위.
+    ///
+    /// 잠금은 DOM에도 자물쇠 오버레이로 드러나지만 **연령 제한은 DOM에 전혀 나타나지 않아**
+    /// 서버가 내려준 profileList(`profilePwd`, `gradeCode`)를 읽는다. 파싱이 실패하거나
+    /// 개수가 DOM과 어긋나면 DOM 자물쇠 판정으로만 폴백한다.
+    private func autoSelectProfile() async throws -> ProfileSelection {
+        // 로그인 제출 후 프로필 화면으로 넘어올 때까지 대기 (~15초)
+        var table: [ProfileCandidate]?
+        for _ in 0..<50 {
+            try Task.checkCancellation()
+            table = await readProfileTable()
+            if table != nil { break }
+            try await Task.sleep(for: .milliseconds(300))
+        }
+        guard let candidates = table else { return .notShown }
+        guard let index = Self.pickProfile(from: candidates) else { return .allLocked }
+        let name = candidates[index].name
+
+        // 클릭이 실제로 화면을 넘겼는지 확인하고 아니면 재시도.
+        // ("클릭했다"만으로는 부족한 이유는 waitAndFill과 같다 — React가 되돌릴 수 있다)
+        for _ in 0..<10 {
+            try Task.checkCancellation()
+            _ = try? await executeJS(Self.profileClickJS(index: index))
+            try await Task.sleep(for: .milliseconds(600))
+            if await readProfileTable() == nil { return .selected(name) }
+        }
+        return .selectFailed
+    }
+
+    /// 프로필 선택 화면이 아니거나 읽지 못하면 nil.
+    private func readProfileTable() async -> [ProfileCandidate]? {
+        guard let json = try? await executeJS(Self.profileTableJS),
+              json != "none",
+              let rows = try? JSONDecoder().decode([ProfileCandidate].self, from: Data(json.utf8)),
+              !rows.isEmpty
+        else { return nil }
+        return rows
+    }
+
+    /// 연령 제한 없는 프로필의 등급 코드. 그 밖의 값(CPTG0007 등)은 연령 제한 프로필이다.
+    private static let unrestrictedGradeCode = "CPTG0019"
+
+    /// 프로필 버튼만 고른다 — 아바타 img를 가진 버튼. "프로필 편집"은 여기서 걸러진다.
+    private static let profileButtonsJS = """
+        var btns = Array.prototype.filter.call(
+            document.querySelectorAll('button'),
+            function(b) { return b.querySelector('img[alt]'); }
+        );
+        """
+
+    private static let profileTableJS = """
+        (function() {
+            if (location.pathname.indexOf('/account/profiles') < 0) return 'none';
+            \(profileButtonsJS)
+            if (!btns.length) return 'none';
+
+            // 서버가 내려준 프로필 원본 읽기. RSC 페이로드는 따옴표가 이스케이프돼 있어 먼저 되돌린다.
+            // (백슬래시를 fromCharCode로 만들어 Swift 문자열 이스케이프를 피한다)
+            var meta = null;
+            try {
+                var blob = '';
+                var scripts = document.querySelectorAll('script');
+                for (var i = 0; i < scripts.length; i++) blob += scripts[i].textContent || '';
+                blob = blob.split(String.fromCharCode(92) + '"').join('"');
+
+                var pwd = [], grade = [], m;
+                var pwdRe = /"profilePwd"\\s*:\\s*(true|false)/g;
+                while ((m = pwdRe.exec(blob)) !== null) pwd.push(m[1] === 'true');
+                var gradeRe = /"gradeCode"\\s*:\\s*"([^"]*)"/g;
+                while ((m = gradeRe.exec(blob)) !== null) grade.push(m[1]);
+
+                if (pwd.length === btns.length && grade.length === btns.length) {
+                    meta = { pwd: pwd, grade: grade };
+                }
+            } catch (e) {
+                meta = null;
+            }
+
+            var rows = [];
+            for (var j = 0; j < btns.length; j++) {
+                // 페이로드가 없으면 자물쇠 오버레이(svg)로 판정. 편집 모드는 연필 svg가 붙어
+                // 전부 잠김으로 보이므로 자동 선택이 일어나지 않는다.
+                rows.push({
+                    name: (btns[j].querySelector('img[alt]').getAttribute('alt') || '').trim(),
+                    locked: meta ? meta.pwd[j] : !!btns[j].querySelector('svg'),
+                    restricted: meta ? (meta.grade[j] !== '\(unrestrictedGradeCode)') : false
+                });
+            }
+            return JSON.stringify(rows);
+        })()
+        """
+
+    private static func profileClickJS(index: Int) -> String {
+        """
+        (function() {
+            if (location.pathname.indexOf('/account/profiles') < 0) return 'gone';
+            \(profileButtonsJS)
+            if (!btns[\(index)]) return 'gone';
+            btns[\(index)].click();
+            return 'clicked';
+        })()
+        """
+    }
+}
+
+/// 프로필 선택 화면에서 읽어온 프로필 하나.
+struct ProfileCandidate: Decodable {
+    let name: String
+    let locked: Bool
+    /// 연령 제한 프로필(7+/12+ 등). 선택 후순위로 밀린다.
+    let restricted: Bool
 }
 
 enum LoginError: LocalizedError {

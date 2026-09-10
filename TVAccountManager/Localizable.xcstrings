@@ -151,6 +151,17 @@
         }
       }
     },
+    "All profiles are locked. Please select one yourself." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 프로필이 잠겨 있습니다. 직접 선택해 주세요."
+          }
+        }
+      }
+    },
     "App Info" : {
       "localizations" : {
         "ko" : {
@@ -227,6 +238,17 @@
         }
       }
     },
+    "Checking for profile selection..." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로필 선택 화면 확인 중..."
+          }
+        }
+      }
+    },
     "Clicking confirm..." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -288,6 +310,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "아이디 입력란을 찾을 수 없습니다."
+          }
+        }
+      }
+    },
+    "Could not select a profile. Please select one yourself." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로필을 자동 선택하지 못했습니다. 직접 선택해 주세요."
           }
         }
       }
@@ -510,6 +543,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "비밀번호를 포함하면 파일에 평문으로 저장됩니다."
+          }
+        }
+      }
+    },
+    "[%@] %@ — All profiles locked, select one yourself" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "[%@] %@ — 프로필이 모두 잠김, 직접 선택 필요"
+          }
+        }
+      }
+    },
+    "[%@] %@ — Profile %@ selected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "[%@] %@ — 프로필 %@ 선택 완료"
+          }
+        }
+      }
+    },
+    "[%@] %@ — Profile not selected, select one yourself" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "[%@] %@ — 프로필 자동 선택 실패, 직접 선택 필요"
           }
         }
       }
