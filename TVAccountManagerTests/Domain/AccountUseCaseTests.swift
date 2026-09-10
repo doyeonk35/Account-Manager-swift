@@ -154,7 +154,7 @@ struct AccountUseCaseTests {
         let id = accounts[0].id
 
         useCase.updateAccount(in: &accounts, id: id, title: "New", username: "new_user",
-                             password: "new_pw", accountType: .qa, planType: .premium, memo: "updated")
+                             password: "new_pw", accountType: .qa, planType: .premium, memo: "updated", isPinned: false)
 
         #expect(accounts[0].title == "New")
         #expect(accounts[0].username == "new_user")
@@ -169,7 +169,7 @@ struct AccountUseCaseTests {
         let id = accounts[0].id
 
         useCase.updateAccount(in: &accounts, id: id, title: "A", username: "u",
-                             password: "new_pw", accountType: .qc, planType: .basic, memo: "")
+                             password: "new_pw", accountType: .qc, planType: .basic, memo: "", isPinned: false)
 
         #expect(repository.storedPasswords[id] == "new_pw")
     }
@@ -180,7 +180,7 @@ struct AccountUseCaseTests {
         let id = accounts[0].id
 
         useCase.updateAccount(in: &accounts, id: id, title: "", username: "u",
-                             password: "p", accountType: .qc, planType: .basic, memo: "")
+                             password: "p", accountType: .qc, planType: .basic, memo: "", isPinned: false)
 
         #expect(!accounts[0].title.isEmpty)
         #expect(accounts[0].title != "Old")
@@ -192,7 +192,7 @@ struct AccountUseCaseTests {
         let originalTitle = accounts[0].title
 
         useCase.updateAccount(in: &accounts, id: UUID(), title: "Changed", username: "u2",
-                             password: "p", accountType: .qa, planType: .premium, memo: "")
+                             password: "p", accountType: .qa, planType: .premium, memo: "", isPinned: false)
 
         #expect(accounts[0].title == originalTitle)
         #expect(repository.saveAccountsCallCount == 0)
