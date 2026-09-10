@@ -74,18 +74,22 @@ final class LoginService: NSObject {
                     try await Task.sleep(for: .milliseconds(300))
                 }
 
+                // 로그인 폼 셀렉터 (아이디/비밀번호 — 입력·재확인 공용)
+                let usernameSelectors = [
+                    "input[name=\"id\"]",
+                    "input[autocomplete=\"username\"]",
+                    "input[placeholder=\"아이디\"]",
+                ]
+                let passwordSelectors = [
+                    "input[name=\"password\"]",
+                    "input[autocomplete=\"current-password\"]",
+                    "input[placeholder=\"비밀번호\"]",
+                ]
+
                 // 아이디 입력
                 try Task.checkCancellation()
                 onStatusUpdate?(.enteringCredentials, String(localized: "Entering username..."))
-                let usernameEntered = try await waitAndFill(
-                    selectors: [
-                        "input[name=\"id\"]",
-                        "input[autocomplete=\"username\"]",
-                        "input[placeholder=\"아이디\"]",
-                    ],
-                    value: account.username
-                )
-                guard usernameEntered else {
+                guard try await waitAndFill(selectors: usernameSelectors, value: account.username) else {
                     onComplete?(false, String(localized: "Could not find username field."))
                     return
                 }
@@ -95,22 +99,28 @@ final class LoginService: NSObject {
                 // 비밀번호 입력
                 try Task.checkCancellation()
                 onStatusUpdate?(.enteringCredentials, String(localized: "Entering password..."))
-                let passwordEntered = try await waitAndFill(
-                    selectors: [
-                        "input[name=\"password\"]",
-                        "input[autocomplete=\"current-password\"]",
-                        "input[placeholder=\"비밀번호\"]",
-                    ],
-                    value: account.password
-                )
-                guard passwordEntered else {
+                guard try await waitAndFill(selectors: passwordSelectors, value: account.password) else {
                     onComplete?(false, String(localized: "Could not find password field."))
                     return
                 }
 
-                // "로그인" 버튼 자동 클릭 시도
+                // "로그인" 버튼 클릭 전 최종 확인: 제출 직전 React가 필드를 비웠으면 한 번 더 채운다
                 try Task.checkCancellation()
                 try await Task.sleep(for: .milliseconds(300))
+                if try await isFieldEmpty(usernameSelectors) {
+                    _ = try await waitAndFill(selectors: usernameSelectors, value: account.username)
+                }
+                if try await isFieldEmpty(passwordSelectors) {
+                    _ = try await waitAndFill(selectors: passwordSelectors, value: account.password)
+                }
+                let usernameFilled = !(try await isFieldEmpty(usernameSelectors))
+                let passwordFilled = !(try await isFieldEmpty(passwordSelectors))
+                guard usernameFilled, passwordFilled else {
+                    onComplete?(false, String(localized: "Login form was cleared before submit. Please try again."))
+                    return
+                }
+
+                // "로그인" 버튼 자동 클릭 시도
                 onStatusUpdate?(.submitting, String(localized: "Clicking login button..."))
                 let loginClicked = try await autoClickLoginSubmit()
 
@@ -242,28 +252,31 @@ final class LoginService: NSObject {
 
     // MARK: - Wait + Fill (React 호환)
 
-    /// 셀렉터에 해당하는 엘리먼트가 나타날 때까지 최대 10초 대기 후 값 입력
+    /// 셀렉터 중 첫 매칭 필드의 값이 비어 있으면 true. 필드를 못 찾아도 비었다고 간주한다.
+    private func isFieldEmpty(_ selectors: [String]) async throws -> Bool {
+        let selectorJS = selectors.map { "document.querySelector('\($0)')" }.joined(separator: " || ")
+        let value = (try? await executeJS("""
+            (function() {
+                var f = \(selectorJS);
+                return (f && f.value) ? f.value : '';
+            })()
+        """)) ?? ""
+        return value.isEmpty
+    }
+
+    /// 셀렉터에 해당하는 엘리먼트가 나타나고, 입력값이 실제로 유지될 때까지 재시도하며 값 입력.
+    /// React 컨트롤드 인풋은 필드가 DOM에 나타난 직후 마운트/재렌더되며 값을 되돌리므로,
+    /// "값을 넣었다"만으로는 부족하다. 넣은 뒤 재렌더 여유를 두고 값이 남아 있는지 확인하고,
+    /// 되돌아갔으면 재시도한다. (아이디·비밀번호 공용)
     private func waitAndFill(selectors: [String], value: String) async throws -> Bool {
         let selectorJS = selectors.map { "document.querySelector('\($0)')" }.joined(separator: " || ")
+        let escaped = value.escapedForJS
 
-        // 엘리먼트 대기 (500ms 간격, 최대 20회 = 10초)
-        for _ in 0..<20 {
-            try Task.checkCancellation()
-            let found = (try? await executeJS("""
-                (function() {
-                    var f = \(selectorJS);
-                    return f ? 'found' : 'not_found';
-                })()
-            """)) ?? "not_found"
-            if found == "found" { break }
-            try await Task.sleep(for: .milliseconds(500))
-        }
-
-        // React/Vue 호환 값 입력
-        let result = (try? await executeJS("""
+        let fillJS = """
             (function() {
                 var f = \(selectorJS);
                 if (!f) return 'not_found';
+                if (f.disabled || f.readOnly) return 'not_ready';
 
                 f.focus();
 
@@ -271,7 +284,7 @@ final class LoginService: NSObject {
                 var nativeSetter = Object.getOwnPropertyDescriptor(
                     window.HTMLInputElement.prototype, 'value'
                 ).set;
-                nativeSetter.call(f, '\(value.escapedForJS)');
+                nativeSetter.call(f, '\(escaped)');
 
                 // 이벤트 디스패치 — React, Vue, Angular 모두 대응
                 f.dispatchEvent(new Event('input', {bubbles: true}));
@@ -279,10 +292,31 @@ final class LoginService: NSObject {
                 f.dispatchEvent(new KeyboardEvent('keydown', {bubbles: true}));
                 f.dispatchEvent(new KeyboardEvent('keyup', {bubbles: true}));
 
-                return 'ok';
+                return 'filled';
             })()
-        """)) ?? "not_found"
-        return result == "ok"
+        """
+        // 재렌더 후 값이 남아 있는지 확인
+        let verifyJS = """
+            (function() {
+                var f = \(selectorJS);
+                if (!f) return 'gone';
+                return f.value === '\(escaped)' ? 'ok' : 'reset';
+            })()
+        """
+
+        // 필드가 나타나고 값이 유지될 때까지 재시도 (~16초: 30회 × (fill + 250ms + 300ms))
+        for _ in 0..<30 {
+            try Task.checkCancellation()
+            let filled = (try? await executeJS(fillJS)) ?? "not_found"
+            if filled == "filled" {
+                // React 재렌더가 값을 되돌리는지 확인할 여유
+                try await Task.sleep(for: .milliseconds(250))
+                let verified = (try? await executeJS(verifyJS)) ?? "gone"
+                if verified == "ok" { return true }
+            }
+            try await Task.sleep(for: .milliseconds(300))
+        }
+        return false
     }
 
     // MARK: - Click
