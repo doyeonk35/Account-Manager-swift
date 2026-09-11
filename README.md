@@ -23,6 +23,7 @@ TVING QC/QA 환경을 위한 macOS 계정 관리 및 자동 로그인 앱입니�
 - **요금제 태그** — 구독 없음 / 베이직 / 광고 요금제 / 스탠다드 / 프리미엄
 - **OTP 자동 입력** — 6자리 코드 자동 분배 입력
 - **ID/PW 자동 완성** — React 호환 nativeInputValueSetter 방식
+- **프로필 자동 선택** — 로그인 후 프로필이 여러 개면 잠기지 않은 프로필을 자동 선택 (연령 제한 프로필은 후순위, 전부 잠겨 있으면 직접 선택)
 - **비밀번호 보안** — macOS Keychain 저장 (JSON에 평문 미포함)
 - **자동 업데이트** — Sparkle 기반 앱 업데이트
 - **사용 가이드** — 앱 내 온보딩 가이드 (6페이지)
@@ -64,6 +65,7 @@ xcodebuild build -scheme TVAccountManager -configuration Release -destination 'p
 2. 타이틀, TVING ID, 비밀번호, 환경(QC/QA), 요금제 선택 후 저장
 3. OTP 코드 입력 (필요 시)
 4. **Login** 버튼 클릭 → WebView에서 자동 로그인 진행
+5. 프로필이 여러 개면 잠기지 않은 프로필이 자동 선택됩니다
 
 ### 계정 일괄 등록
 
@@ -88,6 +90,18 @@ xcodebuild build -scheme TVAccountManager -configuration Release -destination 'p
 
 > `account_type`: `QC` | `QA`
 > `plan_type`: `구독 없음` | `베이직` | `광고 요금제` | `스탠다드` | `프리미엄`
+
+### 계정 내보내기
+
+현재 계정 목록을 JSON 파일로 저장합니다. 일괄 등록과 같은 형식이라 파일 이름을 `presets.json`으로 바꾸면 그대로 다시 불러올 수 있습니다.
+
+1. 설정 > 일반 > **파일로 계정 내보내기** 클릭
+2. **비밀번호 포함** / **비밀번호 제외** 선택
+3. 저장 후 Finder가 해당 파일을 선택한 채로 열립니다
+
+파일은 불러오기 폴더에 `accounts-export-2026-09-11-094957.json` 형식으로 저장되며, 초 단위 시각이 붙어 기존 파일을 덮어쓰지 않습니다.
+
+> **비밀번호 포함을 선택하면 파일에 평문으로 저장됩니다.** 공유할 파일이라면 제외를 선택하세요.
 
 ### 데이터 저장
 
@@ -118,7 +132,7 @@ Clean Architecture + TCA-inspired 단방향 Store 패턴
 | 브라우저 자동화 | WKWebView + JavaScript injection |
 | 보안 | Security.framework (Keychain Services) |
 | 자동 업데이트 | Sparkle (EdDSA 서명) |
-| 테스트 | Swift Testing (91 tests) |
+| 테스트 | Swift Testing (111 tests) |
 | 프로젝트 생성 | XcodeGen |
 
 ---
@@ -136,6 +150,7 @@ A macOS account management and auto-login app for TVING QC/QA environments.
 - **Plan tags** — None / Basic / Ad-supported / Standard / Premium
 - **OTP auto-fill** — Distributes 6 digits across individual input fields
 - **ID/PW auto-fill** — React-compatible nativeInputValueSetter
+- **Automatic profile selection** — Picks an unlocked profile after login when the account has several (age-restricted profiles come last; if every profile is locked, you pick one yourself)
 - **Password security** — Stored in macOS Keychain (not in JSON)
 - **Auto-update** — Sparkle-based app updates
 - **Usage guide** — Built-in onboarding guide (6 pages)
@@ -177,6 +192,7 @@ xcodebuild build -scheme TVAccountManager -configuration Release -destination 'p
 2. Enter title, TVING ID, password, environment (QC/QA), and plan type
 3. Enter OTP code if required
 4. Click **Login** → Auto-login proceeds in WebView
+5. If the account has several profiles, an unlocked one is selected automatically
 
 ### Bulk Import
 
@@ -201,6 +217,18 @@ Import multiple accounts at once from a JSON file.
 
 > `account_type`: `QC` | `QA`
 > `plan_type`: `구독 없음` | `베이직` | `광고 요금제` | `스탠다드` | `프리미엄`
+
+### Export
+
+Saves the current account list to a JSON file. It uses the same format as bulk import, so renaming the file to `presets.json` imports it straight back.
+
+1. Settings > General > **Export Accounts to File**
+2. Choose **Include Passwords** or **Exclude Passwords**
+3. Finder opens with the saved file selected
+
+The file lands in the import folder as `accounts-export-2026-09-11-094957.json`; the second-precision timestamp keeps repeated exports from overwriting each other.
+
+> **Including passwords writes them to the file as plain text.** Exclude them for any file you intend to share.
 
 ### Data Storage
 
@@ -231,7 +259,7 @@ Clean Architecture + TCA-inspired unidirectional Store pattern
 | Browser automation | WKWebView + JavaScript injection |
 | Security | Security.framework (Keychain Services) |
 | Auto-update | Sparkle (EdDSA signing) |
-| Testing | Swift Testing (91 tests) |
+| Testing | Swift Testing (111 tests) |
 | Project generation | XcodeGen |
 
 ---
