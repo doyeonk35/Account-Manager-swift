@@ -28,6 +28,10 @@ packages:
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle
     from: "2.7.0"
+  # CLI 선택기·진행 표시. 0.x라 minorVersion으로 묶는다 (0.58에서 깨지는 변경이 와도 안 끌려온다).
+  Noora:
+    url: https://github.com/tuist/Noora
+    minorVersion: "0.57.5"
 targets:
   TVAccountManager:
     type: application
@@ -36,6 +40,12 @@ targets:
       - TVAccountManager
     dependencies:
       - package: Sparkle
+      # 선택기 UI 헬퍼. 샌드박스 밖이어야 터미널 raw 모드를 쓸 수 있어 별도 바이너리로 둔다.
+      - target: tvlogin
+        embed: true
+        codeSign: true
+        copy:
+          destination: executables
     settings:
       base:
         CODE_SIGN_ENTITLEMENTS: TVAccountManager/TVAccountManager.entitlements
@@ -49,6 +59,24 @@ targets:
           PRODUCT_NAME: TVAccountManager-Debug
           CODE_SIGN_STYLE: Automatic
           DEVELOPMENT_TEAM: F64BRNFSBB
+  tvlogin:
+    type: tool
+    platform: macOS
+    sources:
+      - TVAccountManagerCLI
+    dependencies:
+      - package: Noora
+    settings:
+      base:
+        PRODUCT_NAME: tvlogin
+        PRODUCT_BUNDLE_IDENTIFIER: com.tv.account-manager.cli
+        # 엔타이틀먼트 없음 — 샌드박스되면 tcsetattr가 EPERM이라 선택기를 띄울 수 없다.
+        # release.sh의 `codesign --deep`이 hardened runtime으로 함께 서명한다.
+      configs:
+        Debug:
+          CODE_SIGN_STYLE: Automatic
+          DEVELOPMENT_TEAM: F64BRNFSBB
+
   TVAccountManagerTests:
     type: bundle.unit-test
     platform: macOS
