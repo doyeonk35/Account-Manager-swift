@@ -13,25 +13,54 @@ enum LoginStep: String {
     case failed = "Login failed."
 }
 
+/// 로그인 시퀀스의 최종 결과. GUI는 창이 떠 있어 사용자가 직접 이어갈 수 있지만,
+/// 헤드리스(CLI)는 클릭할 창이 없으므로 "프로필 대기"를 성공으로 뭉개면 거짓 보고가 된다.
+enum LoginOutcome: Sendable, Equatable {
+    case submitted                  // 프로필 선택 화면이 없음 (프로필 1개)
+    case profileSelected(String)
+    case profileSkipped             // 요청대로 프로필을 안 골랐음 (--no-profile)
+    case profilePending             // 전부 잠김 / 클릭 실패 — 사람이 직접 골라야 함
+    case profileNotFound([String])  // 지정한 이름이 없음 — 후보 목록
+    case failed
+
+    /// GUI 기준 성공 여부. 사람이 직접 프로필을 고를 수 있으면 성공으로 본다.
+    var isSuccess: Bool {
+        switch self {
+        case .submitted, .profileSelected, .profileSkipped, .profilePending: true
+        case .profileNotFound, .failed: false
+        }
+    }
+}
+
+/// 프로필 선택 방식. GUI는 항상 `.auto`.
+enum ProfilePreference: Sendable, Equatable {
+    case auto
+    case named(String)
+    case skip
+}
+
 @MainActor
 final class LoginService: NSObject {
     private weak var webView: WKWebView?
     private var account: AccountInfo?
     private var otpCode: String = ""
     private var onStatusUpdate: ((LoginStep, String) -> Void)?
-    private var onComplete: ((Bool, String) -> Void)?
+    private var onComplete: ((LoginOutcome, String) -> Void)?
     private var loginTask: Task<Void, Never>?
+    private var profilePreference: ProfilePreference = .auto
 
     func configure(
         webView: WKWebView,
         account: AccountInfo,
         otpCode: String,
+        profile: ProfilePreference = .auto,
         onStatusUpdate: @escaping (LoginStep, String) -> Void,
-        onComplete: @escaping (Bool, String) -> Void
+        onComplete: @escaping (LoginOutcome, String) -> Void
     ) {
         self.webView = webView
         self.account = account
         self.otpCode = otpCode
+        self.profilePreference = profile
         self.onStatusUpdate = onStatusUpdate
         self.onComplete = onComplete
     }
@@ -91,7 +120,7 @@ final class LoginService: NSObject {
                 try Task.checkCancellation()
                 onStatusUpdate?(.enteringCredentials, String(localized: "Entering username..."))
                 guard try await waitAndFill(selectors: usernameSelectors, value: account.username) else {
-                    onComplete?(false, String(localized: "Could not find username field."))
+                    onComplete?(.failed, String(localized: "Could not find username field."))
                     return
                 }
                 try Task.checkCancellation()
@@ -101,7 +130,7 @@ final class LoginService: NSObject {
                 try Task.checkCancellation()
                 onStatusUpdate?(.enteringCredentials, String(localized: "Entering password..."))
                 guard try await waitAndFill(selectors: passwordSelectors, value: account.password) else {
-                    onComplete?(false, String(localized: "Could not find password field."))
+                    onComplete?(.failed, String(localized: "Could not find password field."))
                     return
                 }
 
@@ -117,7 +146,7 @@ final class LoginService: NSObject {
                 let usernameFilled = !(try await isFieldEmpty(usernameSelectors))
                 let passwordFilled = !(try await isFieldEmpty(passwordSelectors))
                 guard usernameFilled, passwordFilled else {
-                    onComplete?(false, String(localized: "Login form was cleared before submit. Please try again."))
+                    onComplete?(.failed, String(localized: "Login form was cleared before submit. Please try again."))
                     return
                 }
 
@@ -129,31 +158,39 @@ final class LoginService: NSObject {
                 if loginClicked {
                     // 프로필이 여러 개면 프로필 선택까지 끝내야 로그인이 완료된다
                     onStatusUpdate?(.selectingProfile, String(localized: "Checking for profile selection..."))
-                    switch try await autoSelectProfile() {
+                    switch try await selectProfile(preference: profilePreference) {
                     case .notShown:
-                        onStatusUpdate?(.success, String(localized: "[\(env)] \(account.title) — Login submitted"))
-                        onComplete?(true, String(localized: "[\(env)] \(account.title) — Login submitted"))
+                        finish(.submitted, String(localized: "[\(env)] \(account.title) — Login submitted"))
                     case .selected(let name):
-                        onStatusUpdate?(.success, String(localized: "[\(env)] \(account.title) — Profile \(name) selected"))
-                        onComplete?(true, String(localized: "[\(env)] \(account.title) — Profile \(name) selected"))
+                        finish(.profileSelected(name), String(localized: "[\(env)] \(account.title) — Profile \(name) selected"))
                     case .allLocked:
-                        onStatusUpdate?(.selectingProfile, String(localized: "All profiles are locked. Please select one yourself."))
-                        onComplete?(true, String(localized: "[\(env)] \(account.title) — All profiles locked, select one yourself"))
+                        finish(.profilePending, String(localized: "[\(env)] \(account.title) — All profiles locked, select one yourself"))
                     case .selectFailed:
-                        onStatusUpdate?(.selectingProfile, String(localized: "Could not select a profile. Please select one yourself."))
-                        onComplete?(true, String(localized: "[\(env)] \(account.title) — Profile not selected, select one yourself"))
+                        finish(.profilePending, String(localized: "[\(env)] \(account.title) — Profile not selected, select one yourself"))
+                    case .skipped:
+                        finish(.profileSkipped, String(localized: "[\(env)] \(account.title) — Stopped at profile selection"))
+                    case .lockedTarget(let name):
+                        finish(.profilePending, String(localized: "[\(env)] \(account.title) — Profile \(name) is locked"))
+                    case .notFound(let names):
+                        finish(.profileNotFound(names), String(localized: "[\(env)] \(account.title) — Profile not found"))
                     }
                 } else {
                     onStatusUpdate?(.enteringCredentials, String(localized: "[\(env)] \(account.title) — Credentials filled. Please click Login."))
-                    onComplete?(true, String(localized: "[\(env)] \(account.title) — Credentials filled"))
+                    onComplete?(.submitted, String(localized: "[\(env)] \(account.title) — Credentials filled"))
                 }
             } catch is CancellationError {
                 // Sheet dismissed — silently stop
             } catch {
                 let env = account.accountType.rawValue.uppercased()
-                onComplete?(false, String(localized: "[\(env)] \(account.title) — Login failed: \(error.localizedDescription)"))
+                onComplete?(.failed, String(localized: "[\(env)] \(account.title) — Login failed: \(error.localizedDescription)"))
             }
         }
+    }
+
+    /// 상태 표시와 최종 보고를 같은 문장으로 묶는다.
+    private func finish(_ outcome: LoginOutcome, _ message: String) {
+        onStatusUpdate?(outcome.isSuccess ? .success : .failed, message)
+        onComplete?(outcome, message)
     }
 
     // MARK: - OTP
@@ -336,45 +373,12 @@ final class LoginService: NSObject {
 
     // MARK: - Click
 
-    /// 여러 셀렉터를 순서대로 시도하여 클릭 (최대 10초 대기)
-    private func waitAndClick(selectors: [String]) async throws -> Bool {
-        let selectorJS = selectors.map { "document.querySelector('\($0)')" }.joined(separator: " || ")
-        for _ in 0..<20 {
-            let result = (try? await executeJS("""
-                (function() {
-                    var e = \(selectorJS);
-                    if (e) { e.click(); return 'clicked'; }
-                    return 'not_found';
-                })()
-            """)) ?? "not_found"
-            if result == "clicked" { return true }
-            try await Task.sleep(for: .milliseconds(500))
-        }
-        return false
-    }
-
     private func clickElement(_ selector: String, fallback: String? = nil) async throws {
         var js = "document.querySelector('\(selector)')"
         if let fb = fallback {
             js = "(\(js) || document.querySelector('\(fb)'))"
         }
         _ = try? await executeJS("(function() { var e = \(js); if (e) e.click(); })()")
-    }
-
-    // MARK: - Verify
-
-    private func verifyLogin() async throws -> Bool {
-        let result = try await executeJS("""
-            (function() {
-                var t = document.body.innerText || '';
-                if (t.includes('로그인 완료')) return 'success';
-                if (t.includes('로그인되었습니다')) return 'success';
-                if (t.includes('환영합니다')) return 'success';
-                if (window.location.href.includes('/main')) return 'success';
-                return 'unknown';
-            })()
-        """)
-        return result == "success"
     }
 
     // MARK: - JS Execution
@@ -386,25 +390,25 @@ final class LoginService: NSObject {
         return (result as? String) ?? ""
     }
 
-    // MARK: - React 호환 value setter JS 생성
-
-    /// React의 synthetic event 시스템을 우회하여 input value를 설정하는 JS 코드 조각
-    private func reactSetValue(_ varName: String, _ value: String) -> String {
-        """
-        var _ns = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-        _ns.call(\(varName), '\(value)');
-        \(varName).dispatchEvent(new Event('input', {bubbles: true}));
-        \(varName).dispatchEvent(new Event('change', {bubbles: true}));
-        """
-    }
-
     // MARK: - Profile selection
 
     private enum ProfileSelection {
-        case notShown          // 프로필이 1개거나 선택 화면이 안 뜬 경우
+        case notShown              // 프로필이 1개거나 선택 화면이 안 뜬 경우
         case selected(String)
-        case allLocked         // 잠긴 프로필만 있음 — 자동 선택 포기
-        case selectFailed      // 클릭이 화면을 넘기지 못함
+        case allLocked             // 잠긴 프로필만 있음 — 자동 선택 포기
+        case selectFailed          // 클릭이 화면을 넘기지 못함
+        case skipped               // .skip — 화면까지만 가고 선택 안 함
+        case lockedTarget(String)  // .named 대상이 잠김
+        case notFound([String])    // .named 이름 없음 — 후보 목록
+    }
+
+    /// 이름으로 프로필 찾기. 완전 일치(대소문자 무시) → 접두사 순.
+    nonisolated static func findProfile(named name: String, in candidates: [ProfileCandidate]) -> ProfileLookup {
+        let target = name.trimmingCharacters(in: .whitespaces)
+        let hit = candidates.firstIndex { $0.name.caseInsensitiveCompare(target) == .orderedSame }
+            ?? candidates.firstIndex { $0.name.lowercased().hasPrefix(target.lowercased()) && !target.isEmpty }
+        guard let index = hit else { return .notFound }
+        return candidates[index].locked ? .locked(index) : .found(index)
     }
 
     /// 잠금 없는 프로필 중 연령 제한 없는 쪽을 우선해 고른다. 전부 잠겼으면 nil.
@@ -414,12 +418,12 @@ final class LoginService: NSObject {
         return (unlocked.first { !$0.element.restricted } ?? unlocked[0]).offset
     }
 
-    /// 잠금 없는 프로필을 하나 골라 클릭한다. 연령 제한 프로필은 후순위.
+    /// 프로필을 골라 클릭한다. `.auto`면 잠금 없는 것 중 연령 제한 없는 쪽 우선.
     ///
     /// 잠금은 DOM에도 자물쇠 오버레이로 드러나지만 **연령 제한은 DOM에 전혀 나타나지 않아**
     /// 서버가 내려준 profileList(`profilePwd`, `gradeCode`)를 읽는다. 파싱이 실패하거나
     /// 개수가 DOM과 어긋나면 DOM 자물쇠 판정으로만 폴백한다.
-    private func autoSelectProfile() async throws -> ProfileSelection {
+    private func selectProfile(preference: ProfilePreference) async throws -> ProfileSelection {
         // 로그인 제출 후 프로필 화면으로 넘어올 때까지 대기 (~15초)
         var table: [ProfileCandidate]?
         for _ in 0..<50 {
@@ -429,7 +433,21 @@ final class LoginService: NSObject {
             try await Task.sleep(for: .milliseconds(300))
         }
         guard let candidates = table else { return .notShown }
-        guard let index = Self.pickProfile(from: candidates) else { return .allLocked }
+
+        let index: Int
+        switch preference {
+        case .skip:
+            return .skipped
+        case .named(let wanted):
+            switch Self.findProfile(named: wanted, in: candidates) {
+            case .found(let i): index = i
+            case .locked(let i): return .lockedTarget(candidates[i].name)
+            case .notFound: return .notFound(candidates.map(\.name))
+            }
+        case .auto:
+            guard let auto = Self.pickProfile(from: candidates) else { return .allLocked }
+            index = auto
+        }
         let name = candidates[index].name
 
         // 클릭이 실제로 화면을 넘겼는지 확인하고 아니면 재시도.
@@ -517,6 +535,13 @@ final class LoginService: NSObject {
         })()
         """
     }
+}
+
+/// 이름으로 프로필을 찾은 결과.
+enum ProfileLookup: Equatable {
+    case found(Int)
+    case locked(Int)
+    case notFound
 }
 
 /// 프로필 선택 화면에서 읽어온 프로필 하나.
