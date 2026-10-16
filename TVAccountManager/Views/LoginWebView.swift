@@ -37,10 +37,10 @@ struct LoginWebView: View {
                 onStatusUpdate: { _, message in
                     currentStep = message
                 },
-                onComplete: { success, message in
+                onComplete: { outcome, message in
                     isLoginDone = true
                     currentStep = message
-                    store.send(.loginCompleted(success: success, message: message))
+                    store.send(.loginCompleted(success: outcome.isSuccess, message: message))
                 }
             )
         }
@@ -52,7 +52,7 @@ struct WebViewContainer: NSViewRepresentable {
     let account: AccountInfo
     let otpCode: String
     let onStatusUpdate: (LoginStep, String) -> Void
-    let onComplete: (Bool, String) -> Void
+    let onComplete: (LoginOutcome, String) -> Void
 
     func makeCoordinator() -> Coordinator {
         Coordinator(onComplete: onComplete)
@@ -85,9 +85,9 @@ struct WebViewContainer: NSViewRepresentable {
     class Coordinator: NSObject, WKNavigationDelegate {
         let loginService = LoginService()
         private var hasStartedLogin = false
-        private let onComplete: (Bool, String) -> Void
+        private let onComplete: (LoginOutcome, String) -> Void
 
-        init(onComplete: @escaping (Bool, String) -> Void) {
+        init(onComplete: @escaping (LoginOutcome, String) -> Void) {
             self.onComplete = onComplete
             super.init()
         }
@@ -101,7 +101,7 @@ struct WebViewContainer: NSViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            onComplete(false, String(localized: "Navigation failed: \(error.localizedDescription)"))
+            onComplete(.failed, String(localized: "Navigation failed: \(error.localizedDescription)"))
         }
 
         func webView(
