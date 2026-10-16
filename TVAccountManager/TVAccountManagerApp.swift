@@ -1,7 +1,7 @@
 import SwiftUI
 import Sparkle
 
-@main
+// 진입점은 CLI/main.swift — `@main` 대신 거기서 GUI/CLI를 분기한다.
 struct TVAccountManagerApp: App {
     @StateObject private var accountStore: AccountStore
     @StateObject private var settingsStore: SettingsStore
