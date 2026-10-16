@@ -24,6 +24,7 @@ TVING QC/QA 환경을 위한 macOS 계정 관리 및 자동 로그인 앱입니�
 - **OTP 자동 입력** — 6자리 코드 자동 분배 입력
 - **ID/PW 자동 완성** — React 호환 nativeInputValueSetter 방식
 - **프로필 자동 선택** — 로그인 후 프로필이 여러 개면 잠기지 않은 프로필을 자동 선택 (연령 제한 프로필은 후순위, 전부 잠겨 있으면 직접 선택)
+- **CLI 로그인** — 터미널에서 `tvlogin qa 483920` (창 없는 헤드리스 로그인)
 - **비밀번호 보안** — macOS Keychain 저장 (JSON에 평문 미포함)
 - **자동 업데이트** — Sparkle 기반 앱 업데이트
 - **사용 가이드** — 앱 내 온보딩 가이드 (6페이지)
@@ -66,6 +67,47 @@ xcodebuild build -scheme TVAccountManager -configuration Release -destination 'p
 3. OTP 코드 입력 (필요 시)
 4. **Login** 버튼 클릭 → WebView에서 자동 로그인 진행
 5. 프로필이 여러 개면 잠기지 않은 프로필이 자동 선택됩니다
+
+### CLI로 로그인
+
+앱 창을 띄우지 않고 터미널에서 바로 로그인합니다. 로그인은 보이지 않는 헤드리스 WebView에서 진행됩니다.
+
+`tvlogin`은 앱 번들 안의 작은 헬퍼 바이너리입니다. 계정 선택기(화살표)는 이 헬퍼가 띄우고, 로그인은 앱 본체가 수행합니다 — 앱 본체는 샌드박스라 터미널을 raw 모드로 바꿀 수 없기 때문입니다.
+
+```bash
+./scripts/install-cli.sh      # /usr/local/bin/tvlogin 설치 (권한 없으면 sudo로 재실행)
+
+tvlogin qa                    # QA 계정 목록만 출력
+tvlogin qa 483920             # 목록에서 번호를 고른 뒤 로그인
+tvlogin qa 483920 --account QA_BASIC
+tvlogin prod 483920 --profile 키즈
+```
+
+```
+  QA 계정 (4)
+     1  QA_PREMIUM   webqa7  프리미엄 ★
+     2  QA_BASIC     webqa3  베이직
+  선택 [1]: 2
+  → QA_BASIC
+    아이디 입력 중...
+    프로필 확인 중...
+  [QA] QA_BASIC — 프로필 홍길동 선택 완료
+```
+
+| 인자 / 옵션 | 설명 |
+|---|---|
+| `<env>` | `qc` \| `qa` \| `prod` — `prod`는 QC 계정에 운영 URL (설정은 바뀌지 않음) |
+| `<otp>` | TV 화면에 뜬 6자리 숫자. 생략하면 목록만 출력 |
+| `--account <title>` | 계정 지정. 생략하면 화살표 선택기 (title 완전일치 → 접두사 → username) |
+| `--profile <name>` | 프로필 이름 지정 (기본: 자동 선택) |
+| `--no-profile` | 프로필 선택 화면까지만 가고 종료 (확인용) |
+| `--json` | 목록과 최종 결과를 JSON으로 출력 (진행 상황은 stderr) |
+| `--timeout <sec>` | 로그인 시퀀스 상한, 기본 120 |
+
+종료 코드: `0` 성공 · `1` 로그인 실패 · `2` 인자 오류 / 계정 없음 · `3` 타임아웃 · `4` 프로필이 전부 PIN 잠김 (직접 선택 필요) · `130` 취소
+
+> 파이프·스크립트처럼 터미널이 아닌 환경에서 `--account` 없이 실행하면, 프롬프트 앞에서 멈추지 않고 바로 종료합니다.
+> `--no-profile`은 확인용입니다. TV 로그인은 프로필을 골라야 완료되므로 정상 로그인 경로가 아닙니다.
 
 ### 계정 일괄 등록
 
@@ -151,6 +193,7 @@ A macOS account management and auto-login app for TVING QC/QA environments.
 - **OTP auto-fill** — Distributes 6 digits across individual input fields
 - **ID/PW auto-fill** — React-compatible nativeInputValueSetter
 - **Automatic profile selection** — Picks an unlocked profile after login when the account has several (age-restricted profiles come last; if every profile is locked, you pick one yourself)
+- **CLI login** — `tvlogin qa 483920` from the terminal (headless, no window)
 - **Password security** — Stored in macOS Keychain (not in JSON)
 - **Auto-update** — Sparkle-based app updates
 - **Usage guide** — Built-in onboarding guide (6 pages)
@@ -193,6 +236,36 @@ xcodebuild build -scheme TVAccountManager -configuration Release -destination 'p
 3. Enter OTP code if required
 4. Click **Login** → Auto-login proceeds in WebView
 5. If the account has several profiles, an unlocked one is selected automatically
+
+### CLI Login
+
+Log in from the terminal without opening the app window. The login runs in a hidden headless WebView.
+
+`tvlogin` is a small helper binary inside the app bundle. It renders the arrow-key account picker; the app binary itself performs the login. The split exists because the sandboxed app cannot put the terminal into raw mode.
+
+```bash
+./scripts/install-cli.sh      # installs /usr/local/bin/tvlogin (re-run with sudo if needed)
+
+tvlogin qa                    # list QA accounts only
+tvlogin qa 483920             # pick an account by number, then log in
+tvlogin qa 483920 --account QA_BASIC
+tvlogin prod 483920 --profile Kids
+```
+
+| Argument / Option | Description |
+|---|---|
+| `<env>` | `qc` \| `qa` \| `prod` — `prod` uses QC accounts with the production URL (settings untouched) |
+| `<otp>` | The 6-digit code shown on the TV. Omit it to only list accounts |
+| `--account <title>` | Pick an account without the picker (exact title → prefix → username) |
+| `--profile <name>` | Pick a profile by name (default: automatic) |
+| `--no-profile` | Stop at the profile screen without selecting |
+| `--json` | Emit the list and the final result as JSON (progress stays on stderr) |
+| `--timeout <sec>` | Login sequence limit, default 120 |
+
+Exit codes: `0` success · `1` login failed · `2` bad arguments / no account · `3` timeout · `4` every profile is PIN-locked (pick one yourself) · `130` cancelled
+
+> When stdin is not a terminal (pipes, scripts) and `--account` is absent, it exits immediately instead of waiting at the prompt.
+> `--no-profile` is for inspection only — TV login completes only once a profile is selected.
 
 ### Bulk Import
 
