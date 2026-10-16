@@ -106,9 +106,15 @@ struct SettingsFeatureTests {
 
     // MARK: - Default values
 
-    @Test("기본 URL 상수값이 올바르다")
+    @Test("기본 URL이 Info.plist에서 주입된다")
     func defaultStateValues() {
-        #expect(SettingsState.defaultQcURL == "https://user.tving.com/")
-        #expect(SettingsState.defaultQaURL == "https://userqa.tving.com/tv/login/qrcode.tving")
+        // QC/QA URL 값은 setup-plist.sh가 환경별로 주입하고 Info.plist는 gitignore 대상이라,
+        // 문자열을 박아두면 환경이 바뀔 때마다 깨진다. 주입이 됐는지(형태)만 검증한다.
+        for url in [SettingsState.defaultQcURL, SettingsState.defaultQaURL] {
+            #expect(url.hasPrefix("https://"))
+            #expect(url.hasSuffix("/tv/login/qrcode.tving"))
+        }
+        // 운영 URL은 소스에 박힌 상수이므로 값 자체를 검증한다.
+        #expect(SettingsState.prodURL == "https://user.tving.com/tv/login/qrcode.tving")
     }
 }
