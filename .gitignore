@@ -3,11 +3,13 @@ dist/
 *.xcarchive
 *.xcuserdata
 DerivedData/
+*.profraw
 .DS_Store
 xcuserdata/
 *.xcworkspace/xcuserdata/
 .omc
-.claude/
+.claude/*
+!.claude/skills/
 CLAUDE.md
 screenshots/
 releases/
