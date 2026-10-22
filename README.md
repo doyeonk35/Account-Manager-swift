@@ -149,9 +149,9 @@ tvlogin prod 483920 --profile 키즈
 
 | 항목 | 위치 |
 |------|------|
-| 계정 메타데이터 | `~/Library/Application Support/tving-login-manager/accounts.json` |
+| 계정 메타데이터 | `~/Library/Containers/com.tv.account-manager/Data/Library/Application Support/tving-login-manager/accounts.json` |
 | 비밀번호 | macOS Keychain (`com.tving.login-manager`) |
-| 일괄 등록 파일 | `~/Library/Application Support/tving-login-manager/presets.json` |
+| 일괄 등록 파일 | 위 폴더의 `presets.json` (설정 > 일반 > **불러오기 폴더 열기**) |
 | 로그인 URL 설정 | UserDefaults |
 
 ### 아키텍처
@@ -164,6 +164,8 @@ Clean Architecture + TCA-inspired 단방향 Store 패턴
 | Data | RepositoryImpl (Keychain + JSON) |
 | Presentation | State / Action / Reducer, Store |
 | Views | SwiftUI (3-column NavigationSplitView) |
+| CLI | Headless login entry point + picker helper (`tvlogin`) |
+| CLI | 헤드리스 로그인 진입점 + 선택기 헬퍼 (`tvlogin`) |
 
 ### 기술 스택
 
@@ -174,7 +176,8 @@ Clean Architecture + TCA-inspired 단방향 Store 패턴
 | 브라우저 자동화 | WKWebView + JavaScript injection |
 | 보안 | Security.framework (Keychain Services) |
 | 자동 업데이트 | Sparkle (EdDSA 서명) |
-| 테스트 | Swift Testing (111 tests) |
+| CLI UI | Noora (Tuist) — 화살표 선택기 |
+| 테스트 | Swift Testing (143 tests) |
 | 프로젝트 생성 | XcodeGen |
 
 ---
@@ -307,9 +310,9 @@ The file lands in the import folder as `accounts-export-2026-09-11-094957.json`;
 
 | Item | Location |
 |------|----------|
-| Account metadata | `~/Library/Application Support/tving-login-manager/accounts.json` |
+| Account metadata | `~/Library/Containers/com.tv.account-manager/Data/Library/Application Support/tving-login-manager/accounts.json` |
 | Passwords | macOS Keychain (`com.tving.login-manager`) |
-| Bulk import file | `~/Library/Application Support/tving-login-manager/presets.json` |
+| Bulk import file | `presets.json` in the folder above (Settings > General > **Open Import Folder**) |
 | Login URL settings | UserDefaults |
 
 ### Architecture
@@ -332,7 +335,8 @@ Clean Architecture + TCA-inspired unidirectional Store pattern
 | Browser automation | WKWebView + JavaScript injection |
 | Security | Security.framework (Keychain Services) |
 | Auto-update | Sparkle (EdDSA signing) |
-| Testing | Swift Testing (111 tests) |
+| CLI UI | Noora (Tuist) — arrow-key picker |
+| Testing | Swift Testing (143 tests) |
 | Project generation | XcodeGen |
 
 ---
