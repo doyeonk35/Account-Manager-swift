@@ -65,6 +65,7 @@ struct AccountState {
     var editPlanType: PlanType = .none
     var editMemo = ""
     var editIsPinned = false
+    var editProfilePins: [Int: String] = [:]   // profileNo → PIN (빈 값 = 삭제)
 
     // Login
     var loginStatus = ""
@@ -90,6 +91,16 @@ struct AccountState {
 
     var isEditFormValid: Bool {
         !editUsername.isEmpty && !editPassword.isEmpty
+            && editingProfiles.filter(\.isLocked).allSatisfy {
+                let pin = editProfilePins[$0.profileNo] ?? ""
+                return pin.isEmpty || ProfileInfo.isValidPin(pin)
+            }
+    }
+
+    /// 편집 중인 기존 계정의 프로필. 새 계정이면 비어 있다.
+    var editingProfiles: [ProfileInfo] {
+        guard let id = editingAccountId else { return [] }
+        return accounts.first { $0.id == id }?.profiles ?? []
     }
 
     var sortedAccounts: [AccountInfo] {
@@ -167,6 +178,7 @@ enum AccountAction: Sendable {
     case setEditPlanType(PlanType)
     case setEditMemo(String)
     case setEditIsPinned(Bool)
+    case setEditProfilePin(profileNo: Int, pin: String)
 
     // Login
     case startLogin(AccountInfo)
@@ -174,6 +186,7 @@ enum AccountAction: Sendable {
     case cancelLogin
     case dismissLoginWebView
     case setOtpCode(String)
+    case profilesCollected(accountId: UUID, profiles: [ProfileInfo])
 
     // Preset import
     case importPresets
@@ -243,6 +256,7 @@ enum AccountEnvironment {
                 state.editPlanType = .basic
                 state.editMemo = ""
                 state.editIsPinned = false
+                state.editProfilePins = [:]
                 state.isEditing = true
                 return .none
 
@@ -255,6 +269,7 @@ enum AccountEnvironment {
                 state.editPlanType = account.planType
                 state.editMemo = account.memo
                 state.editIsPinned = account.isPinned
+                state.editProfilePins = account.profilePins
                 state.isEditing = true
                 return .none
 
@@ -270,7 +285,7 @@ enum AccountEnvironment {
                         title: state.editTitle, username: state.editUsername,
                         password: state.editPassword, accountType: state.editAccountType,
                         planType: state.editPlanType, memo: state.editMemo,
-                        isPinned: state.editIsPinned
+                        isPinned: state.editIsPinned, profilePins: state.editProfilePins
                     )
                 } else {
                     useCase.addAccount(
@@ -322,6 +337,10 @@ enum AccountEnvironment {
                 state.editIsPinned = value
                 return .none
 
+            case .setEditProfilePin(let profileNo, let pin):
+                state.editProfilePins[profileNo] = String(pin.filter { $0.isASCII && $0.isNumber }.prefix(4))
+                return .none
+
             // MARK: - Login
 
             case .startLogin(let account):
@@ -358,6 +377,10 @@ enum AccountEnvironment {
 
             case .setOtpCode(let value):
                 state.otpCode = value
+                return .none
+
+            case .profilesCollected(let accountId, let profiles):
+                useCase.mergeProfiles(in: &state.accounts, id: accountId, collected: profiles)
                 return .none
 
             // MARK: - Preset Import

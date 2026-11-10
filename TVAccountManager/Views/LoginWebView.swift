@@ -41,6 +41,9 @@ struct LoginWebView: View {
                     isLoginDone = true
                     currentStep = message
                     store.send(.loginCompleted(success: outcome.isSuccess, message: message))
+                },
+                onProfilesFound: { [accountId = account.id] profiles in
+                    store.send(.profilesCollected(accountId: accountId, profiles: profiles))
                 }
             )
         }
@@ -53,6 +56,7 @@ struct WebViewContainer: NSViewRepresentable {
     let otpCode: String
     let onStatusUpdate: (LoginStep, String) -> Void
     let onComplete: (LoginOutcome, String) -> Void
+    let onProfilesFound: ([ProfileInfo]) -> Void
 
     func makeCoordinator() -> Coordinator {
         Coordinator(onComplete: onComplete)
@@ -69,7 +73,8 @@ struct WebViewContainer: NSViewRepresentable {
             account: account,
             otpCode: otpCode,
             onStatusUpdate: onStatusUpdate,
-            onComplete: onComplete
+            onComplete: onComplete,
+            onProfilesFound: onProfilesFound
         )
 
         webView.load(URLRequest(url: url))

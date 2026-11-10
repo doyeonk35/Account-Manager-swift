@@ -25,6 +25,29 @@ struct AccountDetailView: View {
                 }
             }
 
+            Section("Profiles") {
+                if account.profiles.isEmpty {
+                    Text("Profiles are filled in automatically when you log in.")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(account.profiles) { profile in
+                        HStack {
+                            ProfileLabel(profile: profile)
+                            Spacer()
+                            if profile.isLocked {
+                                if account.profilePins[profile.profileNo] != nil {
+                                    Label("PIN saved", systemImage: "checkmark.circle.fill")
+                                        .foregroundStyle(.green)
+                                } else {
+                                    Label("PIN needed", systemImage: "exclamationmark.circle")
+                                        .foregroundStyle(.orange)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             Section {
                 DetailRow(label: String(localized: "Date Added"), value: account.createdAt.formatted(date: .abbreviated, time: .shortened))
                 DetailRow(label: String(localized: "Last Used"), value: account.lastUsed.formatted(date: .abbreviated, time: .shortened))
@@ -70,6 +93,33 @@ struct AccountDetailView: View {
             }
         } message: { _ in
             Text("This will permanently delete the account and its stored password.")
+        }
+    }
+}
+
+/// 프로필 이름 · 대표 표시 · 자물쇠 · 연령 배지. 상세·편집 화면 공용.
+struct ProfileLabel: View {
+    let profile: ProfileInfo
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(profile.name)
+            if profile.isMain {
+                Text("Main")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if profile.isLocked {
+                Image(systemName: "lock.fill")
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel(Text("Locked"))
+            }
+            Text(profile.gradeDisplayName)
+                .font(.caption)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 1)
+                .background(Color.gray.opacity(0.15))
+                .clipShape(Capsule())
         }
     }
 }

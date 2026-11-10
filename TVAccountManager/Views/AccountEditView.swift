@@ -78,6 +78,34 @@ struct AccountEditView: View {
                 Text(store.state.editingAccountId != nil ? LocalizedStringKey("Edit Account") : LocalizedStringKey("New Account"))
             }
 
+            if store.state.editingAccountId != nil {
+                Section("Profiles") {
+                    if store.state.editingProfiles.isEmpty {
+                        Text("Profiles are filled in automatically when you log in.")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(store.state.editingProfiles) { profile in
+                            HStack {
+                                ProfileLabel(profile: profile)
+                                Spacer()
+                                if profile.isLocked {
+                                    // macOS Form은 제목을 필드 왼쪽 라벨로 그린다. 폭 100 안에서 라벨이
+                                    // 자리를 다 차지해 입력칸이 사라지므로 라벨을 숨기고 prompt로 안내한다.
+                                    SecureField("4-digit PIN", text: Binding(
+                                        get: { store.state.editProfilePins[profile.profileNo] ?? "" },
+                                        set: { store.send(.setEditProfilePin(profileNo: profile.profileNo, pin: $0)) }
+                                    ), prompt: Text("4-digit PIN"))
+                                    .labelsHidden()
+                                    .textFieldStyle(.roundedBorder)
+                                    .frame(width: 110)
+                                    .accessibilityIdentifier("edit_profile_pin_\(profile.profileNo)")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             Section {
                 HStack {
                     Button("Cancel", role: .cancel) {
