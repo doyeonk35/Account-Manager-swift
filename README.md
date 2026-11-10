@@ -23,7 +23,8 @@ TVING QC/QA 환경을 위한 macOS 계정 관리 및 자동 로그인 앱입니�
 - **요금제 태그** — 구독 없음 / 베이직 / 광고 요금제 / 스탠다드 / 프리미엄
 - **OTP 자동 입력** — 6자리 코드 자동 분배 입력
 - **ID/PW 자동 완성** — React 호환 nativeInputValueSetter 방식
-- **프로필 자동 선택** — 로그인 후 프로필이 여러 개면 잠기지 않은 프로필을 자동 선택 (연령 제한 프로필은 후순위, 전부 잠겨 있으면 직접 선택)
+- **프로필 자동 선택** — 로그인 후 프로필이 여러 개면 잠기지 않은 프로필을 자동 선택 (연령 제한 프로필은 후순위). 전부 잠겨 있으면 계정에 저장한 프로필 PIN으로 열고, PIN이 없으면 직접 선택
+- **프로필 정보 저장** — 로그인할 때 프로필 목록(이름·잠금·연령)을 자동 수집. 잠금 프로필 PIN은 계정 편집에서 입력 (Keychain 저장)
 - **CLI 로그인** — 터미널에서 `tvlogin qa 483920` (창 없는 헤드리스 로그인)
 - **비밀번호 보안** — macOS Keychain 저장 (JSON에 평문 미포함)
 - **자동 업데이트** — Sparkle 기반 앱 업데이트
@@ -66,7 +67,7 @@ xcodebuild build -scheme TVAccountManager -configuration Release -destination 'p
 2. 타이틀, TVING ID, 비밀번호, 환경(QC/QA), 요금제 선택 후 저장
 3. OTP 코드 입력 (필요 시)
 4. **Login** 버튼 클릭 → WebView에서 자동 로그인 진행
-5. 프로필이 여러 개면 잠기지 않은 프로필이 자동 선택됩니다
+5. 프로필이 여러 개면 잠기지 않은 프로필이 자동 선택됩니다. 잠금 프로필만 있는 계정은 한 번 로그인해 프로필 목록이 채워진 뒤, 계정 편집에서 PIN을 저장하면 다음부터 자동으로 열립니다
 
 ### CLI로 로그인
 
@@ -104,7 +105,7 @@ tvlogin prod 483920 --profile 키즈
 | `--json` | 목록과 최종 결과를 JSON으로 출력 (진행 상황은 stderr) |
 | `--timeout <sec>` | 로그인 시퀀스 상한, 기본 120 |
 
-종료 코드: `0` 성공 · `1` 로그인 실패 · `2` 인자 오류 / 계정 없음 · `3` 타임아웃 · `4` 프로필이 전부 PIN 잠김 (직접 선택 필요) · `130` 취소
+종료 코드: `0` 성공 · `1` 로그인 실패 · `2` 인자 오류 / 계정 없음 · `3` 타임아웃 · `4` 프로필이 PIN 잠김인데 저장된 PIN이 없거나 통과 안 됨 (직접 선택 필요) · `130` 취소
 
 > 파이프·스크립트처럼 터미널이 아닌 환경에서 `--account` 없이 실행하면, 프롬프트 앞에서 멈추지 않고 바로 종료합니다.
 > `--no-profile`은 확인용입니다. TV 로그인은 프로필을 골라야 완료되므로 정상 로그인 경로가 아닙니다.
@@ -195,7 +196,8 @@ A macOS account management and auto-login app for TVING QC/QA environments.
 - **Plan tags** — None / Basic / Ad-supported / Standard / Premium
 - **OTP auto-fill** — Distributes 6 digits across individual input fields
 - **ID/PW auto-fill** — React-compatible nativeInputValueSetter
-- **Automatic profile selection** — Picks an unlocked profile after login when the account has several (age-restricted profiles come last; if every profile is locked, you pick one yourself)
+- **Automatic profile selection** — Picks an unlocked profile after login when the account has several (age-restricted profiles come last). If every profile is locked, it opens one with the profile PIN saved for the account; without a PIN you pick one yourself
+- **Profile info** — The profile list (name, lock, age setting) is collected on login. PINs for locked profiles are entered in the account editor (stored in Keychain)
 - **CLI login** — `tvlogin qa 483920` from the terminal (headless, no window)
 - **Password security** — Stored in macOS Keychain (not in JSON)
 - **Auto-update** — Sparkle-based app updates
@@ -238,7 +240,7 @@ xcodebuild build -scheme TVAccountManager -configuration Release -destination 'p
 2. Enter title, TVING ID, password, environment (QC/QA), and plan type
 3. Enter OTP code if required
 4. Click **Login** → Auto-login proceeds in WebView
-5. If the account has several profiles, an unlocked one is selected automatically
+5. If the account has several profiles, an unlocked one is selected automatically. For an account with only locked profiles, log in once so the profile list fills in, then save a PIN in the account editor
 
 ### CLI Login
 
@@ -265,7 +267,7 @@ tvlogin prod 483920 --profile Kids
 | `--json` | Emit the list and the final result as JSON (progress stays on stderr) |
 | `--timeout <sec>` | Login sequence limit, default 120 |
 
-Exit codes: `0` success · `1` login failed · `2` bad arguments / no account · `3` timeout · `4` every profile is PIN-locked (pick one yourself) · `130` cancelled
+Exit codes: `0` success · `1` login failed · `2` bad arguments / no account · `3` timeout · `4` profile is PIN-locked and no saved PIN worked (pick one yourself) · `130` cancelled
 
 > When stdin is not a terminal (pipes, scripts) and `--account` is absent, it exits immediately instead of waiting at the prompt.
 > `--no-profile` is for inspection only — TV login completes only once a profile is selected.

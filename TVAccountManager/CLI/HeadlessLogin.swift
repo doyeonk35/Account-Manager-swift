@@ -258,6 +258,14 @@ enum HeadlessLogin {
         let plan: String
         let pinned: Bool
         let hasPassword: Bool
+        let profiles: [ProfileRow]
+    }
+
+    /// 저장된 프로필. PIN 값은 내보내지 않고 저장 여부만 알린다.
+    private struct ProfileRow: Encodable {
+        let name: String
+        let locked: Bool
+        let hasPin: Bool
     }
 
     private struct ListPayload: Encodable {
@@ -271,7 +279,10 @@ enum HeadlessLogin {
             let payload = ListPayload(env: env.rawValue, accounts: accounts.map {
                 AccountRow(
                     title: $0.title, username: $0.username, plan: $0.planType.rawValue,
-                    pinned: $0.isPinned, hasPassword: !$0.password.isEmpty
+                    pinned: $0.isPinned, hasPassword: !$0.password.isEmpty,
+                    profiles: $0.profiles.map { [pins = $0.profilePins] profile in
+                        ProfileRow(name: profile.name, locked: profile.isLocked, hasPin: profile.isLocked && pins[profile.profileNo] != nil)
+                    }
                 )
             })
             print(encode(payload))
@@ -370,7 +381,13 @@ enum HeadlessLogin {
                 otpCode: otp,
                 profile: options.profile,
                 onStatusUpdate: { _, message in printErr("    \(message)") },
-                onComplete: { [weak self] outcome, message in self?.complete(outcome, message) }
+                onComplete: { [weak self] outcome, message in self?.complete(outcome, message) },
+                onProfilesFound: { [accountId = account.id] profiles in
+                    // GUI와 같은 병합 경로로 저장한다 (PIN 유지, 사라진 프로필의 PIN 삭제)
+                    let useCase = AccountUseCase(repository: AccountRepositoryImpl())
+                    var all = useCase.loadAccounts()
+                    useCase.mergeProfiles(in: &all, id: accountId, collected: profiles)
+                }
             )
 
             printErr("  → \(account.title)")
@@ -467,6 +484,8 @@ enum HeadlessLogin {
 
         --profile <name>
             프로필을 이름으로 고른다. 기본은 잠기지 않은 프로필을 자동 선택한다.
+            프로필이 전부 잠겼거나 지정한 프로필이 잠겼으면 앱에 저장된 프로필 PIN으로 연다.
+            PIN이 없거나 받아들여지지 않으면 종료 코드 4로 멈춘다 (PIN은 한 번만 넣는다).
 
         --no-profile
             프로필 선택 화면까지만 가고 멈춘다. 확인용이며 정상 로그인 경로가 아니다 —
@@ -483,7 +502,7 @@ enum HeadlessLogin {
         1    로그인 실패 (폼을 못 찾거나 자격증명 거부)
         2    인자 오류, 해당 env에 계정 없음, 키체인에 비밀번호 없음
         3    타임아웃
-        4    사람이 직접 해야 함 (프로필이 전부 PIN 잠김)
+        4    사람이 직접 해야 함 (프로필이 PIN 잠김인데 저장된 PIN이 없거나 틀림)
         130  사용자 취소
 
     EXAMPLES
