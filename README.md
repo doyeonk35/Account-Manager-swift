@@ -1,8 +1,8 @@
 # TV Account Manager
 
 <p align="center">
-  <a href="https://github.com/doyeonk35/Account-Manager-swift/releases/latest">
-    <img src="https://img.shields.io/github/v/release/doyeonk35/Account-Manager-swift?label=Download%20for%20macOS&style=for-the-badge&logo=apple&logoColor=white&color=0071e3" alt="Download Latest">
+  <a href="https://tving-tvaccountmanager.web.app/TVAccountManager.zip">
+    <img src="https://img.shields.io/badge/Download-for%20macOS-0071e3?style=for-the-badge&logo=apple&logoColor=white" alt="Download Latest">
   </a>
 </p>
 
@@ -39,8 +39,8 @@ TVING QC/QA 환경을 위한 macOS 계정 관리 및 자동 로그인 앱입니�
 
 ### 설치
 
-#### GitHub Releases
-1. [Releases](https://github.com/doyeonk35/Account-Manager-swift/releases) 페이지에서 최신 `TVAccountManager-x.x.x.zip` 다운로드
+#### 다운로드
+1. [최신 버전 다운로드](https://tving-tvaccountmanager.web.app/TVAccountManager.zip) (`TVAccountManager.zip`)
 2. 압축 해제 후 `TVAccountManager.app`을 `/Applications`로 이동
 3. 최초 실행 전 터미널에서 quarantine 플래그 제거:
 ```bash
@@ -50,8 +50,8 @@ xattr -cr /Applications/TVAccountManager.app
 
 #### 소스에서 빌드
 ```bash
-git clone https://github.com/doyeonk35/Account-Manager-swift.git
-cd Account-Manager-swift
+git clone https://github.com/TvingCorp/TVAccountManager.git
+cd TVAccountManager
 
 # Info.plist 생성 (환경 URL 설정)
 ./scripts/setup-plist.sh
@@ -212,8 +212,8 @@ A macOS account management and auto-login app for TVING QC/QA environments.
 
 ### Installation
 
-#### GitHub Releases
-1. Download the latest `TVAccountManager-x.x.x.zip` from the [Releases](https://github.com/doyeonk35/Account-Manager-swift/releases) page
+#### Download
+1. [Download the latest version](https://tving-tvaccountmanager.web.app/TVAccountManager.zip) (`TVAccountManager.zip`)
 2. Extract and move `TVAccountManager.app` to `/Applications`
 3. Remove quarantine flag before first launch:
 ```bash
@@ -223,8 +223,8 @@ xattr -cr /Applications/TVAccountManager.app
 
 #### Build from Source
 ```bash
-git clone https://github.com/doyeonk35/Account-Manager-swift.git
-cd Account-Manager-swift
+git clone https://github.com/TvingCorp/TVAccountManager.git
+cd TVAccountManager
 
 # Generate Info.plist (sets environment URLs)
 ./scripts/setup-plist.sh

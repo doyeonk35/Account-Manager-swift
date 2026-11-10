@@ -16,3 +16,4 @@ releases/
 .build/
 *.xcodeproj
 TVAccountManager/Info.plist
+.firebase/
