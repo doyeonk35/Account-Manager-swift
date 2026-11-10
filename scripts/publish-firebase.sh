@@ -1,5 +1,6 @@
 #!/bin/bash
 # Sparkle 업데이트(zip + appcast.xml)를 Firebase Hosting에 배포한다.
+# DMG는 올리지 않는다 — 무료(Spark) 플랜은 .dmg 같은 실행 파일 업로드를 거부한다 (zip은 허용).
 # 앱 이름에 의존하지 않으므로 다른 macOS 앱(예: Prog)도 이 파일과 firebase.json, .firebaserc만
 # 복사해 쓰면 된다. 앱마다 Hosting 사이트를 따로 두는 이유: 배포가 사이트 전체를 교체하기 때문.
 #

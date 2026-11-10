@@ -1,7 +1,7 @@
 # TV Account Manager
 
 <p align="center">
-  <a href="https://tving-tvaccountmanager.web.app/TVAccountManager.zip">
+  <a href="https://github.com/TvingCorp/TVAccountManager/releases/latest">
     <img src="https://img.shields.io/badge/Download-for%20macOS-0071e3?style=for-the-badge&logo=apple&logoColor=white" alt="Download Latest">
   </a>
 </p>
@@ -40,13 +40,11 @@ TVING QC/QA 환경을 위한 macOS 계정 관리 및 자동 로그인 앱입니�
 ### 설치
 
 #### 다운로드
-1. [최신 버전 다운로드](https://tving-tvaccountmanager.web.app/TVAccountManager.zip) (`TVAccountManager.zip`)
-2. 압축 해제 후 `TVAccountManager.app`을 `/Applications`로 이동
-3. 최초 실행 전 터미널에서 quarantine 플래그 제거:
-```bash
-xattr -cr /Applications/TVAccountManager.app
-```
-> 서명되지 않은 앱이므로 이 과정이 필요합니다. 이후 업데이트는 앱 내 자동 업데이트로 받을 수 있습니다.
+1. [Releases](https://github.com/TvingCorp/TVAccountManager/releases/latest)에서 `TVAccountManager-x.x.x.dmg`를 받습니다 (레포 권한 필요, 없으면 [zip](https://tving-tvaccountmanager.web.app/TVAccountManager.zip)을 받아 압축을 풀고 앱을 `Applications`로 옮깁니다)
+2. DMG를 열고, 창 안내대로 `TVAccountManager`를 `Applications` 폴더로 끌어다 놓습니다
+3. 이미 설치돼 있으면 "대치"를 누르세요. 계정과 설정은 그대로 유지됩니다
+
+> Apple 공증을 받은 앱이라 추가 설정 없이 바로 실행됩니다. 이후 업데이트는 앱 내 자동 업데이트로 받습니다.
 
 #### 소스에서 빌드
 ```bash
@@ -213,13 +211,11 @@ A macOS account management and auto-login app for TVING QC/QA environments.
 ### Installation
 
 #### Download
-1. [Download the latest version](https://tving-tvaccountmanager.web.app/TVAccountManager.zip) (`TVAccountManager.zip`)
-2. Extract and move `TVAccountManager.app` to `/Applications`
-3. Remove quarantine flag before first launch:
-```bash
-xattr -cr /Applications/TVAccountManager.app
-```
-> Required because the app is not code-signed with a Developer ID. Subsequent updates are delivered via in-app auto-update.
+1. Download `TVAccountManager-x.x.x.dmg` from [Releases](https://github.com/TvingCorp/TVAccountManager/releases/latest) (needs repository access; otherwise download the [zip](https://tving-tvaccountmanager.web.app/TVAccountManager.zip), extract it and move the app to `Applications`)
+2. Open the DMG and drag `TVAccountManager` to the `Applications` folder as shown
+3. If it is already installed, choose "Replace". Your accounts and settings are kept
+
+> The app is notarized by Apple, so it opens without extra steps. Later updates arrive through in-app auto-update.
 
 #### Build from Source
 ```bash

@@ -28,6 +28,7 @@ GENERATE_APPCAST=$(find ${SPARKLE_BIN} -name "generate_appcast" -maxdepth 1 2>/d
 [ -z "$SIGN_UPDATE" ] && err "sign_update를 찾을 수 없습니다. Xcode에서 먼저 빌드하세요."
 [ -z "$GENERATE_APPCAST" ] && err "generate_appcast를 찾을 수 없습니다."
 command -v firebase >/dev/null || err "firebase CLI가 없습니다: brew install firebase-cli"
+command -v create-dmg >/dev/null || err "create-dmg가 없습니다: brew install create-dmg"
 
 # 잘못된 피드 주소로 빌드하면 그 버전을 설치한 사람은 다시는 업데이트를 못 받는다
 PLIST_FEED=$(/usr/libexec/PlistBuddy -c "Print :SUFeedURL" "${PROJECT_DIR}/TVAccountManager/Info.plist")
@@ -96,7 +97,10 @@ log "EdDSA 서명..."
 SIGNATURE=$("$SIGN_UPDATE" "$ZIP_PATH" 2>&1)
 log "서명 정보: ${SIGNATURE}"
 
-# 6. Firebase Hosting 배포 (피드 + zip)
+# 6. 신규 설치용 DMG (안내 창 + 서명·공증)
+"${PROJECT_DIR}/scripts/make-dmg.sh" "$ZIP_PATH" "$VERSION"
+
+# 7. Firebase Hosting 배포 (피드 + zip) — DMG는 GitHub Release에 첨부한다
 ZIP_SIZE=$(stat -f%z "$ZIP_PATH")
 ED_SIG=$(echo "$SIGNATURE" | grep -o 'sparkle:edSignature="[^"]*"' | sed 's/sparkle:edSignature="//;s/"//')
 [ -n "$ED_SIG" ] || err "EdDSA 서명을 얻지 못했습니다."
@@ -105,7 +109,7 @@ DOWNLOAD_URL=$("${PROJECT_DIR}/scripts/publish-firebase.sh" "$ZIP_PATH" "$VERSIO
     | tee /dev/stderr | sed -n 's/^DOWNLOAD_URL=//p')
 [ -n "$DOWNLOAD_URL" ] || err "Firebase 배포 실패"
 
-# 7. 이전 피드(docs/appcast.xml, 개인 레포 GitHub Pages) 갱신
+# 8. 이전 피드(docs/appcast.xml, 개인 레포 GitHub Pages) 갱신
 # ponytail: 1.5.0 이하 설치본이 새 피드로 넘어오기 위한 다리. 개인 레포를 비공개로 돌린 뒤에는 이 단계를 지운다.
 log "이전 피드(docs/appcast.xml) 갱신..."
 PUB_DATE=$(date -R)
@@ -131,7 +135,7 @@ open('docs/appcast.xml', 'w').write(xml)
 PYEOF
 rm -f "$ITEM_FILE"
 
-# 8. .build 정리
+# 9. .build 정리
 rm -rf "${PROJECT_DIR}/.build"
 
 echo ""
@@ -143,4 +147,4 @@ echo "다음 단계:"
 echo "  1. git add -A && git commit -m \"release: v${VERSION}\" && git tag v${VERSION}"
 echo "  2. git push origin main --tags                # TvingCorp 레포"
 echo "  3. git push personal main                     # 이전 피드(Pages) 갱신 — 다리 릴리스 기간에만"
-echo "  4. gh release create v${VERSION} \"${ZIP_PATH}\" --title \"v${VERSION}\"   # 기록용 (선택)"
+echo "  4. gh release create v${VERSION} \"${ZIP_PATH%.zip}.dmg\" \"${ZIP_PATH}\" --title \"v${VERSION}\"   # 신규 설치용 DMG"
