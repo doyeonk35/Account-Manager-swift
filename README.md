@@ -19,7 +19,10 @@ TVING QC/QA 환경을 위한 macOS 계정 관리 및 자동 로그인 앱입니�
 - **멀티 계정 관리** — 추가 / 수정 / 삭제
 - **계정 일괄 등록** — JSON 파일에서 여러 계정을 한번에 불러오기 (중복 자동 건너뜀)
 - **계정 내보내기** — 현재 계정 목록을 JSON 파일로 저장 (비밀번호 포함/제외 선택, 저장 후 Finder로 열기)
-- **환경 구분** — QC / QA 로그인 URL 분리, 명시적 저장 버튼
+- **메뉴바** — OTP 입력칸과 계정 최대 3개(고정 계정 먼저, 남는 자리는 최근 사용 순). 창 없이 백그라운드로 로그인하고, 프로필을 직접 골라야 하면 "창에서 로그인"을 제안
+- **환경 설정** — QC 로그인 서버(개발/운영) 전환, QC / QA 로그인 URL 검증. 바꾸지 않은 URL은 앱 업데이트의 기본값을 자동으로 따름
+- **로그인 시 실행** — Mac에 로그인하면 메뉴바로만 시작
+- **툴팁** — 버튼·아이콘에 마우스를 올리면 설명과 단축키 표시
 - **요금제 태그** — 구독 없음 / 베이직 / 광고 요금제 / 스탠다드 / 프리미엄
 - **OTP 자동 입력** — 6자리 코드 자동 분배 입력
 - **ID/PW 자동 완성** — React 호환 nativeInputValueSetter 방식
@@ -27,7 +30,7 @@ TVING QC/QA 환경을 위한 macOS 계정 관리 및 자동 로그인 앱입니�
 - **프로필 정보 저장** — 로그인할 때 프로필 목록(이름·잠금·연령)을 자동 수집. 잠금 프로필 PIN은 계정 편집에서 입력 (Keychain 저장)
 - **CLI 로그인** — 터미널에서 `tvlogin qa 483920` (창 없는 헤드리스 로그인)
 - **비밀번호 보안** — macOS Keychain 저장 (JSON에 평문 미포함)
-- **자동 업데이트** — Sparkle 기반 앱 업데이트
+- **자동 업데이트** — Sparkle 기반, 설정에서 자동 확인 켜고 끄기
 - **사용 가이드** — 앱 내 온보딩 가이드 (6페이지)
 - **다크/라이트 모드** — 시스템 설정 자동 대응
 - **한/영 지원** — 시스템 로케일 자동 대응
@@ -67,6 +70,27 @@ xcodebuild build -scheme TVAccountManager -configuration Release -destination 'p
 4. **Login** 버튼 클릭 → WebView에서 자동 로그인 진행
 5. 프로필이 여러 개면 잠기지 않은 프로필이 자동 선택됩니다. 잠금 프로필만 있는 계정은 한 번 로그인해 프로필 목록이 채워진 뒤, 계정 편집에서 PIN을 저장하면 다음부터 자동으로 열립니다
 
+### 메뉴바에서 로그인
+
+메뉴바의 TV 아이콘을 누르면 OTP 입력칸과 계정 최대 3개가 나옵니다. 고정한 계정이 먼저 나오고, 남는 자리는 최근에 쓴 계정으로 채웁니다.
+
+1. TV 화면의 6자리 코드를 입력합니다
+2. 계정 옆 **Login**을 누릅니다. 창은 뜨지 않고 15~20초 안에 끝납니다
+3. 잠금 프로필 PIN이 없거나 실패하면 **창에서 로그인**이 나타납니다. 누르면 로그인 창에서 직접 이어갈 수 있습니다
+
+메뉴바 표시와 로그인 시 실행은 설정 > 일반에서 켜고 끕니다.
+
+### 설정
+
+| 화면 | 항목 |
+|---|---|
+| 일반 | 메뉴바 표시 · 로그인 시 실행 · 계정 불러오기/내보내기 · 사용 가이드 · 자동 업데이트 확인 |
+| 환경 | QC 로그인 서버(개발/운영) · QC 개발 URL · QA URL · 기본값으로 초기화 |
+
+- **QC 로그인 서버**를 운영으로 바꾸면 QC 계정이 `user.tving.com`으로 로그인합니다. 바로 적용되고, 상태바와 메뉴바에 "QC → 운영" 배지가 붙습니다. 개발 URL은 그대로 보관됩니다
+- URL을 기본값 그대로 두면 저장되지 않고, 앱 업데이트로 기본값이 바뀌면 자동으로 따라갑니다. 직접 바꾼 URL만 저장됩니다
+- 단축키: `⌘,` 설정 · `⌘N` 계정 추가 · `⌘↩` 편집/저장 · `⌘S` URL 저장 · `Esc` 취소
+
 ### CLI로 로그인
 
 앱 창을 띄우지 않고 터미널에서 바로 로그인합니다. 로그인은 보이지 않는 헤드리스 WebView에서 진행됩니다.
@@ -95,7 +119,7 @@ tvlogin prod 483920 --profile 키즈
 
 | 인자 / 옵션 | 설명 |
 |---|---|
-| `<env>` | `qc` \| `qa` \| `prod` — `prod`는 QC 계정에 운영 URL (설정은 바뀌지 않음) |
+| `<env>` | `qc` \| `qa` \| `prod` — `prod`는 QC 계정에 운영 URL (설정은 바뀌지 않음). `qc`는 앱의 QC 로그인 서버 설정(개발/운영)을 따름 |
 | `<otp>` | TV 화면에 뜬 6자리 숫자. 생략하면 목록만 출력 |
 | `--account <title>` | 계정 지정. 생략하면 화살표 선택기 (title 완전일치 → 접두사 → username) |
 | `--profile <name>` | 프로필 이름 지정 (기본: 자동 선택) |
@@ -151,7 +175,16 @@ tvlogin prod 483920 --profile 키즈
 | 계정 메타데이터 | `~/Library/Containers/com.tv.account-manager/Data/Library/Application Support/tving-login-manager/accounts.json` |
 | 비밀번호 | macOS Keychain (`com.tving.login-manager`) |
 | 일괄 등록 파일 | 위 폴더의 `presets.json` (설정 > 일반 > **불러오기 폴더 열기**) |
-| 로그인 URL 설정 | UserDefaults |
+| 로그인 URL 설정 | UserDefaults (기본값과 다를 때만 저장) |
+
+### 릴리스 (관리자용)
+
+```bash
+brew install firebase-cli create-dmg   # 최초 1회, firebase login 필요
+./scripts/release.sh 1.7.0
+```
+
+Release 빌드 → 회사 Developer ID 재서명 → 공증 → zip·DMG → Sparkle 서명 → Firebase Hosting(`tving-tvaccountmanager.web.app`)에 피드와 zip 배포까지 한 번에 합니다. 끝나면 출력된 순서대로 커밋·태그·푸시하고 `gh release create`로 DMG를 GitHub 릴리스에 올립니다. Firebase는 무료(Spark) 플랜이라 DMG는 올릴 수 없어 GitHub 릴리스에만 둡니다.
 
 ### 아키텍처
 
@@ -163,7 +196,6 @@ Clean Architecture + TCA-inspired 단방향 Store 패턴
 | Data | RepositoryImpl (Keychain + JSON) |
 | Presentation | State / Action / Reducer, Store |
 | Views | SwiftUI (3-column NavigationSplitView) |
-| CLI | Headless login entry point + picker helper (`tvlogin`) |
 | CLI | 헤드리스 로그인 진입점 + 선택기 헬퍼 (`tvlogin`) |
 
 ### 기술 스택
@@ -174,9 +206,10 @@ Clean Architecture + TCA-inspired 단방향 Store 패턴
 | 상태 관리 | TCA-inspired 단방향 Store |
 | 브라우저 자동화 | WKWebView + JavaScript injection |
 | 보안 | Security.framework (Keychain Services) |
-| 자동 업데이트 | Sparkle (EdDSA 서명) |
+| 자동 업데이트 | Sparkle (EdDSA 서명) + Firebase Hosting 피드 |
+| 설치 파일 | DMG (create-dmg, 공증) |
 | CLI UI | Noora (Tuist) — 화살표 선택기 |
-| 테스트 | Swift Testing (143 tests) |
+| 테스트 | Swift Testing (179 tests) |
 | 프로젝트 생성 | XcodeGen |
 
 ---
@@ -190,7 +223,10 @@ A macOS account management and auto-login app for TVING QC/QA environments.
 - **Multi-account management** — Add / Edit / Delete
 - **Bulk import** — Import multiple accounts from a JSON file (duplicates auto-skipped)
 - **Export** — Save the account list to a JSON file (choose whether to include passwords, revealed in Finder when done)
-- **Environment separation** — QC / QA login URLs with explicit save
+- **Menu bar** — OTP field and up to 3 accounts (pinned first, then recently used). Logs in in the background without a window, and offers "Log In in Window" when you need to pick a profile yourself
+- **Environment settings** — Switch the QC login server (development / production), validated QC / QA login URLs. URLs left at their default follow app updates automatically
+- **Launch at login** — Starts in the menu bar when you log in to your Mac
+- **Tooltips** — Hover over buttons and icons for a description and shortcut
 - **Plan tags** — None / Basic / Ad-supported / Standard / Premium
 - **OTP auto-fill** — Distributes 6 digits across individual input fields
 - **ID/PW auto-fill** — React-compatible nativeInputValueSetter
@@ -198,7 +234,7 @@ A macOS account management and auto-login app for TVING QC/QA environments.
 - **Profile info** — The profile list (name, lock, age setting) is collected on login. PINs for locked profiles are entered in the account editor (stored in Keychain)
 - **CLI login** — `tvlogin qa 483920` from the terminal (headless, no window)
 - **Password security** — Stored in macOS Keychain (not in JSON)
-- **Auto-update** — Sparkle-based app updates
+- **Auto-update** — Sparkle-based, automatic checks can be turned off in Settings
 - **Usage guide** — Built-in onboarding guide (6 pages)
 - **Dark/Light mode** — Follows system appearance
 - **Localization** — English and Korean (follows system locale)
@@ -238,6 +274,27 @@ xcodebuild build -scheme TVAccountManager -configuration Release -destination 'p
 4. Click **Login** → Auto-login proceeds in WebView
 5. If the account has several profiles, an unlocked one is selected automatically. For an account with only locked profiles, log in once so the profile list fills in, then save a PIN in the account editor
 
+### Menu Bar Login
+
+Click the TV icon in the menu bar for the OTP field and up to 3 accounts. Pinned accounts come first; remaining slots show recently used accounts.
+
+1. Enter the 6-digit code shown on the TV
+2. Click **Login** next to an account. No window opens; it finishes in 15–20 seconds
+3. If a locked profile has no PIN or the PIN fails, **Log In in Window** appears so you can continue in the login window
+
+Turn the menu bar icon and launch at login on or off in Settings > General.
+
+### Settings
+
+| Page | Items |
+|---|---|
+| General | Show in Menu Bar · Launch at Login · import/export accounts · usage guide · automatic update checks |
+| Environment | QC login server (development / production) · QC development URL · QA URL · Reset to Defaults |
+
+- Switching the **QC login server** to production makes QC accounts log in to `user.tving.com`. It applies immediately and shows a "QC → Production" badge in the status bar and menu bar. The development URL is kept
+- URLs left at their default are not stored, so they follow new defaults shipped in app updates. Only URLs you change are saved
+- Shortcuts: `⌘,` Settings · `⌘N` add account · `⌘↩` edit/save · `⌘S` save URLs · `Esc` cancel
+
 ### CLI Login
 
 Log in from the terminal without opening the app window. The login runs in a hidden headless WebView.
@@ -255,7 +312,7 @@ tvlogin prod 483920 --profile Kids
 
 | Argument / Option | Description |
 |---|---|
-| `<env>` | `qc` \| `qa` \| `prod` — `prod` uses QC accounts with the production URL (settings untouched) |
+| `<env>` | `qc` \| `qa` \| `prod` — `prod` uses QC accounts with the production URL (settings untouched). `qc` follows the app's QC login server setting |
 | `<otp>` | The 6-digit code shown on the TV. Omit it to only list accounts |
 | `--account <title>` | Pick an account without the picker (exact title → prefix → username) |
 | `--profile <name>` | Pick a profile by name (default: automatic) |
@@ -311,7 +368,16 @@ The file lands in the import folder as `accounts-export-2026-09-11-094957.json`;
 | Account metadata | `~/Library/Containers/com.tv.account-manager/Data/Library/Application Support/tving-login-manager/accounts.json` |
 | Passwords | macOS Keychain (`com.tving.login-manager`) |
 | Bulk import file | `presets.json` in the folder above (Settings > General > **Open Import Folder**) |
-| Login URL settings | UserDefaults |
+| Login URL settings | UserDefaults (only when different from the default) |
+
+### Releasing (maintainers)
+
+```bash
+brew install firebase-cli create-dmg   # once; requires firebase login
+./scripts/release.sh 1.7.0
+```
+
+Builds Release, re-signs with the company Developer ID, notarizes, makes the zip and DMG, signs for Sparkle and deploys the feed and zip to Firebase Hosting (`tving-tvaccountmanager.web.app`) in one go. Then commit, tag and push as printed, and attach the DMG with `gh release create`. Firebase runs on the free Spark plan, which rejects DMG uploads, so the DMG lives only on the GitHub release.
 
 ### Architecture
 
@@ -323,6 +389,7 @@ Clean Architecture + TCA-inspired unidirectional Store pattern
 | Data | RepositoryImpl (Keychain + JSON) |
 | Presentation | State / Action / Reducer, Store |
 | Views | SwiftUI (3-column NavigationSplitView) |
+| CLI | Headless login entry point + picker helper (`tvlogin`) |
 
 ### Tech Stack
 
@@ -332,9 +399,10 @@ Clean Architecture + TCA-inspired unidirectional Store pattern
 | State management | TCA-inspired unidirectional Store |
 | Browser automation | WKWebView + JavaScript injection |
 | Security | Security.framework (Keychain Services) |
-| Auto-update | Sparkle (EdDSA signing) |
+| Auto-update | Sparkle (EdDSA signing) + Firebase Hosting feed |
+| Installer | DMG (create-dmg, notarized) |
 | CLI UI | Noora (Tuist) — arrow-key picker |
-| Testing | Swift Testing (143 tests) |
+| Testing | Swift Testing (179 tests) |
 | Project generation | XcodeGen |
 
 ---
