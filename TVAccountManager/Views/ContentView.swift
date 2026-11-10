@@ -74,6 +74,9 @@ struct ContentView: View {
                         .font(.footnote)
                         .foregroundStyle(accountStore.state.isLoggingIn ? .orange : .secondary)
                     Spacer()
+                    if settingsStore.state.isUsingProdURL {
+                        ProductionBadge()
+                    }
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 8)

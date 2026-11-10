@@ -1,5 +1,6 @@
 import SwiftUI
 import Sparkle
+import ServiceManagement
 
 struct SettingsView: View {
     @Binding var selectedCategory: SettingsCategory?
@@ -26,6 +27,7 @@ struct SettingsEnvironmentView: View {
                 TextField("QC Login URL", text: store.binding(\.draftQcLoginURL, send: SettingsAction.setDraftQcLoginURL))
                     .accessibilityIdentifier("settings_qc_url")
                     .textFieldStyle(.roundedBorder)
+                InvalidURLNote(url: store.state.draftQcLoginURL)
                 Text("Default: \(SettingsState.defaultQcURL)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -37,6 +39,7 @@ struct SettingsEnvironmentView: View {
                 TextField("QA Login URL", text: store.binding(\.draftQaLoginURL, send: SettingsAction.setDraftQaLoginURL))
                     .accessibilityIdentifier("settings_qa_url")
                     .textFieldStyle(.roundedBorder)
+                InvalidURLNote(url: store.state.draftQaLoginURL)
                 Text("Default: \(SettingsState.defaultQaURL)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -79,7 +82,7 @@ struct SettingsEnvironmentView: View {
                     }
                     .accessibilityIdentifier("settings_save")
                     .buttonStyle(.borderedProminent)
-                    .disabled(!store.state.hasUnsavedChanges)
+                    .disabled(!store.state.canSave)
                 }
             }
         }
@@ -91,11 +94,52 @@ struct SettingsEnvironmentView: View {
     }
 }
 
+private struct InvalidURLNote: View {
+    let url: String
+
+    var body: some View {
+        if !SettingsState.isValidLoginURL(url) {
+            Label("Enter a full https:// URL.", systemImage: "exclamationmark.triangle.fill")
+                .font(.caption)
+                .foregroundStyle(.red)
+        }
+    }
+}
+
 // MARK: - General Settings
 
 struct SettingsGeneralView: View {
     let updater: SPUUpdater
     @EnvironmentObject var accountStore: AccountStore
+    @AppStorage("showMenuBarExtra") private var showMenuBarExtra = true
+    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
+    @State private var launchAtLoginError: String?
+
+    private static var versionText: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "-"
+        let build = info?["CFBundleVersion"] as? String ?? "-"
+        return "\(version) (\(build))"
+    }
+
+    private func setLaunchAtLogin(_ enabled: Bool) {
+        do {
+            if enabled {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
+            launchAtLoginError = nil
+        } catch {
+            launchAtLoginError = error.localizedDescription
+        }
+        if SMAppService.mainApp.status == .requiresApproval {
+            launchAtLoginError = String(localized: "Allow the app in System Settings › General › Login Items.")
+            SMAppService.openSystemSettingsLoginItems()
+        }
+        // 실패하거나 사용자 승인 대기면 실제 상태로 되돌린다
+        launchAtLogin = SMAppService.mainApp.status == .enabled
+    }
 
     private var importAlertTitle: LocalizedStringKey {
         guard let result = accountStore.state.importResult else { return "" }
@@ -214,6 +258,25 @@ struct SettingsGeneralView: View {
             }
 
             Section {
+                Toggle("Show in Menu Bar", isOn: $showMenuBarExtra)
+                    .accessibilityIdentifier("settings_show_menubar")
+                Toggle("Launch at Login", isOn: Binding(
+                    get: { launchAtLogin },
+                    set: setLaunchAtLogin
+                ))
+                .accessibilityIdentifier("settings_launch_at_login")
+                if let launchAtLoginError {
+                    Text(launchAtLoginError)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            } header: {
+                Text("Menu Bar")
+            } footer: {
+                Text("The menu bar shows the OTP field and up to 3 accounts: pinned accounts first, then recently used ones.")
+            }
+
+            Section {
                 Button {
                     NotificationCenter.default.post(name: .showOnboarding, object: nil)
                 } label: {
@@ -226,7 +289,8 @@ struct SettingsGeneralView: View {
 
             Section {
                 LabeledContent("Version") {
-                    Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "-")
+                    Text(verbatim: Self.versionText)
+                        .textSelection(.enabled)
                 }
             } header: {
                 Text("App Info")

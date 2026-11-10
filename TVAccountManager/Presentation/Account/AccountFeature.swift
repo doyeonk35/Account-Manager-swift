@@ -73,6 +73,11 @@ struct AccountState {
     var otpCode = ""
     var showLoginWebView = false
     var loginAccount: AccountInfo?
+    var backgroundLoginAccountId: UUID?
+    /// 진행 중인 메뉴바 로그인 실행 id — 늦게 도착한 이전 실행의 결과를 걸러낸다
+    var backgroundLoginRunId: UUID?
+    /// 백그라운드 로그인이 사람 손을 필요로 끝난 계정 — 메뉴바가 "창에서 로그인"을 제안한다
+    var windowLoginFallbackId: UUID?
 
     // Delete confirmation
     var accountToDelete: AccountInfo?
@@ -145,6 +150,15 @@ struct AccountState {
         accounts.filter(\.isPinned).count
     }
 
+    /// 메뉴바에 보일 계정 (최대 3개): 고정 계정을 고정한 순서대로 먼저, 남는 자리는 최근 사용 순.
+    var menuBarAccounts: [AccountInfo] {
+        let pinned = accounts.filter(\.isPinned).sorted {
+            ($0.pinnedAt ?? .distantPast) < ($1.pinnedAt ?? .distantPast)
+        }
+        let recent = accounts.filter { !$0.isPinned }.sorted { $0.lastUsed > $1.lastUsed }
+        return Array((pinned + recent).prefix(3))
+    }
+
     var exportedFileURL: URL? {
         guard case .success(let url, _, _) = exportResult else { return nil }
         return url
@@ -187,6 +201,11 @@ enum AccountAction: Sendable {
     case dismissLoginWebView
     case setOtpCode(String)
     case profilesCollected(accountId: UUID, profiles: [ProfileInfo])
+
+    // Menu bar (창 없이 백그라운드 로그인)
+    case startBackgroundLogin(AccountInfo)
+    case backgroundLoginFinished(runId: UUID, accountId: UUID, outcome: LoginOutcome, message: String, profiles: [ProfileInfo]?)
+    case cancelBackgroundLogin
 
     // Preset import
     case importPresets
@@ -346,6 +365,7 @@ enum AccountEnvironment {
             case .startLogin(let account):
                 guard !state.isLoggingIn else { return .none }
                 state.isLoggingIn = true
+                state.windowLoginFallbackId = nil
                 state.loginStatus = String(localized: "Logging in...")
                 state.selectedAccountId = account.id
 
@@ -356,7 +376,8 @@ enum AccountEnvironment {
                 return .none
 
             case .loginCompleted(let success, let message):
-                state.isLoggingIn = false
+                // 창 로그인 결과가 진행 중인 메뉴바 로그인의 잠금을 풀면 안 된다
+                if state.backgroundLoginRunId == nil { state.isLoggingIn = false }
                 state.loginStatus = message
                 if success, let id = state.loginAccount?.id {
                     useCase.markUsed(in: &state.accounts, id: id)
@@ -364,8 +385,10 @@ enum AccountEnvironment {
                 return .none
 
             case .cancelLogin:
-                state.isLoggingIn = false
-                state.loginStatus = String(localized: "Login cancelled.")
+                if state.backgroundLoginRunId == nil {
+                    state.isLoggingIn = false
+                    state.loginStatus = String(localized: "Login cancelled.")
+                }
                 state.showLoginWebView = false
                 state.loginAccount = nil
                 return .none
@@ -376,12 +399,69 @@ enum AccountEnvironment {
                 return .none
 
             case .setOtpCode(let value):
-                state.otpCode = value
+                // 붙여넣기한 "123 456" 같은 값도 받되 숫자 6자리만 남긴다
+                state.otpCode = String(value.filter { $0.isASCII && $0.isNumber }.prefix(6))
                 return .none
 
             case .profilesCollected(let accountId, let profiles):
                 useCase.mergeProfiles(in: &state.accounts, id: accountId, collected: profiles)
                 return .none
+
+            // MARK: - Menu Bar
+
+            case .startBackgroundLogin(let account):
+                guard !state.isLoggingIn else { return .none }
+                let runId = UUID()
+                state.isLoggingIn = true
+                state.backgroundLoginRunId = runId
+                state.backgroundLoginAccountId = account.id
+                state.windowLoginFallbackId = nil
+                state.loginStatus = String(localized: "Logging in...")
+
+                var target = account
+                target.password = useCase.loadPassword(forAccountId: account.id) ?? account.password
+                let loginTarget = target
+                let otp = state.otpCode
+                let url = SettingsState.loginURL(for: account.accountType)
+                return .run {
+                    let result = await BackgroundLogin.run(runId: runId, account: loginTarget, otp: otp, url: url)
+                    return .backgroundLoginFinished(
+                        runId: runId, accountId: loginTarget.id, outcome: result.outcome,
+                        message: result.message, profiles: result.profiles
+                    )
+                }
+
+            case .backgroundLoginFinished(let runId, let id, let outcome, let message, let profiles):
+                if let profiles {
+                    useCase.mergeProfiles(in: &state.accounts, id: id, collected: profiles)
+                }
+                // 취소됐거나 다른 실행으로 대체된 실행의 결과는 화면 상태에 반영하지 않는다
+                guard runId == state.backgroundLoginRunId else { return .none }
+                state.isLoggingIn = false
+                state.backgroundLoginRunId = nil
+                state.backgroundLoginAccountId = nil
+                state.loginStatus = message
+                switch outcome {
+                case .submitted, .profileSelected, .profileSkipped:
+                    useCase.markUsed(in: &state.accounts, id: id)
+                    state.otpCode = ""   // 페어링 코드는 한 번 쓰면 끝난다
+                case .credentialsFilled, .profilePending, .profileNotFound, .failed:
+                    // 창 없이는 사람이 프로필을 고를 수 없다 — 창에서 다시 하도록 제안
+                    state.windowLoginFallbackId = id
+                }
+                return .none
+
+            case .cancelBackgroundLogin:
+                guard let runId = state.backgroundLoginRunId else { return .none }
+                // 사용자가 취소한 것이므로 창 로그인 제안 없이 바로 정리한다. 늦게 오는 결과는 runId로 걸러진다.
+                state.isLoggingIn = false
+                state.backgroundLoginRunId = nil
+                state.backgroundLoginAccountId = nil
+                state.loginStatus = String(localized: "Login cancelled.")
+                return .run {
+                    await BackgroundLogin.cancel(runId: runId)
+                    return nil
+                }
 
             // MARK: - Preset Import
 

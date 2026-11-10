@@ -355,6 +355,142 @@ struct AccountFeatureTests {
         #expect(store.state.otpCode == "123456")
     }
 
+    @Test("OTP는 숫자 6자리만 남긴다")
+    func setOtpCodeFiltersDigits() {
+        store.send(.setOtpCode(" 123 4a56789"))
+        #expect(store.state.otpCode == "123456")
+    }
+
+    // MARK: - Menu Bar
+
+    /// 리듀서를 직접 호출해 백그라운드 로그인을 "시작된 상태"로 만든다 (효과는 실행하지 않는다 — WebView 안 뜸).
+    private func startedBackgroundLogin(_ account: AccountInfo, otp: String = "123456") -> (AccountState, UUID) {
+        repository.storedAccounts = [account]
+        let reduce = AccountEnvironment.reducer(useCase: useCase)
+        var state = AccountState()
+        _ = reduce(&state, .load)
+        _ = reduce(&state, .setOtpCode(otp))
+        _ = reduce(&state, .startBackgroundLogin(account))
+        return (state, state.backgroundLoginRunId!)
+    }
+
+    private func reduce(_ state: inout AccountState, _ action: AccountAction) {
+        _ = AccountEnvironment.reducer(useCase: useCase)(&state, action)
+    }
+
+    @Test("백그라운드 로그인 성공 시 사용일시를 기록하고 OTP를 비운다")
+    func backgroundLoginSuccess() {
+        let old = Date(timeIntervalSince1970: 0)
+        let account = AccountInfo(title: "A", username: "u", lastUsed: old)
+        var (state, runId) = startedBackgroundLogin(account)
+        #expect(state.isLoggingIn)
+
+        reduce(&state, .backgroundLoginFinished(runId: runId, accountId: account.id,
+                                                outcome: .profileSelected("p"), message: "ok", profiles: nil))
+
+        #expect(state.accounts[0].lastUsed > old)
+        #expect(state.otpCode.isEmpty)
+        #expect(state.windowLoginFallbackId == nil)
+        #expect(!state.isLoggingIn)
+        #expect(state.backgroundLoginRunId == nil)
+        #expect(state.loginStatus == "ok")
+    }
+
+    @Test("백그라운드 로그인이 사람 손이 필요하면 창 로그인을 제안하고 OTP는 남긴다", arguments: [
+        LoginOutcome.profilePending, .failed, .profileNotFound(["x"]), .credentialsFilled,
+    ])
+    func backgroundLoginNeedsWindow(outcome: LoginOutcome) {
+        let old = Date(timeIntervalSince1970: 0)
+        let account = AccountInfo(title: "A", username: "u", lastUsed: old)
+        var (state, runId) = startedBackgroundLogin(account)
+
+        reduce(&state, .backgroundLoginFinished(runId: runId, accountId: account.id,
+                                                outcome: outcome, message: "m", profiles: nil))
+
+        #expect(state.windowLoginFallbackId == account.id)
+        #expect(state.otpCode == "123456")
+        #expect(state.accounts[0].lastUsed == old)
+        #expect(!state.isLoggingIn)
+    }
+
+    @Test("대체되거나 취소된 실행의 늦은 결과는 진행 중인 로그인 상태를 바꾸지 않는다")
+    func staleBackgroundResultIgnored() {
+        let account = AccountInfo(title: "A", username: "u")
+        var (state, runId) = startedBackgroundLogin(account)
+
+        reduce(&state, .backgroundLoginFinished(runId: UUID(), accountId: account.id,
+                                                outcome: .failed, message: "stale", profiles: nil))
+
+        #expect(state.isLoggingIn)
+        #expect(state.backgroundLoginRunId == runId)
+        #expect(state.windowLoginFallbackId == nil)
+        #expect(state.loginStatus != "stale")
+    }
+
+    @Test("메뉴바 로그인을 취소하면 창 로그인 제안 없이 정리되고, 늦은 결과는 무시된다")
+    func cancelBackgroundLogin() {
+        let account = AccountInfo(title: "A", username: "u")
+        var (state, runId) = startedBackgroundLogin(account)
+
+        reduce(&state, .cancelBackgroundLogin)
+        #expect(!state.isLoggingIn)
+        #expect(state.backgroundLoginRunId == nil)
+
+        reduce(&state, .backgroundLoginFinished(runId: runId, accountId: account.id,
+                                                outcome: .failed, message: "late", profiles: nil))
+        #expect(state.windowLoginFallbackId == nil)
+        #expect(state.loginStatus == String(localized: "Login cancelled."))
+    }
+
+    @Test("창 로그인 시트를 닫아도 진행 중인 메뉴바 로그인의 잠금은 유지된다")
+    func sheetActionsKeepBackgroundLock() {
+        let account = AccountInfo(title: "A", username: "u")
+        var (state, _) = startedBackgroundLogin(account)
+
+        reduce(&state, .loginCompleted(success: true, message: "sheet"))
+        #expect(state.isLoggingIn)
+        reduce(&state, .cancelLogin)
+        #expect(state.isLoggingIn)
+    }
+
+    @Test("창 로그인을 시작하면 창 로그인 제안을 지운다")
+    func startLoginClearsFallback() {
+        let account = AccountInfo(title: "A", username: "u")
+        var (state, runId) = startedBackgroundLogin(account)
+        reduce(&state, .backgroundLoginFinished(runId: runId, accountId: account.id,
+                                                outcome: .failed, message: "m", profiles: nil))
+        #expect(state.windowLoginFallbackId == account.id)
+
+        reduce(&state, .startLogin(account))
+
+        #expect(state.windowLoginFallbackId == nil)
+    }
+
+    @Test("메뉴바 계정: 고정 계정이 고정 순서로 먼저, 남는 자리는 최근 사용 순")
+    func menuBarAccountsPinnedThenRecent() {
+        let now = Date()
+        var state = AccountState()
+        state.accounts = [
+            AccountInfo(title: "old", username: "u1", lastUsed: now.addingTimeInterval(-300)),
+            AccountInfo(title: "pin2", username: "u2", lastUsed: now.addingTimeInterval(-900),
+                        isPinned: true, pinnedAt: now),
+            AccountInfo(title: "newest", username: "u3", lastUsed: now),
+            AccountInfo(title: "pin1", username: "u4", lastUsed: now.addingTimeInterval(-900),
+                        isPinned: true, pinnedAt: now.addingTimeInterval(-60)),
+        ]
+        #expect(state.menuBarAccounts.map(\.title) == ["pin1", "pin2", "newest"])
+    }
+
+    @Test("메뉴바 계정: 고정 계정이 없으면 최근 사용 순 3개")
+    func menuBarAccountsRecentOnly() {
+        let now = Date()
+        var state = AccountState()
+        state.accounts = (0..<5).map {
+            AccountInfo(title: "a\($0)", username: "u\($0)", lastUsed: now.addingTimeInterval(Double(-$0)))
+        }
+        #expect(state.menuBarAccounts.map(\.title) == ["a0", "a1", "a2"])
+    }
+
     // MARK: - Preset Import
 
     private func writePresetsFile(_ presets: [PresetAccount]) throws {
