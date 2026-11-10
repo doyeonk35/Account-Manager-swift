@@ -21,6 +21,19 @@ struct SettingsState {
         draftQcLoginURL != qcLoginURL || draftQaLoginURL != qaLoginURL
     }
 
+    var canSave: Bool {
+        hasUnsavedChanges && Self.isValidLoginURL(draftQcLoginURL) && Self.isValidLoginURL(draftQaLoginURL)
+    }
+
+    /// https 이고 호스트가 있어야 한다. 잘못된 URL은 로그인 창이 "Preparing..."에서 멈추는 원인이 된다.
+    static func isValidLoginURL(_ string: String) -> Bool {
+        guard let url = URL(string: string.trimmingCharacters(in: .whitespaces)),
+              url.scheme?.lowercased() == "https",
+              let host = url.host(), !host.isEmpty
+        else { return false }
+        return true
+    }
+
     init(
         qcLoginURL: String = UserDefaults.standard.string(forKey: "loginURL_QC") ?? defaultQcURL,
         qaLoginURL: String = UserDefaults.standard.string(forKey: "loginURL_QA") ?? defaultQaURL
@@ -32,14 +45,11 @@ struct SettingsState {
     }
 
     static func loginURL(for accountType: AccountType) -> URL {
-        switch accountType {
-        case .qc:
-            let urlString = UserDefaults.standard.string(forKey: "loginURL_QC") ?? defaultQcURL
-            return URL(string: urlString) ?? URL(string: defaultQcURL)!
-        case .qa:
-            let urlString = UserDefaults.standard.string(forKey: "loginURL_QA") ?? defaultQaURL
-            return URL(string: urlString) ?? URL(string: defaultQaURL)!
-        }
+        let (key, fallback) = accountType == .qa ? ("loginURL_QA", defaultQaURL) : ("loginURL_QC", defaultQcURL)
+        // 검증 도입 전에 저장됐거나 직접 써 넣은 잘못된 값은 쓰지 않는다
+        let stored = UserDefaults.standard.string(forKey: key)?.trimmingCharacters(in: .whitespaces)
+        let urlString = stored.flatMap { isValidLoginURL($0) ? $0 : nil } ?? fallback
+        return URL(string: urlString) ?? URL(string: prodURL)!
     }
 }
 
@@ -70,6 +80,9 @@ enum SettingsEnvironment {
             return .none
 
         case .saveChanges:
+            guard state.canSave else { return .none }
+            state.draftQcLoginURL = state.draftQcLoginURL.trimmingCharacters(in: .whitespaces)
+            state.draftQaLoginURL = state.draftQaLoginURL.trimmingCharacters(in: .whitespaces)
             state.qcLoginURL = state.draftQcLoginURL
             state.qaLoginURL = state.draftQaLoginURL
             UserDefaults.standard.set(state.qcLoginURL, forKey: "loginURL_QC")

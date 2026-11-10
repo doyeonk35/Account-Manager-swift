@@ -117,4 +117,33 @@ struct SettingsFeatureTests {
         // 운영 URL은 소스에 박힌 상수이므로 값 자체를 검증한다.
         #expect(SettingsState.prodURL == "https://user.tving.com/tv/login/qrcode.tving")
     }
+
+    // MARK: - URL validation
+
+    @Test("로그인 URL은 https와 호스트가 있어야 한다", arguments: [
+        ("https://user.tving.com/tv/login", true),
+        (" https://qc.tving.com/ ", true),
+        ("http://user.tving.com/", false),
+        ("user.tving.com", false),
+        ("https://", false),
+        ("", false),
+    ])
+    func validatesLoginURL(url: String, valid: Bool) {
+        #expect(SettingsState.isValidLoginURL(url) == valid)
+    }
+
+    @Test("잘못된 URL은 저장되지 않는다")
+    func invalidURLIsNotSaved() {
+        store.send(.setDraftQcLoginURL("not a url"))
+        #expect(!store.state.canSave)
+        store.send(.saveChanges)
+        #expect(store.state.qcLoginURL == SettingsState.defaultQcURL)
+    }
+
+    @Test("저장된 URL이 검증을 통과하지 못하면 기본 URL로 로그인한다")
+    func invalidStoredURLFallsBack() {
+        UserDefaults.standard.set("user.tving.com/tv/login", forKey: "loginURL_QA")
+        defer { UserDefaults.standard.removeObject(forKey: "loginURL_QA") }
+        #expect(SettingsState.loginURL(for: .qa).absoluteString == SettingsState.defaultQaURL)
+    }
 }
