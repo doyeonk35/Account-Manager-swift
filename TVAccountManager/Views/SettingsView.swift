@@ -24,47 +24,47 @@ struct SettingsEnvironmentView: View {
     var body: some View {
         Form {
             Section {
-                TextField("QC Login URL", text: store.binding(\.draftQcLoginURL, send: SettingsAction.setDraftQcLoginURL))
-                    .accessibilityIdentifier("settings_qc_url")
-                    .textFieldStyle(.roundedBorder)
-                InvalidURLNote(url: store.state.draftQcLoginURL)
-                Text("Default: \(SettingsState.defaultQcURL)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } header: {
-                Text("QC Environment")
-            }
+                Picker("Login Server", selection: Binding(
+                    get: { store.state.qcUsesProduction },
+                    set: { store.send(.setQcUsesProduction($0)) }
+                )) {
+                    Text("Development").tag(false)
+                    Text("Production").tag(true)
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("settings_qc_target")
+                .help(Text("Choose which server QC accounts log in to. Applies immediately."))
 
-            Section {
-                TextField("QA Login URL", text: store.binding(\.draftQaLoginURL, send: SettingsAction.setDraftQaLoginURL))
-                    .accessibilityIdentifier("settings_qa_url")
-                    .textFieldStyle(.roundedBorder)
-                InvalidURLNote(url: store.state.draftQaLoginURL)
-                Text("Default: \(SettingsState.defaultQaURL)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } header: {
-                Text("QA Environment")
-            }
-
-            Section {
-                Button {
-                    store.send(.useProductionURL)
-                } label: {
-                    HStack {
-                        Label("Use Production URL", systemImage: "globe")
-                        Spacer()
-                        if store.state.isUsingProdURL {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
-                        }
+                if store.state.qcUsesProduction {
+                    LabeledContent("Production URL") {
+                        Text(verbatim: SettingsState.prodURL)
+                            .textSelection(.enabled)
+                            .foregroundStyle(.secondary)
                     }
                 }
-                .disabled(store.state.isUsingProdURL)
+                URLField(
+                    title: "Development URL",
+                    text: store.binding(\.draftQcLoginURL, send: SettingsAction.setDraftQcLoginURL),
+                    defaultURL: SettingsState.defaultQcURL,
+                    identifier: "settings_qc_url"
+                )
             } header: {
-                Text("Quick Switch")
+                Text("QC Environment")
             } footer: {
-                Text("Switches QC login URL to production (user.tving.com). Use 'Reset to Defaults' to restore.")
+                if store.state.qcUsesProduction {
+                    Text("QC accounts log in to production. Your development URL is kept for when you switch back.")
+                }
+            }
+
+            Section {
+                URLField(
+                    title: "Login URL",
+                    text: store.binding(\.draftQaLoginURL, send: SettingsAction.setDraftQaLoginURL),
+                    defaultURL: SettingsState.defaultQaURL,
+                    identifier: "settings_qa_url"
+                )
+            } header: {
+                Text("QA Environment")
             }
 
             Section {
@@ -74,6 +74,7 @@ struct SettingsEnvironmentView: View {
                     }
                     .accessibilityIdentifier("settings_reset")
                     .controlSize(.small)
+                    .help(Text("Use the app's default URLs and the development server. Defaults follow app updates."))
 
                     Spacer()
 
@@ -83,7 +84,11 @@ struct SettingsEnvironmentView: View {
                     .accessibilityIdentifier("settings_save")
                     .buttonStyle(.borderedProminent)
                     .disabled(!store.state.canSave)
+                    .keyboardShortcut("s", modifiers: .command)
+                    .help(Text("Save URL changes (⌘S)"))
                 }
+            } footer: {
+                Text("URLs left at their default follow app updates automatically.")
             }
         }
         .formStyle(.grouped)
@@ -94,14 +99,37 @@ struct SettingsEnvironmentView: View {
     }
 }
 
-private struct InvalidURLNote: View {
-    let url: String
+/// 로그인 URL 입력칸: 검증 안내 + 기본값 사용 여부 + 기본값으로 되돌리기
+private struct URLField: View {
+    let title: LocalizedStringKey
+    @Binding var text: String
+    let defaultURL: String
+    let identifier: String
 
     var body: some View {
-        if !SettingsState.isValidLoginURL(url) {
+        TextField(title, text: $text)
+            .accessibilityIdentifier(identifier)
+            .textFieldStyle(.roundedBorder)
+        if !SettingsState.isValidLoginURL(text) {
             Label("Enter a full https:// URL.", systemImage: "exclamationmark.triangle.fill")
                 .font(.caption)
                 .foregroundStyle(.red)
+        }
+        HStack {
+            if text.trimmingCharacters(in: .whitespaces) == defaultURL {
+                Label("Using the default URL", systemImage: "checkmark.circle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("Default: \(defaultURL)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                Spacer()
+                Button("Use Default") { text = defaultURL }
+                    .controlSize(.small)
+                    .help(Text("Fill in the app's default URL. Save to apply."))
+            }
         }
     }
 }
@@ -114,6 +142,7 @@ struct SettingsGeneralView: View {
     @AppStorage("showMenuBarExtra") private var showMenuBarExtra = true
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var launchAtLoginError: String?
+    @State private var updaterRefresh = false   // Sparkle 값이 바뀌면 다시 그리게 하는 신호
 
     private static var versionText: String {
         let info = Bundle.main.infoDictionary
@@ -200,6 +229,7 @@ struct SettingsGeneralView: View {
                     Label("Open Import Folder", systemImage: "folder")
                 }
                 .accessibilityIdentifier("settings_open_presets_folder")
+                .help(Text("Open the folder that holds presets.json and the example file"))
 
                 Button {
                     accountStore.send(.importPresets)
@@ -207,6 +237,7 @@ struct SettingsGeneralView: View {
                     Label("Import Accounts from File", systemImage: "tray.and.arrow.down")
                 }
                 .accessibilityIdentifier("settings_import_presets")
+                .help(Text("Add accounts from presets.json. Existing accounts are skipped."))
 
                 Button {
                     accountStore.send(.startExport)
@@ -214,6 +245,7 @@ struct SettingsGeneralView: View {
                     Label("Export Accounts to File", systemImage: "square.and.arrow.up")
                 }
                 .accessibilityIdentifier("settings_export_accounts")
+                .help(Text("Save all accounts to a file you can import on another Mac"))
                 .disabled(accountStore.state.accounts.isEmpty)
                 .confirmationDialog("Export Accounts?",
                                     isPresented: Binding(
@@ -260,11 +292,13 @@ struct SettingsGeneralView: View {
             Section {
                 Toggle("Show in Menu Bar", isOn: $showMenuBarExtra)
                     .accessibilityIdentifier("settings_show_menubar")
+                    .help(Text("Show the OTP field and up to 3 accounts in the menu bar"))
                 Toggle("Launch at Login", isOn: Binding(
                     get: { launchAtLogin },
                     set: setLaunchAtLogin
                 ))
                 .accessibilityIdentifier("settings_launch_at_login")
+                .help(Text("Start in the menu bar when you log in to your Mac"))
                 if let launchAtLoginError {
                     Text(launchAtLoginError)
                         .font(.caption)
@@ -283,6 +317,7 @@ struct SettingsGeneralView: View {
                     Label("View Usage Guide", systemImage: "questionmark.circle")
                 }
                 .accessibilityIdentifier("settings_show_guide")
+                .help(Text("Show the first-run guide again"))
             } header: {
                 Text("Help")
             }
@@ -297,9 +332,16 @@ struct SettingsGeneralView: View {
             }
 
             Section {
+                Toggle("Check for Updates Automatically", isOn: Binding(
+                    get: { _ = updaterRefresh; return updater.automaticallyChecksForUpdates },
+                    set: { updater.automaticallyChecksForUpdates = $0; updaterRefresh.toggle() }
+                ))
+                .accessibilityIdentifier("settings_auto_update")
+                .help(Text("Check for new versions in the background and offer to install them"))
                 CheckForUpdatesView(
                     viewModel: CheckForUpdatesViewModel(updater: updater)
                 )
+                .help(Text("Check for a new version now"))
             } header: {
                 Text("Updates")
             }

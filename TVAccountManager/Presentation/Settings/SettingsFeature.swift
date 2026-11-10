@@ -3,8 +3,11 @@ import Foundation
 typealias SettingsStore = Store<SettingsState, SettingsAction>
 
 struct SettingsState {
+    /// QC·QA 개발 서버 URL. 사용자가 바꾸지 않았으면 앱 기본값(Info.plist)과 같다.
     var qcLoginURL: String
     var qaLoginURL: String
+    /// QC 계정을 운영 서버로 로그인한다. 개발 URL은 그대로 보존된다.
+    var qcUsesProduction: Bool
 
     var draftQcLoginURL: String
     var draftQaLoginURL: String
@@ -13,9 +16,11 @@ struct SettingsState {
     static let defaultQaURL = Bundle.main.object(forInfoDictionaryKey: "DefaultQALoginURL") as? String ?? ""
     static let prodURL = "https://user.tving.com/tv/login/qrcode.tving"
 
-    var isUsingProdURL: Bool {
-        qcLoginURL == Self.prodURL
-    }
+    static let qcURLKey = "loginURL_QC"
+    static let qaURLKey = "loginURL_QA"
+    static let qcTargetKey = "qcTarget"   // "production" 이면 운영, 없으면 개발
+
+    var isUsingProdURL: Bool { qcUsesProduction }
 
     var hasUnsavedChanges: Bool {
         draftQcLoginURL != qcLoginURL || draftQaLoginURL != qaLoginURL
@@ -35,21 +40,48 @@ struct SettingsState {
     }
 
     init(
-        qcLoginURL: String = UserDefaults.standard.string(forKey: "loginURL_QC") ?? defaultQcURL,
-        qaLoginURL: String = UserDefaults.standard.string(forKey: "loginURL_QA") ?? defaultQaURL
+        qcLoginURL: String = UserDefaults.standard.string(forKey: qcURLKey) ?? defaultQcURL,
+        qaLoginURL: String = UserDefaults.standard.string(forKey: qaURLKey) ?? defaultQaURL,
+        qcUsesProduction: Bool = UserDefaults.standard.string(forKey: qcTargetKey) == "production"
     ) {
         self.qcLoginURL = qcLoginURL
         self.qaLoginURL = qaLoginURL
+        self.qcUsesProduction = qcUsesProduction
         self.draftQcLoginURL = qcLoginURL
         self.draftQaLoginURL = qaLoginURL
     }
 
     static func loginURL(for accountType: AccountType) -> URL {
-        let (key, fallback) = accountType == .qa ? ("loginURL_QA", defaultQaURL) : ("loginURL_QC", defaultQcURL)
+        if accountType == .qc, UserDefaults.standard.string(forKey: qcTargetKey) == "production" {
+            return URL(string: prodURL)!
+        }
+        let (key, fallback) = accountType == .qa ? (qaURLKey, defaultQaURL) : (qcURLKey, defaultQcURL)
         // 검증 도입 전에 저장됐거나 직접 써 넣은 잘못된 값은 쓰지 않는다
         let stored = UserDefaults.standard.string(forKey: key)?.trimmingCharacters(in: .whitespaces)
         let urlString = stored.flatMap { isValidLoginURL($0) ? $0 : nil } ?? fallback
         return URL(string: urlString) ?? URL(string: prodURL)!
+    }
+
+    /// 기본값과 같은 URL은 저장하지 않는다 — 저장해 두면 업데이트로 기본값이 바뀌어도 옛 값에 묶인다.
+    static func persistURL(_ url: String, key: String, default defaultURL: String, in defaults: UserDefaults = .standard) {
+        if url == defaultURL {
+            defaults.removeObject(forKey: key)
+        } else {
+            defaults.set(url, forKey: key)
+        }
+    }
+
+    /// 1.6.0 이하가 남긴 값 정리: 기본값을 그대로 복사해 둔 키는 지우고,
+    /// "Use Production URL"로 QC URL을 덮어쓴 경우는 QC 대상=운영으로 옮긴다.
+    static func migrateStoredURLs(in defaults: UserDefaults = .standard) {
+        // "https://user.tving.com/"는 6월 이전 QC 기본값 — 운영 서버라 운영으로 옮긴다
+        let storedQC = defaults.string(forKey: qcURLKey)?.trimmingCharacters(in: .whitespaces)
+        if storedQC == prodURL || storedQC == "https://user.tving.com/" {
+            defaults.set("production", forKey: qcTargetKey)
+            defaults.removeObject(forKey: qcURLKey)
+        }
+        if defaults.string(forKey: qcURLKey) == defaultQcURL { defaults.removeObject(forKey: qcURLKey) }
+        if defaults.string(forKey: qaURLKey) == defaultQaURL { defaults.removeObject(forKey: qaURLKey) }
     }
 }
 
@@ -60,7 +92,7 @@ enum SettingsAction: Sendable {
     case saveChanges
     case discardChanges
     case resetToDefaults
-    case useProductionURL
+    case setQcUsesProduction(Bool)
 }
 
 enum SettingsEnvironment {
@@ -85,8 +117,8 @@ enum SettingsEnvironment {
             state.draftQaLoginURL = state.draftQaLoginURL.trimmingCharacters(in: .whitespaces)
             state.qcLoginURL = state.draftQcLoginURL
             state.qaLoginURL = state.draftQaLoginURL
-            UserDefaults.standard.set(state.qcLoginURL, forKey: "loginURL_QC")
-            UserDefaults.standard.set(state.qaLoginURL, forKey: "loginURL_QA")
+            SettingsState.persistURL(state.qcLoginURL, key: SettingsState.qcURLKey, default: SettingsState.defaultQcURL)
+            SettingsState.persistURL(state.qaLoginURL, key: SettingsState.qaURLKey, default: SettingsState.defaultQaURL)
             return .none
 
         case .discardChanges:
@@ -99,14 +131,19 @@ enum SettingsEnvironment {
             state.qaLoginURL = SettingsState.defaultQaURL
             state.draftQcLoginURL = SettingsState.defaultQcURL
             state.draftQaLoginURL = SettingsState.defaultQaURL
-            UserDefaults.standard.set(SettingsState.defaultQcURL, forKey: "loginURL_QC")
-            UserDefaults.standard.set(SettingsState.defaultQaURL, forKey: "loginURL_QA")
+            state.qcUsesProduction = false
+            UserDefaults.standard.removeObject(forKey: SettingsState.qcURLKey)
+            UserDefaults.standard.removeObject(forKey: SettingsState.qaURLKey)
+            UserDefaults.standard.removeObject(forKey: SettingsState.qcTargetKey)
             return .none
 
-        case .useProductionURL:
-            state.qcLoginURL = SettingsState.prodURL
-            state.draftQcLoginURL = SettingsState.prodURL
-            UserDefaults.standard.set(SettingsState.prodURL, forKey: "loginURL_QC")
+        case .setQcUsesProduction(let enabled):
+            state.qcUsesProduction = enabled
+            if enabled {
+                UserDefaults.standard.set("production", forKey: SettingsState.qcTargetKey)
+            } else {
+                UserDefaults.standard.removeObject(forKey: SettingsState.qcTargetKey)
+            }
             return .none
         }
     }

@@ -35,6 +35,7 @@ struct AccountEditView: View {
                         Image(systemName: showPassword ? "eye.slash" : "eye")
                     }
                     .buttonStyle(.borderless)
+                    .help(showPassword ? Text("Hide password") : Text("Show password"))
                 }
                 Picker("Account Type", selection: store.binding(\.editAccountType, send: AccountAction.setEditAccountType)) {
                     ForEach(AccountType.allCases, id: \.self) { type in
@@ -74,6 +75,7 @@ struct AccountEditView: View {
                 }
                 .disabled(!store.state.editIsPinned && store.state.pinnedCount >= 2)
                 .accessibilityIdentifier("edit_pin")
+                .help(Text("Pinned accounts stay on top of the list and the menu bar (up to 2)."))
             } header: {
                 Text(store.state.editingAccountId != nil ? LocalizedStringKey("Edit Account") : LocalizedStringKey("New Account"))
             }
@@ -99,6 +101,7 @@ struct AccountEditView: View {
                                     .textFieldStyle(.roundedBorder)
                                     .frame(width: 110)
                                     .accessibilityIdentifier("edit_profile_pin_\(profile.profileNo)")
+                                    .help(Text("Saved in the Keychain. Used to open this profile during auto login."))
                                 }
                             }
                         }
@@ -112,12 +115,14 @@ struct AccountEditView: View {
                         store.send(.cancelEditing)
                     }
                     .accessibilityIdentifier("edit_cancel")
+                    .help(Text("Discard changes (Esc)"))
                     .keyboardShortcut(.escape, modifiers: [])
                     Spacer()
                     Button(store.state.editingAccountId != nil ? LocalizedStringKey("Update") : LocalizedStringKey("Save")) {
                         store.send(.saveEdit)
                     }
                     .accessibilityIdentifier("edit_save")
+                    .help(Text("Save (⌘↩)"))
                     .keyboardShortcut(.return, modifiers: .command)
                     .buttonStyle(.borderedProminent)
                     .disabled(!store.state.isEditFormValid)

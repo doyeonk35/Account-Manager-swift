@@ -20,7 +20,7 @@ struct MenuBarView: View {
                 }
             }
 
-            TextField("Enter 6-digit code", text: store.binding(\.otpCode, send: AccountAction.setOtpCode))
+            OTPField()
                 .textFieldStyle(.roundedBorder)
                 .font(.system(.title3, design: .monospaced).bold())
                 .accessibilityIdentifier("menubar_otp_field")
@@ -49,10 +49,12 @@ struct MenuBarView: View {
                 Button("Open Main Window") {
                     showMainWindow()
                 }
+                .help(Text("Open the account list and settings"))
                 Spacer()
                 Button("Quit") {
                     NSApp.terminate(nil)
                 }
+                .help(Text("Quit TVAccountManager"))
             }
             .buttonStyle(.borderless)
         }
@@ -66,6 +68,7 @@ struct MenuBarView: View {
                 Image(systemName: "pin.fill")
                     .font(.caption)
                     .foregroundStyle(.orange)
+                    .help(Text("Pinned to top"))
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(account.title.isEmpty ? account.username : account.title)
@@ -82,6 +85,7 @@ struct MenuBarView: View {
                 Button("Cancel") {
                     store.send(.cancelBackgroundLogin)
                 }
+                .help(Text("Stop this login"))
             } else {
                 Button("Login") {
                     store.send(.startBackgroundLogin(account))
@@ -89,6 +93,9 @@ struct MenuBarView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(!isOtpComplete || store.state.isLoggingIn)
                 .accessibilityIdentifier("menubar_login_\(account.title)")
+                .help(isOtpComplete
+                      ? Text("Log in without opening a window")
+                      : Text("Enter the 6-digit OTP code first"))
             }
         }
     }
@@ -106,6 +113,7 @@ struct MenuBarView: View {
                     store.send(.startLogin(account))
                 }
                 .controlSize(.small)
+                .help(Text("Continue in the login window, where you can pick a profile yourself. You may need a new OTP code."))
             }
         }
     }

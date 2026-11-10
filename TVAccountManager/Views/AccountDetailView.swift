@@ -63,11 +63,13 @@ struct AccountDetailView: View {
                     }
                     .keyboardShortcut(.return, modifiers: .command)
                     .buttonStyle(.borderedProminent)
+                    .help(Text("Edit account (⌘↩)"))
 
                     Button("Login") {
                         store.send(.startLogin(account))
                     }
                     .disabled(store.state.isLoggingIn)
+                    .help(Text("Log the TV in with this account using the OTP code"))
 
                     Spacer()
 
@@ -76,6 +78,7 @@ struct AccountDetailView: View {
                     } label: {
                         Label("Delete", systemImage: "trash")
                     }
+                    .help(Text("Delete account"))
                 }
             }
         }
@@ -113,6 +116,7 @@ struct ProfileLabel: View {
                 Image(systemName: "lock.fill")
                     .foregroundStyle(.secondary)
                     .accessibilityLabel(Text("Locked"))
+                    .help(Text("Locked profile — needs a PIN"))
             }
             Text(profile.gradeDisplayName)
                 .font(.caption)

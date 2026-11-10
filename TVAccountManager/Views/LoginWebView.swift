@@ -25,6 +25,7 @@ struct LoginWebView: View {
                     store.send(.cancelLogin)
                 }
                 .keyboardShortcut(.escape, modifiers: [])
+                .help(Text("Stop and close the login window (Esc)"))
             }
             .padding(12)
 

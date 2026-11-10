@@ -10,7 +10,7 @@ struct AccountListView: View {
                     Label("OTP Code", systemImage: "lock.shield")
                         .foregroundStyle(.primary)
                         .font(.body.bold())
-                    TextField("Enter 6-digit code", text: store.binding(\.otpCode, send: AccountAction.setOtpCode))
+                    OTPField()
                         .accessibilityIdentifier("otp_field")
                         .textFieldStyle(.roundedBorder)
                         .frame(maxWidth: .infinity)
@@ -38,6 +38,7 @@ struct AccountListView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
                     .buttonStyle(.plain)
+                    .help(Text("Show \(tab.displayName) accounts"))
                 }
                 Spacer()
             }
@@ -57,6 +58,7 @@ struct AccountListView: View {
                     }
                 }
                 .pickerStyle(.menu)
+                .help(Text("Sort accounts. Pinned accounts always stay on top."))
 
                 Button {
                     store.send(.toggleSortDirection)
@@ -120,6 +122,7 @@ struct AccountListView: View {
                         Image(systemName: "pin.fill")
                             .font(.caption)
                             .foregroundStyle(.orange)
+                            .help(Text("Pinned to top"))
                     }
                     Text(account.title)
                         .font(.headline)
@@ -156,6 +159,7 @@ struct AccountListView: View {
                         .labelStyle(.iconOnly)
                 }
                 .accessibilityIdentifier("edit_\(account.title)")
+                .help(Text("Edit account"))
                 .buttonStyle(.borderless)
 
                 Button(role: .destructive) {
@@ -165,12 +169,14 @@ struct AccountListView: View {
                         .labelStyle(.iconOnly)
                 }
                 .accessibilityIdentifier("delete_\(account.title)")
+                .help(Text("Delete account"))
                 .buttonStyle(.borderless)
 
                 Button("Login") {
                     store.send(.startLogin(account))
                 }
                 .accessibilityIdentifier("login_\(account.title)")
+                .help(Text("Log the TV in with this account using the OTP code"))
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
                 .disabled(store.state.isLoggingIn)

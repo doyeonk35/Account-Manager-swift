@@ -66,6 +66,7 @@ struct OnboardingView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(currentPage == 0)
+                .help(Text("Previous"))
                 .opacity(currentPage == 0 ? 0.3 : 1)
 
                 pageContent(onboardingPages[currentPage])
@@ -80,6 +81,7 @@ struct OnboardingView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(currentPage == onboardingPages.count - 1)
+                .help(Text("Next"))
                 .opacity(currentPage == onboardingPages.count - 1 ? 0.3 : 1)
             }
             .padding(.horizontal, 16)

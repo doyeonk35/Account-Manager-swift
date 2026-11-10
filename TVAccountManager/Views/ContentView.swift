@@ -91,6 +91,7 @@ struct ContentView: View {
                             Label("Add Account", systemImage: "plus")
                         }
                         .accessibilityIdentifier("add_account")
+                        .help(Text("Add Account (⌘N)"))
                         .keyboardShortcut("n", modifiers: .command)
                         .disabled(accountStore.state.isEditing)
                     }
@@ -147,6 +148,7 @@ struct ContentView: View {
                 openWindow(id: "onboarding")
             }
         }
+        .background(LoginLaunchWindowCloser())
         .onReceive(NotificationCenter.default.publisher(for: .showOnboarding)) { _ in
             openWindow(id: "onboarding")
         }

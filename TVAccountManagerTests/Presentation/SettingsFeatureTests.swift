@@ -2,7 +2,7 @@ import Testing
 import Foundation
 @testable import TVAccountManager
 
-@Suite("SettingsFeature Reducer")
+@Suite("SettingsFeature Reducer", .serialized)   // UserDefaults.standard 공유
 @MainActor
 struct SettingsFeatureTests {
 
@@ -11,6 +11,7 @@ struct SettingsFeatureTests {
     init() {
         UserDefaults.standard.removeObject(forKey: "loginURL_QC")
         UserDefaults.standard.removeObject(forKey: "loginURL_QA")
+        UserDefaults.standard.removeObject(forKey: SettingsState.qcTargetKey)
         store = SettingsStore(
             initialState: SettingsState(
                 qcLoginURL: SettingsState.defaultQcURL,
@@ -101,7 +102,74 @@ struct SettingsFeatureTests {
         #expect(store.state.draftQcLoginURL == SettingsState.defaultQcURL)
         #expect(store.state.draftQaLoginURL == SettingsState.defaultQaURL)
         #expect(store.state.hasUnsavedChanges == false)
-        #expect(UserDefaults.standard.string(forKey: "loginURL_QC") == SettingsState.defaultQcURL)
+        // 기본값은 저장하지 않는다 — 다음 업데이트의 기본값을 따라가야 한다
+        #expect(UserDefaults.standard.string(forKey: "loginURL_QC") == nil)
+        #expect(UserDefaults.standard.string(forKey: "loginURL_QA") == nil)
+    }
+
+    @Test("기본값과 같은 URL로 저장하면 저장된 값을 지운다")
+    func savingDefaultRemovesOverride() {
+        store.send(.setDraftQcLoginURL("https://custom-qc.tving.com/"))
+        store.send(.saveChanges)
+        #expect(UserDefaults.standard.string(forKey: "loginURL_QC") == "https://custom-qc.tving.com/")
+
+        store.send(.setDraftQcLoginURL(SettingsState.defaultQcURL))
+        store.send(.saveChanges)
+
+        #expect(UserDefaults.standard.string(forKey: "loginURL_QC") == nil)
+        #expect(SettingsState.loginURL(for: .qc).absoluteString == SettingsState.defaultQcURL)
+    }
+
+    // MARK: - QC target
+
+    @Test("QC 대상을 운영으로 바꾸면 운영 URL로 로그인하고, 개발 URL은 보존된다")
+    func qcTargetProduction() {
+        store.send(.setDraftQcLoginURL("https://custom-qc.tving.com/"))
+        store.send(.saveChanges)
+
+        store.send(.setQcUsesProduction(true))
+        #expect(store.state.isUsingProdURL)
+        #expect(SettingsState.loginURL(for: .qc).absoluteString == SettingsState.prodURL)
+        #expect(SettingsState.loginURL(for: .qa).absoluteString == SettingsState.defaultQaURL)
+
+        store.send(.setQcUsesProduction(false))
+        #expect(SettingsState.loginURL(for: .qc).absoluteString == "https://custom-qc.tving.com/")
+    }
+
+    @Test("기본값으로 초기화하면 QC 대상도 개발로 돌아간다")
+    func resetClearsProduction() {
+        store.send(.setQcUsesProduction(true))
+        store.send(.resetToDefaults)
+        #expect(!store.state.qcUsesProduction)
+        #expect(UserDefaults.standard.string(forKey: SettingsState.qcTargetKey) == nil)
+    }
+
+    // MARK: - Migration
+
+    @Test("이전 버전이 남긴 값 정리: 기본값 복사본은 지우고, 운영 URL은 QC 대상=운영으로 옮긴다")
+    func migratesLegacyValues() throws {
+        let suite = "SettingsMigrationTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        defaults.set(SettingsState.prodURL, forKey: SettingsState.qcURLKey)
+        defaults.set(SettingsState.defaultQaURL, forKey: SettingsState.qaURLKey)
+        SettingsState.migrateStoredURLs(in: defaults)
+        #expect(defaults.string(forKey: SettingsState.qcTargetKey) == "production")
+        #expect(defaults.string(forKey: SettingsState.qcURLKey) == nil)
+        #expect(defaults.string(forKey: SettingsState.qaURLKey) == nil)
+
+        // 6월 이전 QC 기본값(운영 호스트)도 운영으로 옮긴다
+        defaults.removeObject(forKey: SettingsState.qcTargetKey)
+        defaults.set("https://user.tving.com/", forKey: SettingsState.qcURLKey)
+        SettingsState.migrateStoredURLs(in: defaults)
+        #expect(defaults.string(forKey: SettingsState.qcTargetKey) == "production")
+        #expect(defaults.string(forKey: SettingsState.qcURLKey) == nil)
+
+        // 사용자가 직접 바꾼 값은 남긴다
+        defaults.set("https://custom-qa.tving.com/", forKey: SettingsState.qaURLKey)
+        SettingsState.migrateStoredURLs(in: defaults)
+        #expect(defaults.string(forKey: SettingsState.qaURLKey) == "https://custom-qa.tving.com/")
     }
 
     // MARK: - Default values
