@@ -3,6 +3,14 @@
     <channel>
         <title>TVAccountManager</title>
         <item>
+            <title>1.7.0</title>
+            <pubDate>Tue, 10 Nov 2026 18:53:08 +0900</pubDate>
+            <sparkle:version>19</sparkle:version>
+            <sparkle:shortVersionString>1.7.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://tving-tvaccountmanager.web.app/1.7.0/TVAccountManager-1.7.0.zip" length="8350064" type="application/octet-stream" sparkle:edSignature="yzXSxbve8x11zq4+2il/mW9pQ/+u7l7+XoiRTgPxM7OIzM+c/WkpmRaXvM4JYT71lFO/kQ07j9m6AEHywel/Aw=="/>
+        </item>
+        <item>
             <title>1.6.0</title>
             <pubDate>Tue, 10 Nov 2026 17:44:06 +0900</pubDate>
             <sparkle:version>18</sparkle:version>
