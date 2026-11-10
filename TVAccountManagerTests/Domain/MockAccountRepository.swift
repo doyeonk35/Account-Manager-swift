@@ -5,6 +5,7 @@ import Foundation
 final class MockAccountRepository: AccountRepository {
     var storedAccounts: [AccountInfo] = []
     var storedPasswords: [UUID: String] = [:]
+    var storedPins: [String: String] = [:]
 
     var loadAccountsCallCount = 0
     var saveAccountsCallCount = 0
@@ -33,5 +34,17 @@ final class MockAccountRepository: AccountRepository {
     func deletePassword(forAccountId id: UUID) {
         deletePasswordCallCount += 1
         storedPasswords.removeValue(forKey: id)
+    }
+
+    func loadProfilePin(forAccountId id: UUID, profileNo: Int) -> String? {
+        storedPins[KeychainService.profilePinKey(accountId: id, profileNo: profileNo)]
+    }
+
+    func saveProfilePin(_ pin: String, forAccountId id: UUID, profileNo: Int) {
+        storedPins[KeychainService.profilePinKey(accountId: id, profileNo: profileNo)] = pin
+    }
+
+    func deleteProfilePin(forAccountId id: UUID, profileNo: Int) {
+        storedPins.removeValue(forKey: KeychainService.profilePinKey(accountId: id, profileNo: profileNo))
     }
 }

@@ -35,6 +35,9 @@ struct AccountInfo: Identifiable {
     var createdAt: Date
     var isPinned: Bool
     var pinnedAt: Date?
+    var profiles: [ProfileInfo]
+    /// profileNo → PIN. Memory only — stored in Keychain, NOT in JSON
+    var profilePins: [Int: String]
 
     init(
         id: UUID = UUID(),
@@ -47,7 +50,9 @@ struct AccountInfo: Identifiable {
         lastUsed: Date = Date(),
         createdAt: Date = Date(),
         isPinned: Bool = false,
-        pinnedAt: Date? = nil
+        pinnedAt: Date? = nil,
+        profiles: [ProfileInfo] = [],
+        profilePins: [Int: String] = [:]
     ) {
         self.id = id
         self.title = title
@@ -60,6 +65,8 @@ struct AccountInfo: Identifiable {
         self.createdAt = createdAt
         self.isPinned = isPinned
         self.pinnedAt = pinnedAt
+        self.profiles = profiles
+        self.profilePins = profilePins
     }
 
     static func generateRandomTitle() -> String {
@@ -101,6 +108,7 @@ extension AccountInfo: Codable {
         case createdAt = "created_at"
         case isPinned = "is_pinned"
         case pinnedAt = "pinned_at"
+        case profiles
     }
 
     func encode(to encoder: Encoder) throws {
@@ -116,6 +124,8 @@ extension AccountInfo: Codable {
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(isPinned, forKey: .isPinned)
         try container.encodeIfPresent(pinnedAt, forKey: .pinnedAt)
+        try container.encode(profiles, forKey: .profiles)
+        // profilePins intentionally NOT encoded — stored in Keychain
     }
 
     init(from decoder: Decoder) throws {
@@ -133,5 +143,8 @@ extension AccountInfo: Codable {
         createdAt = (try? container.decode(Date.self, forKey: .createdAt)) ?? lastUsed
         isPinned = (try? container.decode(Bool.self, forKey: .isPinned)) ?? false
         pinnedAt = try? container.decode(Date.self, forKey: .pinnedAt)
+        // Migration: profiles가 없는 기존 JSON 호환
+        profiles = (try? container.decode([ProfileInfo].self, forKey: .profiles)) ?? []
+        profilePins = [:]
     }
 }

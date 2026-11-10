@@ -7,11 +7,15 @@ struct PresetAccount: Codable {
     let accountType: AccountType
     let planType: PlanType
     let memo: String
+    let profiles: [ProfileInfo]?
+    /// profileNo(문자열) → PIN. 비밀번호를 포함해 내보낼 때만 채운다.
+    let profilePins: [String: String]?
 
     enum CodingKeys: String, CodingKey {
-        case title, username, password, memo
+        case title, username, password, memo, profiles
         case accountType = "account_type"
         case planType = "plan_type"
+        case profilePins = "profile_pins"
     }
 
     init(
@@ -20,7 +24,9 @@ struct PresetAccount: Codable {
         password: String,
         accountType: AccountType,
         planType: PlanType = .none,
-        memo: String = ""
+        memo: String = "",
+        profiles: [ProfileInfo]? = nil,
+        profilePins: [String: String]? = nil
     ) {
         self.title = title
         self.username = username
@@ -28,6 +34,17 @@ struct PresetAccount: Codable {
         self.accountType = accountType
         self.planType = planType
         self.memo = memo
+        self.profiles = profiles
+        self.profilePins = profilePins
+    }
+
+    /// 형식이 맞는 PIN만 profileNo 키로 돌려준다.
+    var validProfilePins: [Int: String] {
+        var pins: [Int: String] = [:]
+        for (key, pin) in profilePins ?? [:] {
+            if let no = Int(key), ProfileInfo.isValidPin(pin) { pins[no] = pin }
+        }
+        return pins
     }
 }
 
@@ -106,7 +123,11 @@ extension PresetAccount {
             password: includePassword ? account.password : "",
             accountType: account.accountType,
             planType: account.planType,
-            memo: account.memo
+            memo: account.memo,
+            profiles: account.profiles.isEmpty ? nil : account.profiles,
+            profilePins: includePassword && !account.profilePins.isEmpty
+                ? Dictionary(uniqueKeysWithValues: account.profilePins.map { (String($0.key), $0.value) })
+                : nil
         )
     }
 

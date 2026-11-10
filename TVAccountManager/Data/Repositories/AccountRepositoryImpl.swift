@@ -29,4 +29,16 @@ final class AccountRepositoryImpl: AccountRepository {
     func deletePassword(forAccountId id: UUID) {
         keychain.deletePassword(forAccountId: id)
     }
+
+    func loadProfilePin(forAccountId id: UUID, profileNo: Int) -> String? {
+        keychain.load(forKey: KeychainService.profilePinKey(accountId: id, profileNo: profileNo))
+    }
+
+    func saveProfilePin(_ pin: String, forAccountId id: UUID, profileNo: Int) {
+        keychain.saveOrUpdate(pin, forKey: KeychainService.profilePinKey(accountId: id, profileNo: profileNo))
+    }
+
+    func deleteProfilePin(forAccountId id: UUID, profileNo: Int) {
+        keychain.delete(forKey: KeychainService.profilePinKey(accountId: id, profileNo: profileNo))
+    }
 }
