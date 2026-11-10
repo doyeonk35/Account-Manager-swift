@@ -109,7 +109,13 @@ struct ContentView: View {
                 case .environment:
                     SettingsEnvironmentView()
                 case .general:
-                    SettingsGeneralView(updater: updater)
+                    SettingsGeneralView()
+                case .data:
+                    SettingsDataView()
+                case .updates:
+                    SettingsUpdatesView(updater: updater)
+                case .about:
+                    SettingsAboutView()
                 }
             }
         }

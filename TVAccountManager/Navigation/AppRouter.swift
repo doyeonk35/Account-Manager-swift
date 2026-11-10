@@ -17,6 +17,9 @@ enum SidebarTab: String, CaseIterable, Identifiable {
 enum SettingsCategory: String, CaseIterable, Identifiable {
     case general = "General"
     case environment = "Environment"
+    case data = "Data"
+    case updates = "Updates"
+    case about = "About"
 
     var id: String { rawValue }
 
@@ -24,6 +27,9 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general: "gearshape"
         case .environment: "link"
+        case .data: "tray.2"
+        case .updates: "arrow.down.circle"
+        case .about: "info.circle"
         }
     }
 }

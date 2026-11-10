@@ -84,8 +84,11 @@ xcodebuild build -scheme TVAccountManager -configuration Release -destination 'p
 
 | 화면 | 항목 |
 |---|---|
-| 일반 | 메뉴바 표시 · 로그인 시 실행 · 계정 불러오기/내보내기 · 사용 가이드 · 자동 업데이트 확인 |
+| 일반 | 메뉴바 표시 · 로그인 시 실행 |
 | 환경 | QC 로그인 서버(개발/운영) · QC 개발 URL · QA URL · 기본값으로 초기화 |
+| 데이터 | 불러오기 폴더 열기 · 파일에서 계정 불러오기 · 파일로 계정 내보내기 |
+| 업데이트 | 현재 버전 · 자동 업데이트 확인 · 지금 확인 |
+| 정보 | 버전 · 사용 가이드 · 문의처 |
 
 - **QC 로그인 서버**를 운영으로 바꾸면 QC 계정이 `user.tving.com`으로 로그인합니다. 바로 적용되고, 상태바와 메뉴바에 "QC → 운영" 배지가 붙습니다. 개발 URL은 그대로 보관됩니다
 - URL을 기본값 그대로 두면 저장되지 않고, 앱 업데이트로 기본값이 바뀌면 자동으로 따라갑니다. 직접 바꾼 URL만 저장됩니다
@@ -136,7 +139,7 @@ tvlogin prod 483920 --profile 키즈
 
 여러 계정을 한번에 등록할 수 있습니다.
 
-1. 설정 > 일반 > **불러오기 폴더 열기** 클릭
+1. 설정 > 데이터 > **불러오기 폴더 열기** 클릭
 2. 폴더에 생성된 `presets.example.json`을 참고하여 `presets.json` 작성
 3. **파일에서 계정 불러오기** 클릭
 
@@ -160,7 +163,7 @@ tvlogin prod 483920 --profile 키즈
 
 현재 계정 목록을 JSON 파일로 저장합니다. 일괄 등록과 같은 형식이라 파일 이름을 `presets.json`으로 바꾸면 그대로 다시 불러올 수 있습니다.
 
-1. 설정 > 일반 > **파일로 계정 내보내기** 클릭
+1. 설정 > 데이터 > **파일로 계정 내보내기** 클릭
 2. **비밀번호 포함** / **비밀번호 제외** 선택
 3. 저장 후 Finder가 해당 파일을 선택한 채로 열립니다
 
@@ -174,7 +177,7 @@ tvlogin prod 483920 --profile 키즈
 |------|------|
 | 계정 메타데이터 | `~/Library/Containers/com.tv.account-manager/Data/Library/Application Support/tving-login-manager/accounts.json` |
 | 비밀번호 | macOS Keychain (`com.tving.login-manager`) |
-| 일괄 등록 파일 | 위 폴더의 `presets.json` (설정 > 일반 > **불러오기 폴더 열기**) |
+| 일괄 등록 파일 | 위 폴더의 `presets.json` (설정 > 데이터 > **불러오기 폴더 열기**) |
 | 로그인 URL 설정 | UserDefaults (기본값과 다를 때만 저장) |
 
 ### 릴리스 (관리자용)
@@ -288,8 +291,11 @@ Turn the menu bar icon and launch at login on or off in Settings > General.
 
 | Page | Items |
 |---|---|
-| General | Show in Menu Bar · Launch at Login · import/export accounts · usage guide · automatic update checks |
+| General | Show in Menu Bar · Launch at Login |
 | Environment | QC login server (development / production) · QC development URL · QA URL · Reset to Defaults |
+| Data | Open Import Folder · Import Accounts from File · Export Accounts to File |
+| Updates | Current version · automatic update checks · Check for Updates |
+| About | Version · usage guide · contact |
 
 - Switching the **QC login server** to production makes QC accounts log in to `user.tving.com`. It applies immediately and shows a "QC → Production" badge in the status bar and menu bar. The development URL is kept
 - URLs left at their default are not stored, so they follow new defaults shipped in app updates. Only URLs you change are saved
@@ -329,7 +335,7 @@ Exit codes: `0` success · `1` login failed · `2` bad arguments / no account ·
 
 Import multiple accounts at once from a JSON file.
 
-1. Go to Settings > General > Click **Open Import Folder**
+1. Go to Settings > Data > Click **Open Import Folder**
 2. Use the generated `presets.example.json` as a template to create `presets.json`
 3. Click **Import Accounts from File**
 
@@ -353,7 +359,7 @@ Import multiple accounts at once from a JSON file.
 
 Saves the current account list to a JSON file. It uses the same format as bulk import, so renaming the file to `presets.json` imports it straight back.
 
-1. Settings > General > **Export Accounts to File**
+1. Settings > Data > **Export Accounts to File**
 2. Choose **Include Passwords** or **Exclude Passwords**
 3. Finder opens with the saved file selected
 
@@ -367,7 +373,7 @@ The file lands in the import folder as `accounts-export-2026-09-11-094957.json`;
 |------|----------|
 | Account metadata | `~/Library/Containers/com.tv.account-manager/Data/Library/Application Support/tving-login-manager/accounts.json` |
 | Passwords | macOS Keychain (`com.tving.login-manager`) |
-| Bulk import file | `presets.json` in the folder above (Settings > General > **Open Import Folder**) |
+| Bulk import file | `presets.json` in the folder above (Settings > Data > **Open Import Folder**) |
 | Login URL settings | UserDefaults (only when different from the default) |
 
 ### Releasing (maintainers)

@@ -134,22 +134,12 @@ private struct URLField: View {
     }
 }
 
-// MARK: - General Settings
+// MARK: - General (메뉴바 · 시작)
 
 struct SettingsGeneralView: View {
-    let updater: SPUUpdater
-    @EnvironmentObject var accountStore: AccountStore
     @AppStorage("showMenuBarExtra") private var showMenuBarExtra = true
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var launchAtLoginError: String?
-    @State private var updaterRefresh = false   // Sparkle 값이 바뀌면 다시 그리게 하는 신호
-
-    private static var versionText: String {
-        let info = Bundle.main.infoDictionary
-        let version = info?["CFBundleShortVersionString"] as? String ?? "-"
-        let build = info?["CFBundleVersion"] as? String ?? "-"
-        return "\(version) (\(build))"
-    }
 
     private func setLaunchAtLogin(_ enabled: Bool) {
         do {
@@ -169,6 +159,40 @@ struct SettingsGeneralView: View {
         // 실패하거나 사용자 승인 대기면 실제 상태로 되돌린다
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("Show in Menu Bar", isOn: $showMenuBarExtra)
+                    .accessibilityIdentifier("settings_show_menubar")
+                    .help(Text("Show the OTP field and up to 3 accounts in the menu bar"))
+                Toggle("Launch at Login", isOn: Binding(
+                    get: { launchAtLogin },
+                    set: setLaunchAtLogin
+                ))
+                .accessibilityIdentifier("settings_launch_at_login")
+                .help(Text("Start in the menu bar when you log in to your Mac"))
+                if let launchAtLoginError {
+                    Text(launchAtLoginError)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            } header: {
+                Text("Menu Bar")
+            } footer: {
+                Text("The menu bar shows the OTP field and up to 3 accounts: pinned accounts first, then recently used ones.")
+            }
+
+        }
+        .formStyle(.grouped)
+        .navigationTitle("General")
+    }
+}
+
+// MARK: - Data (불러오기 · 내보내기)
+
+struct SettingsDataView: View {
+    @EnvironmentObject var accountStore: AccountStore
 
     private var importAlertTitle: LocalizedStringKey {
         guard let result = accountStore.state.importResult else { return "" }
@@ -284,30 +308,83 @@ struct SettingsGeneralView: View {
                     Text(exportAlertMessage)
                 }
             } header: {
-                Text("Data")
+                Text("Import & Export")
             } footer: {
                 Text("Open the folder to find presets.example.json with the format. Rename it to presets.json and fill in your accounts.")
             }
 
+        }
+        .formStyle(.grouped)
+        .navigationTitle("Data")
+        .alert(importAlertTitle,
+               isPresented: Binding(
+                   get: { accountStore.state.importResult != nil },
+                   set: { if !$0 { accountStore.send(.dismissImportResult) } }
+               )
+        ) {
+            Button("OK", role: .cancel) {
+                accountStore.send(.dismissImportResult)
+            }
+        } message: {
+            Text(importAlertMessage)
+        }
+    }
+}
+
+// MARK: - Updates
+
+struct SettingsUpdatesView: View {
+    let updater: SPUUpdater
+    @State private var updaterRefresh = false   // Sparkle 값이 바뀌면 다시 그리게 하는 신호
+
+    var body: some View {
+        Form {
             Section {
-                Toggle("Show in Menu Bar", isOn: $showMenuBarExtra)
-                    .accessibilityIdentifier("settings_show_menubar")
-                    .help(Text("Show the OTP field and up to 3 accounts in the menu bar"))
-                Toggle("Launch at Login", isOn: Binding(
-                    get: { launchAtLogin },
-                    set: setLaunchAtLogin
+                LabeledContent("Current Version") {
+                    Text(verbatim: SettingsAboutView.versionText)
+                        .textSelection(.enabled)
+                }
+            }
+            Section {
+                Toggle("Check for Updates Automatically", isOn: Binding(
+                    get: { _ = updaterRefresh; return updater.automaticallyChecksForUpdates },
+                    set: { updater.automaticallyChecksForUpdates = $0; updaterRefresh.toggle() }
                 ))
-                .accessibilityIdentifier("settings_launch_at_login")
-                .help(Text("Start in the menu bar when you log in to your Mac"))
-                if let launchAtLoginError {
-                    Text(launchAtLoginError)
-                        .font(.caption)
-                        .foregroundStyle(.red)
+                .accessibilityIdentifier("settings_auto_update")
+                .help(Text("Check for new versions in the background and offer to install them"))
+                CheckForUpdatesView(
+                    viewModel: CheckForUpdatesViewModel(updater: updater)
+                )
+                .help(Text("Check for a new version now"))
+            } footer: {
+                Text("Updates are signed and notarized. Your accounts and settings are kept.")
+            }
+
+        }
+        .formStyle(.grouped)
+        .navigationTitle("Updates")
+    }
+}
+
+// MARK: - About (버전 · 도움말 · 문의)
+
+struct SettingsAboutView: View {
+    static var versionText: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "-"
+        let build = info?["CFBundleVersion"] as? String ?? "-"
+        return "\(version) (\(build))"
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                LabeledContent("Version") {
+                    Text(verbatim: Self.versionText)
+                        .textSelection(.enabled)
                 }
             } header: {
-                Text("Menu Bar")
-            } footer: {
-                Text("The menu bar shows the OTP field and up to 3 accounts: pinned accounts first, then recently used ones.")
+                Text("App Info")
             }
 
             Section {
@@ -320,30 +397,6 @@ struct SettingsGeneralView: View {
                 .help(Text("Show the first-run guide again"))
             } header: {
                 Text("Help")
-            }
-
-            Section {
-                LabeledContent("Version") {
-                    Text(verbatim: Self.versionText)
-                        .textSelection(.enabled)
-                }
-            } header: {
-                Text("App Info")
-            }
-
-            Section {
-                Toggle("Check for Updates Automatically", isOn: Binding(
-                    get: { _ = updaterRefresh; return updater.automaticallyChecksForUpdates },
-                    set: { updater.automaticallyChecksForUpdates = $0; updaterRefresh.toggle() }
-                ))
-                .accessibilityIdentifier("settings_auto_update")
-                .help(Text("Check for new versions in the background and offer to install them"))
-                CheckForUpdatesView(
-                    viewModel: CheckForUpdatesViewModel(updater: updater)
-                )
-                .help(Text("Check for a new version now"))
-            } header: {
-                Text("Updates")
             }
 
             Section {
@@ -362,18 +415,6 @@ struct SettingsGeneralView: View {
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("General")
-        .alert(importAlertTitle,
-               isPresented: Binding(
-                   get: { accountStore.state.importResult != nil },
-                   set: { if !$0 { accountStore.send(.dismissImportResult) } }
-               )
-        ) {
-            Button("OK", role: .cancel) {
-                accountStore.send(.dismissImportResult)
-            }
-        } message: {
-            Text(importAlertMessage)
-        }
+        .navigationTitle("About")
     }
 }
