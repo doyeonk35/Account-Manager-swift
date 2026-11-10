@@ -4,14 +4,45 @@ import Security
 final class KeychainService {
     private let serviceName = "com.tving.login-manager"
 
+    /// 프로필 PIN의 Keychain 키. 계정 비밀번호(키 = UUID 문자열)와 같은 서비스에 둔다.
+    static func profilePinKey(accountId: UUID, profileNo: Int) -> String {
+        "\(accountId.uuidString).profile.\(profileNo)"
+    }
+
+    // MARK: - Account password (key = account UUID)
+
     @discardableResult
     func savePassword(_ password: String, forAccountId accountId: UUID) -> Bool {
-        guard let data = password.data(using: .utf8) else { return false }
+        save(password, forKey: accountId.uuidString)
+    }
+
+    func loadPassword(forAccountId accountId: UUID) -> String? {
+        load(forKey: accountId.uuidString)
+    }
+
+    @discardableResult
+    func updatePassword(_ password: String, forAccountId accountId: UUID) -> Bool {
+        update(password, forKey: accountId.uuidString)
+    }
+
+    func deletePassword(forAccountId accountId: UUID) {
+        delete(forKey: accountId.uuidString)
+    }
+
+    func saveOrUpdate(password: String, forAccountId accountId: UUID) {
+        saveOrUpdate(password, forKey: accountId.uuidString)
+    }
+
+    // MARK: - String-keyed secrets
+
+    @discardableResult
+    func save(_ secret: String, forKey key: String) -> Bool {
+        guard let data = secret.data(using: .utf8) else { return false }
 
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceName,
-            kSecAttrAccount as String: accountId.uuidString,
+            kSecAttrAccount as String: key,
             kSecValueData as String: data,
             kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked,
         ]
@@ -21,11 +52,11 @@ final class KeychainService {
         return status == errSecSuccess
     }
 
-    func loadPassword(forAccountId accountId: UUID) -> String? {
+    func load(forKey key: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceName,
-            kSecAttrAccount as String: accountId.uuidString,
+            kSecAttrAccount as String: key,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
         ]
@@ -40,13 +71,13 @@ final class KeychainService {
     }
 
     @discardableResult
-    func updatePassword(_ password: String, forAccountId accountId: UUID) -> Bool {
-        guard let data = password.data(using: .utf8) else { return false }
+    func update(_ secret: String, forKey key: String) -> Bool {
+        guard let data = secret.data(using: .utf8) else { return false }
 
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceName,
-            kSecAttrAccount as String: accountId.uuidString,
+            kSecAttrAccount as String: key,
         ]
 
         let update: [String: Any] = [
@@ -57,21 +88,21 @@ final class KeychainService {
         return status == errSecSuccess
     }
 
-    func deletePassword(forAccountId accountId: UUID) {
+    func delete(forKey key: String) {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceName,
-            kSecAttrAccount as String: accountId.uuidString,
+            kSecAttrAccount as String: key,
         ]
 
         SecItemDelete(query as CFDictionary)
     }
 
-    func saveOrUpdate(password: String, forAccountId accountId: UUID) {
-        if loadPassword(forAccountId: accountId) != nil {
-            updatePassword(password, forAccountId: accountId)
+    func saveOrUpdate(_ secret: String, forKey key: String) {
+        if load(forKey: key) != nil {
+            update(secret, forKey: key)
         } else {
-            savePassword(password, forAccountId: accountId)
+            save(secret, forKey: key)
         }
     }
 }
