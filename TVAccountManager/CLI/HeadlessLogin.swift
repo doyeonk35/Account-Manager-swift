@@ -435,6 +435,9 @@ enum HeadlessLogin {
                 exitCode = .ok
             case .profilePending:
                 exitCode = .needsHuman
+            case .credentialsFilled:
+                // 헤드리스는 버튼을 대신 눌러 줄 사람이 없다 — 로그인 안 된 것
+                exitCode = .loginFailed
             case .profileNotFound(let names):
                 exitCode = .usage
                 candidates = names

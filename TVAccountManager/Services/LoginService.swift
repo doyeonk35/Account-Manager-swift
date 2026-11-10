@@ -17,6 +17,7 @@ enum LoginStep: String {
 /// 헤드리스(CLI)는 클릭할 창이 없으므로 "프로필 대기"를 성공으로 뭉개면 거짓 보고가 된다.
 enum LoginOutcome: Sendable, Equatable {
     case submitted                  // 프로필 선택 화면이 없음 (프로필 1개)
+    case credentialsFilled          // 입력만 하고 로그인 버튼을 못 누름 — 창에선 사람이 누르면 된다
     case profileSelected(String)
     case profileSkipped             // 요청대로 프로필을 안 골랐음 (--no-profile)
     case profilePending             // 전부 잠김 / 클릭 실패 — 사람이 직접 골라야 함
@@ -26,7 +27,7 @@ enum LoginOutcome: Sendable, Equatable {
     /// GUI 기준 성공 여부. 사람이 직접 프로필을 고를 수 있으면 성공으로 본다.
     var isSuccess: Bool {
         switch self {
-        case .submitted, .profileSelected, .profileSkipped, .profilePending: true
+        case .submitted, .credentialsFilled, .profileSelected, .profileSkipped, .profilePending: true
         case .profileNotFound, .failed: false
         }
     }
@@ -181,7 +182,7 @@ final class LoginService: NSObject {
                     }
                 } else {
                     onStatusUpdate?(.enteringCredentials, String(localized: "[\(env)] \(account.title) — Credentials filled. Please click Login."))
-                    onComplete?(.submitted, String(localized: "[\(env)] \(account.title) — Credentials filled"))
+                    onComplete?(.credentialsFilled, String(localized: "[\(env)] \(account.title) — Credentials filled"))
                 }
             } catch is CancellationError {
                 // Sheet dismissed — silently stop

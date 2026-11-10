@@ -229,6 +229,7 @@ struct LoginOutcomeTests {
         #expect(LoginOutcome.profileSelected("엄마").isSuccess)
         #expect(LoginOutcome.profilePending.isSuccess)
         #expect(LoginOutcome.profileSkipped.isSuccess)
+        #expect(LoginOutcome.credentialsFilled.isSuccess)   // 창에서는 사람이 로그인 버튼을 누르면 된다
     }
 
     @Test("실패와 프로필 없음은 실패")
