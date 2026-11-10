@@ -104,6 +104,18 @@ struct WebViewContainer: NSViewRepresentable {
             onComplete(.failed, String(localized: "Navigation failed: \(error.localizedDescription)"))
         }
 
+        // 첫 로드가 DNS/연결 단계에서 실패하면 didFail이 아니라 이쪽으로 온다.
+        // 안 받으면 "Preparing..."에서 영원히 멈춘다.
+        func webView(
+            _ webView: WKWebView,
+            didFailProvisionalNavigation navigation: WKNavigation!,
+            withError error: Error
+        ) {
+            // 로그인 시퀀스가 시작된 뒤의 실패(리다이렉트 교체로 인한 취소 등)는 시퀀스가 판정한다.
+            guard !hasStartedLogin, (error as NSError).code != NSURLErrorCancelled else { return }
+            onComplete(.failed, String(localized: "Navigation failed: \(error.localizedDescription)"))
+        }
+
         func webView(
             _ webView: WKWebView,
             decidePolicyFor navigationAction: WKNavigationAction,
