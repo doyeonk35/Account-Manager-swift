@@ -48,6 +48,7 @@ final class LoginService: NSObject {
     private var onComplete: ((LoginOutcome, String) -> Void)?
     private var loginTask: Task<Void, Never>?
     private var profilePreference: ProfilePreference = .auto
+    private var onProfilesFound: (([ProfileInfo]) -> Void)?
 
     func configure(
         webView: WKWebView,
@@ -55,8 +56,10 @@ final class LoginService: NSObject {
         otpCode: String,
         profile: ProfilePreference = .auto,
         onStatusUpdate: @escaping (LoginStep, String) -> Void,
-        onComplete: @escaping (LoginOutcome, String) -> Void
+        onComplete: @escaping (LoginOutcome, String) -> Void,
+        onProfilesFound: (([ProfileInfo]) -> Void)? = nil
     ) {
+        self.onProfilesFound = onProfilesFound
         self.webView = webView
         self.account = account
         self.otpCode = otpCode
@@ -164,7 +167,9 @@ final class LoginService: NSObject {
                     case .selected(let name):
                         finish(.profileSelected(name), String(localized: "[\(env)] \(account.title) — Profile \(name) selected"))
                     case .allLocked:
-                        finish(.profilePending, String(localized: "[\(env)] \(account.title) — All profiles locked, select one yourself"))
+                        finish(.profilePending, String(localized: "[\(env)] \(account.title) — All profiles locked. Save a profile PIN to select one automatically"))
+                    case .pinRejected(let name):
+                        finish(.profilePending, String(localized: "[\(env)] \(account.title) — PIN for profile \(name) was not accepted. Check the saved PIN"))
                     case .selectFailed:
                         finish(.profilePending, String(localized: "[\(env)] \(account.title) — Profile not selected, select one yourself"))
                     case .skipped:
@@ -398,7 +403,8 @@ final class LoginService: NSObject {
         case allLocked             // 잠긴 프로필만 있음 — 자동 선택 포기
         case selectFailed          // 클릭이 화면을 넘기지 못함
         case skipped               // .skip — 화면까지만 가고 선택 안 함
-        case lockedTarget(String)  // .named 대상이 잠김
+        case lockedTarget(String)  // .named 대상이 잠김 (저장된 PIN 없음)
+        case pinRejected(String)   // 저장된 PIN을 넣었지만 화면이 넘어가지 않음
         case notFound([String])    // .named 이름 없음 — 후보 목록
     }
 
@@ -418,6 +424,30 @@ final class LoginService: NSObject {
         return (unlocked.first { !$0.element.restricted } ?? unlocked[0]).offset
     }
 
+    /// 전부 잠겼을 때 저장된 PIN으로 열 프로필. 대표 프로필 우선, PIN이 없으면 nil.
+    nonisolated static func pickLockedProfile(from candidates: [ProfileCandidate], pins: [Int: String]) -> Int? {
+        let unlockable = candidates.enumerated().filter { _, c in
+            c.locked && c.profileNo.flatMap { pins[$0] }.map(ProfileInfo.isValidPin) == true
+        }
+        return (unlockable.first { $0.element.main == true } ?? unlockable.first)?.offset
+    }
+
+    /// 페이로드에서 읽은 프로필 목록. DOM 폴백(profileNo 없음)이면 nil — 저장 목록을 건드리지 않는다.
+    nonisolated static func collectedProfiles(from candidates: [ProfileCandidate]) -> [ProfileInfo]? {
+        var profiles: [ProfileInfo] = []
+        for c in candidates {
+            guard let no = c.profileNo, let main = c.main, let grade = c.grade else { return nil }
+            profiles.append(ProfileInfo(profileNo: no, name: c.name, isLocked: c.locked, isMain: main, gradeCode: grade))
+        }
+        return profiles.isEmpty ? nil : profiles
+    }
+
+    private func pin(for candidate: ProfileCandidate) -> String? {
+        guard let no = candidate.profileNo, let pin = account?.profilePins[no],
+              ProfileInfo.isValidPin(pin) else { return nil }
+        return pin
+    }
+
     /// 프로필을 골라 클릭한다. `.auto`면 잠금 없는 것 중 연령 제한 없는 쪽 우선.
     ///
     /// 잠금은 DOM에도 자물쇠 오버레이로 드러나지만 **연령 제한은 DOM에 전혀 나타나지 않아**
@@ -433,6 +463,12 @@ final class LoginService: NSObject {
             try await Task.sleep(for: .milliseconds(300))
         }
         guard let candidates = table else { return .notShown }
+        if let profiles = Self.collectedProfiles(from: candidates) {
+            onProfilesFound?(profiles)
+        } else if let diag = try? await executeJS(Self.profileDiagJS) {
+            // 수집 실패 원인 추적용 (개수만, 값 없음). CLI에서는 stderr로 보인다.
+            FileHandle.standardError.write(Data("profile payload not collected: \(diag)\n".utf8))
+        }
 
         let index: Int
         switch preference {
@@ -441,12 +477,20 @@ final class LoginService: NSObject {
         case .named(let wanted):
             switch Self.findProfile(named: wanted, in: candidates) {
             case .found(let i): index = i
-            case .locked(let i): return .lockedTarget(candidates[i].name)
+            case .locked(let i):
+                guard let pin = pin(for: candidates[i]) else { return .lockedTarget(candidates[i].name) }
+                return try await unlockProfile(index: i, name: candidates[i].name, pin: pin)
             case .notFound: return .notFound(candidates.map(\.name))
             }
         case .auto:
-            guard let auto = Self.pickProfile(from: candidates) else { return .allLocked }
-            index = auto
+            if let auto = Self.pickProfile(from: candidates) {
+                index = auto
+            } else if let locked = Self.pickLockedProfile(from: candidates, pins: account?.profilePins ?? [:]),
+                      let pin = pin(for: candidates[locked]) {
+                return try await unlockProfile(index: locked, name: candidates[locked].name, pin: pin)
+            } else {
+                return .allLocked
+            }
         }
         let name = candidates[index].name
 
@@ -459,6 +503,117 @@ final class LoginService: NSObject {
             if await readProfileTable() == nil { return .selected(name) }
         }
         return .selectFailed
+    }
+
+    /// 잠금 프로필을 클릭하고 PIN 모달에 저장된 PIN을 넣는다.
+    ///
+    /// 모달에는 확인 버튼이 없고 4자리가 차면 자동 제출되므로, 성공 여부는 프로필 화면을
+    /// 벗어났는지로만 판단한다. 틀린 PIN을 다시 넣으면 잠금이 누적될 수 있어 **한 번만** 넣는다.
+    /// PIN은 로그·상태 메시지에 절대 싣지 않는다.
+    private func unlockProfile(index: Int, name: String, pin: String) async throws -> ProfileSelection {
+        guard ProfileInfo.isValidPin(pin) else { return .lockedTarget(name) }
+
+        // 클릭 → PIN 입력칸이 뜰 때까지 (~6초). 클릭이 씹히면 다시 클릭한다.
+        var opened = false
+        outer: for _ in 0..<5 {
+            try Task.checkCancellation()
+            _ = try? await executeJS(Self.profileClickJS(index: index))
+            for _ in 0..<6 {
+                try await Task.sleep(for: .milliseconds(200))
+                if (try? await executeJS(Self.pinFieldStateJS)) == "ready" { opened = true; break outer }
+                if await readProfileTable() == nil { return .selected(name) }   // PIN 없이 넘어감
+            }
+        }
+        guard opened else { return .selectFailed }
+
+        // 입력칸은 opacity 0으로 깔린 실제 input이고, 4번째 자리가 들어가면 확인 버튼 없이
+        // 자동 제출된다(password/check). 사람 입력처럼 자리마다 keydown → beforeinput → input을
+        // 보내며 한 글자씩 늘려 넣는다. "한 번에 4자리 → 안 먹으면 재입력"은 "안 먹음"과
+        // "틀림"을 구분할 수 없어 오답이 두 번 제출될 수 있으므로 쓰지 않는다.
+        onStatusUpdate?(.selectingProfile, String(localized: "Entering profile PIN..."))
+        let digits = Array(pin)
+        for count in 1...digits.count {
+            try Task.checkCancellation()
+            let partial = String(digits.prefix(count)).escapedForJS
+            let digit = String(digits[count - 1]).escapedForJS
+            let result = (try? await executeJS(Self.pinTypeJS(partial, digit: digit))) ?? "not_found"
+            if result != "ok" {
+                if count == 1 { return .selectFailed }   // 한 글자도 못 넣음 — PIN 거부가 아니다
+                break   // 자동 제출로 모달이 닫혔거나 화면이 바뀜
+            }
+            try await Task.sleep(for: .milliseconds(120))
+        }
+
+        // 판정 (~8초). check API는 PIN이 틀려도 200/"0000"이라 DOM으로만 판단한다.
+        // - 프로필 화면을 벗어남 → 성공 (성공 시 ~400ms 뒤 returnUrl로 이동)
+        // - 불일치 문구가 보임, 또는 모달이 남은 채 입력칸이 1초 넘게 비어 있음 → 실패
+        //   (실패하면 입력칸이 비워진다. 문구보다 덜 취약하지만, 성공 직후 이동 전에
+        //   잠깐 비워질 가능성을 피하려고 연속으로 비어 있을 때만 실패로 본다)
+        // 어느 쪽이든 재입력하지 않는다 — 잠금 누적 방지.
+        var lastState = ""
+        for _ in 0..<40 {
+            try Task.checkCancellation()
+            try await Task.sleep(for: .milliseconds(200))
+            if await readProfileTable() == nil { return .selected(name) }
+            lastState = (try? await executeJS(Self.pinVerdictJS)) ?? ""
+            if lastState == "mismatch" { return .pinRejected(name) }
+        }
+        return Self.pinTimeoutVerdict(lastState: lastState) ? .pinRejected(name) : .selectFailed
+    }
+
+    /// 판정 시간이 끝났을 때 "PIN 거부"로 볼지. 불일치 문구 없이 시간이 다 된 경우,
+    /// 모달이 남은 채 입력칸이 비어 있을 때만 거부로 본다 (문구가 바뀌어도 잡힌다).
+    /// 그 밖(모달이 닫혔지만 이동이 늦음 등)은 PIN이 맞았을 수 있어 거부라고 하지 않는다.
+    /// 응답이 느린 동안 잠깐 비는 것을 거부로 오판하지 않도록, 도중에는 판정하지 않는다.
+    nonisolated static func pinTimeoutVerdict(lastState: String) -> Bool {
+        lastState == "empty"
+    }
+
+    private static let pinFieldSelectorJS = """
+        (document.querySelector('[role="dialog"] input[type="tel"][maxlength="4"]')
+            || document.querySelector('input[aria-label="프로필 비밀번호 4자리"]'))
+        """
+
+    private static let pinFieldStateJS = """
+        (function() {
+            var f = \(pinFieldSelectorJS);
+            return (f && !f.disabled && !f.readOnly) ? 'ready' : 'none';
+        })()
+        """
+
+    /// PIN 모달 상태. 'mismatch'(불일치 문구) / 'empty'(입력칸 비워짐) / 'filled' / 'gone'(모달 없음).
+    /// 문구는 TVING 사이트 문자열이라 로컬라이즈하지 않는다.
+    private static let pinVerdictJS = """
+        (function() {
+            var dialog = document.querySelector('[role="dialog"][aria-labelledby="profile-password-modal-title"]')
+                || document.querySelector('[role="dialog"]');
+            var f = \(pinFieldSelectorJS);
+            if (!dialog && !f) return 'gone';
+            if (dialog && (dialog.textContent || '').indexOf('비밀번호가 일치하지 않아요') >= 0) return 'mismatch';
+            return (f && !f.value) ? 'empty' : 'filled';
+        })()
+        """
+
+    /// `escapedValue`까지 채우고 마지막 자리 `digit`을 친 것처럼 이벤트를 보낸다.
+    private static func pinTypeJS(_ escapedValue: String, digit: String) -> String {
+        """
+        (function() {
+            var f = \(pinFieldSelectorJS);
+            if (!f) return 'not_found';
+            f.focus();
+            f.dispatchEvent(new KeyboardEvent('keydown', {key: '\(digit)', bubbles: true}));
+            f.dispatchEvent(new InputEvent('beforeinput', {
+                inputType: 'insertText', data: '\(digit)', bubbles: true, cancelable: true
+            }));
+            var nativeSetter = Object.getOwnPropertyDescriptor(
+                window.HTMLInputElement.prototype, 'value'
+            ).set;
+            nativeSetter.call(f, '\(escapedValue)');
+            f.dispatchEvent(new InputEvent('input', {inputType: 'insertText', data: '\(digit)', bubbles: true}));
+            f.dispatchEvent(new KeyboardEvent('keyup', {key: '\(digit)', bubbles: true}));
+            return 'ok';
+        })()
+        """
     }
 
     /// 프로필 선택 화면이 아니거나 읽지 못하면 nil.
@@ -497,14 +652,62 @@ final class LoginService: NSObject {
                 for (var i = 0; i < scripts.length; i++) blob += scripts[i].textContent || '';
                 blob = blob.split(String.fromCharCode(92) + '"').join('"');
 
-                var pwd = [], grade = [], m;
-                var pwdRe = /"profilePwd"\\s*:\\s*(true|false)/g;
-                while ((m = pwdRe.exec(blob)) !== null) pwd.push(m[1] === 'true');
-                var gradeRe = /"gradeCode"\\s*:\\s*"([^"]*)"/g;
-                while ((m = gradeRe.exec(blob)) !== null) grade.push(m[1]);
+                // 1순위: profileList 배열을 통째로 JSON으로 읽는다. 필드 개수를 세는 방식은
+                // 같은 키가 페이로드의 다른 곳에 한 번만 더 나와도 어긋난다.
+                var BS = String.fromCharCode(92);
+                // '['에서 시작해 짝이 맞는 ']'까지 자른다 (문자열 안의 괄호·중첩 배열 무시).
+                function sliceArray(s, start) {
+                    var depth = 0, inStr = false;
+                    for (var i = start; i < s.length; i++) {
+                        var c = s.charAt(i);
+                        if (inStr) {
+                            if (c === BS) i++;
+                            else if (c === '"') inStr = false;
+                        } else if (c === '"') inStr = true;
+                        else if (c === '[') depth++;
+                        else if (c === ']' && --depth === 0) return s.slice(start, i + 1);
+                    }
+                    return null;
+                }
+                var listRe = /"profileList"\\s*:\\s*\\[/g;
+                while (!meta && listRe.exec(blob) !== null) {
+                    try {
+                        var raw = sliceArray(blob, listRe.lastIndex - 1);
+                        if (!raw) continue;
+                        var list = JSON.parse(raw).filter(function(p) { return !p.deleted; });
+                        if (list.length !== btns.length) continue;
+                        // 버튼 순서와 페이로드 순서가 같다고 믿지 않고 이름으로 짝짓는다.
+                        // (어긋나면 다른 프로필의 PIN을 넣게 된다) 이름이 안 맞으면 쓰지 않는다.
+                        var picked = [];
+                        for (var k = 0; k < btns.length; k++) {
+                            var alt = (btns[k].querySelector('img[alt]').getAttribute('alt') || '').trim();
+                            var hits = list.filter(function(p) { return String(p.profileName || '').trim() === alt; });
+                            if (hits.length !== 1) { picked = null; break; }
+                            picked.push(hits[0]);
+                        }
+                        if (!picked) continue;
+                        meta = { pwd: [], grade: [], no: [], type: [] };
+                        for (var q = 0; q < picked.length; q++) {
+                            meta.pwd.push(!!picked[q].profilePwd);
+                            meta.grade.push(picked[q].gradeCode || '');
+                            meta.no.push(Number(picked[q].profileNo));
+                            meta.type.push(picked[q].profileType || '');
+                        }
+                    } catch (e) {
+                        meta = null;
+                    }
+                }
 
-                if (pwd.length === btns.length && grade.length === btns.length) {
-                    meta = { pwd: pwd, grade: grade };
+                // 2순위: 필드별 정규식 (선택에 필요한 잠금·등급만. 번호가 없어 수집은 생략된다)
+                if (!meta) {
+                    var pwd = [], grade = [], m;
+                    var pwdRe = /"profilePwd"\\s*:\\s*(true|false)/g;
+                    while ((m = pwdRe.exec(blob)) !== null) pwd.push(m[1] === 'true');
+                    var gradeRe = /"gradeCode"\\s*:\\s*"([^"]*)"/g;
+                    while ((m = gradeRe.exec(blob)) !== null) grade.push(m[1]);
+                    if (pwd.length === btns.length && grade.length === btns.length) {
+                        meta = { pwd: pwd, grade: grade };
+                    }
                 }
             } catch (e) {
                 meta = null;
@@ -517,10 +720,27 @@ final class LoginService: NSObject {
                 rows.push({
                     name: (btns[j].querySelector('img[alt]').getAttribute('alt') || '').trim(),
                     locked: meta ? meta.pwd[j] : !!btns[j].querySelector('svg'),
-                    restricted: meta ? (meta.grade[j] !== '\(unrestrictedGradeCode)') : false
+                    restricted: meta ? (meta.grade[j] !== '\(unrestrictedGradeCode)') : false,
+                    profileNo: (meta && meta.no) ? meta.no[j] : null,
+                    main: (meta && meta.type) ? (meta.type[j] === 'M') : null,
+                    grade: meta ? meta.grade[j] : null
                 });
             }
             return JSON.stringify(rows);
+        })()
+        """
+
+    private static let profileDiagJS = """
+        (function() {
+            \(profileButtonsJS)
+            var blob = '';
+            var scripts = document.querySelectorAll('script');
+            for (var i = 0; i < scripts.length; i++) blob += scripts[i].textContent || '';
+            blob = blob.split(String.fromCharCode(92) + '"').join('"');
+            function n(re) { return (blob.match(re) || []).length; }
+            return 'buttons=' + btns.length + ' scripts=' + scripts.length + ' bytes=' + blob.length
+                + ' profileList=' + n(/"profileList"/g) + ' profileNo=' + n(/"profileNo"/g)
+                + ' profilePwd=' + n(/"profilePwd"/g) + ' gradeCode=' + n(/"gradeCode"/g);
         })()
         """
 
@@ -550,6 +770,10 @@ struct ProfileCandidate: Decodable {
     let locked: Bool
     /// 연령 제한 프로필(7+/12+ 등). 선택 후순위로 밀린다.
     let restricted: Bool
+    /// 아래는 서버 페이로드를 읽었을 때만 채워진다. DOM 폴백이면 nil.
+    var profileNo: Int? = nil
+    var main: Bool? = nil
+    var grade: String? = nil
 }
 
 enum LoginError: LocalizedError {
