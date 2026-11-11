@@ -22,24 +22,36 @@ private let onboardingPages: [OnboardingPage] = [
     ),
     OnboardingPage(
         id: 2,
-        imageName: "onboarding_login",
-        titleKey: "onboarding.login.title",
-        descriptionKey: "onboarding.login.description"
-    ),
-    OnboardingPage(
-        id: 3,
         imageName: "onboarding_otp",
         titleKey: "onboarding.otp.title",
         descriptionKey: "onboarding.otp.description"
     ),
     OnboardingPage(
+        id: 3,
+        imageName: "onboarding_login",
+        titleKey: "onboarding.login.title",
+        descriptionKey: "onboarding.login.description"
+    ),
+    OnboardingPage(
         id: 4,
+        imageName: "onboarding_menubar",
+        titleKey: "onboarding.menubar.title",
+        descriptionKey: "onboarding.menubar.description"
+    ),
+    OnboardingPage(
+        id: 5,
+        imageName: "onboarding_profiles",
+        titleKey: "onboarding.profiles.title",
+        descriptionKey: "onboarding.profiles.description"
+    ),
+    OnboardingPage(
+        id: 6,
         imageName: "onboarding_settings",
         titleKey: "onboarding.settings.title",
         descriptionKey: "onboarding.settings.description"
     ),
     OnboardingPage(
-        id: 5,
+        id: 7,
         imageName: "onboarding_presets",
         titleKey: "onboarding.import.title",
         descriptionKey: "onboarding.import.description"
