@@ -101,7 +101,6 @@ log "서명 정보: ${SIGNATURE}"
 "${PROJECT_DIR}/scripts/make-dmg.sh" "$ZIP_PATH" "$VERSION"
 
 # 7. Firebase Hosting 배포 (피드 + zip) — DMG는 GitHub Release에 첨부한다
-ZIP_SIZE=$(stat -f%z "$ZIP_PATH")
 ED_SIG=$(echo "$SIGNATURE" | grep -o 'sparkle:edSignature="[^"]*"' | sed 's/sparkle:edSignature="//;s/"//')
 [ -n "$ED_SIG" ] || err "EdDSA 서명을 얻지 못했습니다."
 MIN_SYS="14.0"
@@ -109,33 +108,7 @@ DOWNLOAD_URL=$("${PROJECT_DIR}/scripts/publish-firebase.sh" "$ZIP_PATH" "$VERSIO
     | tee /dev/stderr | sed -n 's/^DOWNLOAD_URL=//p')
 [ -n "$DOWNLOAD_URL" ] || err "Firebase 배포 실패"
 
-# 8. 이전 피드(docs/appcast.xml, 개인 레포 GitHub Pages) 갱신
-# ponytail: 1.5.0 이하 설치본이 새 피드로 넘어오기 위한 다리. 개인 레포를 비공개로 돌린 뒤에는 이 단계를 지운다.
-log "이전 피드(docs/appcast.xml) 갱신..."
-PUB_DATE=$(date -R)
-NEW_ITEM="        <item>
-            <title>${VERSION}</title>
-            <pubDate>${PUB_DATE}</pubDate>
-            <sparkle:version>${NEW_BUILD}</sparkle:version>
-            <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>${MIN_SYS}</sparkle:minimumSystemVersion>
-            <enclosure url=\"${DOWNLOAD_URL}\" length=\"${ZIP_SIZE}\" type=\"application/octet-stream\" sparkle:edSignature=\"${ED_SIG}\"/>
-        </item>"
-ITEM_FILE=$(mktemp)
-echo "$NEW_ITEM" > "$ITEM_FILE"
-python3 - "$VERSION" "$ITEM_FILE" << 'PYEOF'
-import re, sys
-version = sys.argv[1]
-new_item = open(sys.argv[2]).read().rstrip('\n')
-xml = open('docs/appcast.xml').read()
-pattern = r'\s*<item>.*?<sparkle:shortVersionString>' + re.escape(version) + r'</sparkle:shortVersionString>.*?</item>'
-xml = re.sub(pattern, '', xml, flags=re.DOTALL)
-xml = xml.replace('</title>\n', '</title>\n' + new_item + '\n', 1)
-open('docs/appcast.xml', 'w').write(xml)
-PYEOF
-rm -f "$ITEM_FILE"
-
-# 9. .build 정리
+# 8. .build 정리
 rm -rf "${PROJECT_DIR}/.build"
 
 echo ""
@@ -146,5 +119,4 @@ echo ""
 echo "다음 단계:"
 echo "  1. git add -A && git commit -m \"release: v${VERSION}\" && git tag v${VERSION}"
 echo "  2. git push origin main --tags                # TvingCorp 레포"
-echo "  3. git push personal main                     # 이전 피드(Pages) 갱신 — 다리 릴리스 기간에만"
-echo "  4. gh release create v${VERSION} \"${ZIP_PATH%.zip}.dmg\" \"${ZIP_PATH}\" --title \"v${VERSION}\"   # 신규 설치용 DMG"
+echo "  3. gh release create v${VERSION} \"${ZIP_PATH%.zip}.dmg\" \"${ZIP_PATH}\" --title \"v${VERSION}\"   # 신규 설치용 DMG"

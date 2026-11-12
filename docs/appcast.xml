@@ -4,6 +4,14 @@
         <title>TVAccountManager</title>
         <item>
             <title>1.7.1</title>
+            <description><![CDATA[
+<h3>이 업데이트 주소로 보내는 마지막 업데이트입니다</h3>
+<p>TVAccountManager가 회사 저장소로 옮겨졌습니다. <b>지금 이 업데이트를 설치</b>하면 이후 업데이트는 새 주소에서 자동으로 받습니다.</p>
+<p>이 주소는 곧 닫힙니다. 설치하지 않은 채 주소가 닫히면 앞으로 업데이트를 받을 수 없으니, 그때는 아래에서 새 앱을 직접 받아 주세요.<br>
+<a href="https://tving-tvaccountmanager.web.app/TVAccountManager.zip">https://tving-tvaccountmanager.web.app/TVAccountManager.zip</a></p>
+<hr>
+<p><b>This is the last update from this feed.</b> Install it now to keep receiving updates from the new address. If you miss it, download the app again from the link above.</p>
+]]></description>
             <pubDate>Wed, 11 Nov 2026 13:29:39 +0900</pubDate>
             <sparkle:version>20</sparkle:version>
             <sparkle:shortVersionString>1.7.1</sparkle:shortVersionString>
